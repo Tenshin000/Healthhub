@@ -1,4 +1,4 @@
-package it.unipi.mongo;
+package it.unipi.healthhub.mongo;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -8,11 +8,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public class DbConfig {
+public class MongoDbConfig {
     private MongoClient mongoClient;
     private MongoDatabase database;
 
-    public DbConfig() {
+    public MongoDbConfig() {
         Properties properties = loadProperties();
         String uri = properties.getProperty("spring.data.mongodb.uri");
         String dbName = properties.getProperty("spring.data.mongodb.database");

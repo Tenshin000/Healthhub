@@ -1,4 +1,4 @@
-package it.unipi.mongo;
+package it.unipi.healthhub.mongo;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -8,10 +8,10 @@ import org.bson.types.ObjectId;
 import java.util.ArrayList;
 import java.util.List;
 
-public class User {
+public class UserRepository {
     private MongoCollection<Document> collection;
 
-    public User(DbConfig config) {
+    public UserRepository(MongoDbConfig config) {
         MongoDatabase database = config.getDatabase();
         collection = database.getCollection("users");
     }

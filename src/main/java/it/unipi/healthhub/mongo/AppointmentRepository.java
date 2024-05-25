@@ -1,4 +1,4 @@
-package it.unipi.mongo;
+package it.unipi.healthhub.mongo;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -8,10 +8,10 @@ import org.bson.types.ObjectId;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Appointment {
+public class AppointmentRepository {
     private MongoCollection<Document> collection;
 
-    public Appointment(DbConfig config) {
+    public AppointmentRepository(MongoDbConfig config) {
         MongoDatabase database = config.getDatabase();
         collection = database.getCollection("appointments");
     }
