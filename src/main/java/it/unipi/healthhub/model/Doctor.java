@@ -1,4 +1,5 @@
 package it.unipi.healthhub.model;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.List;
 
@@ -8,12 +9,12 @@ public class Doctor extends User {
     private Address address;
     private List<Service> services;
     private int endorsementCount;
-    // private List<Review> reviews;
-    // private List<Appointment> appointments;
-    // private List<Schedule> schedule;
+    private List<Review> reviews;
+    private List<Appointment> appointments;
+    private List<Schedule> schedule;
     private List<String> calendarTemplates; // List of references (foreign keys) to CalendarTemplate
     private List<String> specializations;
-    // Getters and Setters for all fields
+
 
     public Address getAddress() {
         return address;
@@ -39,29 +40,28 @@ public class Doctor extends User {
         this.endorsementCount = endorsementCount;
     }
 
-//    public List<Review> getReviews() {
-//        return reviews;
-//    }
-//
-//    public void setReviews(List<Review> reviews) {
-//        this.reviews = reviews;
-//    }
-//
-//    public List<Appointment> getAppointments() {
-//        return appointments;
-//    }
-//
-//    public void setAppointments(List<Appointment> appointments) {
-//        this.appointments = appointments;
-//    }
-//
-//    public List<Schedule> getSchedule() {
-//        return schedule;
-//    }
-//
-//    public void setSchedule(List<Schedule> schedule) {
-//        this.schedule = schedule;
-//    }
+    public List<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(List<Review> reviews) {
+        this.reviews = reviews;
+    }
+
+    public List<Appointment> getAppointments() {
+        return appointments;
+    }
+    public void setAppointments(List<Appointment> appointments) {
+        this.appointments = appointments;
+    }
+
+    public List<Schedule> getSchedule() {
+        return schedule;
+    }
+
+    public void setSchedule(List<Schedule> schedule) {
+        this.schedule = schedule;
+    }
 
     public List<String> getCalendarTemplates() {
         return calendarTemplates;

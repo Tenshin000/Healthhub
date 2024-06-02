@@ -9,7 +9,6 @@ public class Service {
     public String getService() {
         return service;
     }
-
     public void setService(String service) {
         this.service = service;
     }
@@ -17,7 +16,6 @@ public class Service {
     public double getPrice() {
         return price;
     }
-
     public void setPrice(double price) {
         this.price = price;
     }
