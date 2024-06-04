@@ -9,7 +9,6 @@ public class Schedule {
     public String getWeek() {
         return week;
     }
-
     public void setWeek(String week) {
         this.week = week;
     }
@@ -17,7 +16,6 @@ public class Schedule {
     public List<PrenotableSlot> getSlotList() {
         return slotList;
     }
-
     public void setSlotList(List<PrenotableSlot> slotList) {
         this.slotList = slotList;
     }

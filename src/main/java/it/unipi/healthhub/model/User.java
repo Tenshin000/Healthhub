@@ -9,47 +9,41 @@ import java.util.List;
 public class User {
     @Id
     private String username;
-    private String fiscalCode;
-    private String firstName;
-    private String lastName;
-    private String passwordHash;
-    private String birthDate;
+//  private String fiscalCode;
+    private String name;
+//  private String passwordHash;
+    private int age;
     private String gender;
-    private List<String> phoneNumbers;
+//  private List<String> phoneNumbers;
     private String email;
+    private Address address;
 
-    public String getFiscalCode() {
-        return fiscalCode;
-    }
-    public void setFiscalCode(String fiscalCode) {
-        this.fiscalCode = fiscalCode;
-    }
+
+//  public String getFiscalCode() { return fiscalCode; }
+//  public void setFiscalCode(String fiscalCode) { this.fiscalCode = fiscalCode; }
 
     public String getName() {
-        return firstName;
+        return name;
     }
     public void setName(String name) {
-        this.firstName = name;
+        this.name = name;
     }
 
-    public String getLastName() { return lastName;}
-    public void setLastName(String lastName) { this.lastName = lastName; }
-
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-
-    public String getPasswordHash() {
-        return passwordHash;
+    public String getUsername() {
+        return username;
     }
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public String getBirthDate() {
-        return birthDate;
+//  public String getPasswordHash() {return passwordHash;}
+//  public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+
+    public int getBirthDate() {
+        return age;
     }
-    public void setBirthDate(String birthDate) {
-        this.birthDate = birthDate;
+    public void setBirthDate(int birthDate) {
+        this.age = age;
     }
 
     public String getGender() {
@@ -59,18 +53,18 @@ public class User {
         this.gender = gender;
     }
 
-    public List<String> getPhoneNumbers() {
-        return phoneNumbers;
-    }
-    public void setPhoneNumbers(List<String> phoneNumbers) {
-        this.phoneNumbers = phoneNumbers;
-    }
-
     public String getEmail() {
         return email;
     }
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+    public void setAddress(Address address) {
+        this.address = address;
     }
 }
 

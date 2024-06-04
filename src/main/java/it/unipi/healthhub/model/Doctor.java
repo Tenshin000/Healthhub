@@ -1,12 +1,12 @@
 package it.unipi.healthhub.model;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
 import java.util.List;
 
 @Document(collection = "doctors")
 public class Doctor extends User {
 
-    private Address address;
     private List<Service> services;
     private int endorsementCount;
     private List<Review> reviews;
@@ -14,20 +14,13 @@ public class Doctor extends User {
     private List<Schedule> schedule;
     private List<String> calendarTemplates; // List of references (foreign keys) to CalendarTemplate
     private List<String> specializations;
+    @Field("phone_numbers")
+    private List<String> phoneNumbers;
 
-
-    public Address getAddress() {
-        return address;
-    }
-
-    public void setAddress(Address address) {
-        this.address = address;
-    }
 
     public List<Service> getServices() {
         return services;
     }
-
     public void setServices(List<Service> services) {
         this.services = services;
     }
@@ -35,7 +28,6 @@ public class Doctor extends User {
     public int getEndorsementCount() {
         return endorsementCount;
     }
-
     public void setEndorsementCount(int endorsementCount) {
         this.endorsementCount = endorsementCount;
     }
@@ -43,7 +35,6 @@ public class Doctor extends User {
     public List<Review> getReviews() {
         return reviews;
     }
-
     public void setReviews(List<Review> reviews) {
         this.reviews = reviews;
     }
@@ -58,7 +49,6 @@ public class Doctor extends User {
     public List<Schedule> getSchedule() {
         return schedule;
     }
-
     public void setSchedule(List<Schedule> schedule) {
         this.schedule = schedule;
     }
@@ -66,7 +56,6 @@ public class Doctor extends User {
     public List<String> getCalendarTemplates() {
         return calendarTemplates;
     }
-
     public void setCalendarTemplates(List<String> calendarTemplates) {
         this.calendarTemplates = calendarTemplates;
     }
@@ -74,8 +63,15 @@ public class Doctor extends User {
     public List<String> getSpecializations() {
         return specializations;
     }
-
     public void setSpecializations(List<String> specializations) {
         this.specializations = specializations;
     }
+
+    public List<String> getPhoneNumbers() {
+        return phoneNumbers;
+    }
+    public void setPhoneNumbers(List<String> phoneNumbers) {
+        this.phoneNumbers = phoneNumbers;
+    }
+
 }

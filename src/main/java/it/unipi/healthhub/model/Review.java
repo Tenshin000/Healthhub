@@ -4,20 +4,10 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
 public class Review {
-    @Id
-    private String id;
-
     @DBRef
     public User name;
     public String review;
     public String time;
-
-    public String getId() {
-        return id;
-    }
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public User getName() {
         return name;
