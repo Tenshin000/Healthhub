@@ -42,7 +42,7 @@ public class User {
     public int getBirthDate() {
         return age;
     }
-    public void setBirthDate(int birthDate) {
+    public void setBirthDate(int age) {
         this.age = age;
     }
 
@@ -66,5 +66,7 @@ public class User {
     public void setAddress(Address address) {
         this.address = address;
     }
+
+    public static User parseDocument()
 }
 
