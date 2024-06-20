@@ -8,6 +8,8 @@ import java.util.List;
 @Document(collection = "users")
 public class User {
     @Id
+    private String id;
+    
     private String username;
 //  private String fiscalCode;
     private String name;
@@ -67,6 +69,6 @@ public class User {
         this.address = address;
     }
 
-    public static User parseDocument()
+    //public static User parseDocument(){}
 }
 

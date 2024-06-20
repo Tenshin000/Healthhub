@@ -1,4 +1,5 @@
 package it.unipi.healthhub.model;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -6,6 +7,9 @@ import java.util.List;
 
 @Document(collection = "doctors")
 public class Doctor extends User {
+
+    @Id
+    private String id;
 
     private List<Service> services;
     private int endorsementCount;
