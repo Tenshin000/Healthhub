@@ -1,11 +1,40 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <title>HealthHub</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
 </head>
 <body>
-    <h1>Spring Boot Thymeleaf Example</h1>
-    <p th:text="${title}"></p>
+<header>
+    <h1>HealthHub</h1>
+    <p>Benvenuti su HealthHub, il sito di ricerca per medici con funzioni di social.</p>
+</header>
+
+<nav>
+    <ul>
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Ricerca Medici</a></li>
+        <li><a href="#">Social</a></li>
+        <li><a href="#">Contatti</a></li>
+    </ul>
+</nav>
+
+<main>
+    <section>
+        <h2>Ricerca Medici</h2>
+        <p>Utilizza la nostra funzione di ricerca per trovare medici e specialisti nella tua zona.</p>
+        <a href="#">Inizia la ricerca</a>
+    </section>
+
+    <section>
+        <h2>Funzioni Social</h2>
+        <p>Connettiti con altri medici e professionisti del settore sanitario.</p>
+        <a href="#">Scopri di più</a>
+    </section>
+</main>
+
+<footer>
+    <p>&copy; 2024 HealthHub. Tutti i diritti riservati.</p>
+</footer>
 </body>
 </html>
