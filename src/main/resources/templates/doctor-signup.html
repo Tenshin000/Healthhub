@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Registrazione Medico - HealthHub</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<!-- Include header -->
+<header>
+    <th:block th:include="fragments/header :: header"></th:block>
+</header>
+
+<main>
+    <h2>Iscrizione Medico</h2>
+    <form action="#" th:action="@{/doctor/signup}" th:object="${doctor}" method="post">
+        <label for="name">Nome:</label>
+        <input type="text" id="name" th:field="*{name}" required><br>
+
+        <label for="username">Username:</label>
+        <input type="text" id="username" th:field="*{username}" required><br>
+
+        <label for="age">Età:</label>
+        <input type="number" id="age" th:field="*{age}" required><br>
+
+        <label for="gender">Genere:</label>
+        <select id="gender" th:field="*{gender}" required>
+            <option value="male">Maschio</option>
+            <option value="female">Femmina</option>
+            <option value="other">Altro</option>
+        </select><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" th:field="*{email}" required><br>
+
+        <label for="address">Indirizzo:</label>
+        <input type="text" id="address" th:field="*{address.street}" placeholder="Via" required><br>
+        <input type="text" id="city" th:field="*{address.city}" placeholder="Città" required><br>
+        <input type="text" id="state" th:field="*{address.country}" placeholder="Stato" required><br>
+        <input type="text" id="zip" th:field="*{address.postalCode}" placeholder="CAP" required><br>
+
+        <label for="specializations">Specializzazioni:</label>
+        <input type="text" id="specializations" th:field="*{specializations}" required><br>
+
+        <label for="phoneNumbers">Numeri di Telefono:</label>
+        <input type="text" id="phoneNumbers" th:field="*{phoneNumbers}" required><br>
+
+        <button type="submit">Registrati</button>
+    </form>
+</main>
+
+<!-- Include footer -->
+<footer>
+    <th:block th:include="fragments/footer :: footer"></th:block>
+</footer>
+
+</body>
+</html>

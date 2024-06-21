@@ -1,0 +1,15 @@
+/* Main Content Styles */
+main {
+    padding: 2em;
+    max-width: 800px;
+    margin: auto;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    main {
+        padding: 1em;
+    }
+}

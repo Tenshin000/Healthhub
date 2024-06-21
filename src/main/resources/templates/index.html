@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>HealthHub</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<!-- Include header -->
+<header>
+    <th:block th:include="fragments/header :: header"></th:block>
+</header>
+
+<main>
+    <section>
+        <h2>Ricerca Medici</h2>
+        <p>Utilizza la nostra funzione di ricerca per trovare medici e specialisti nella tua zona.</p>
+        <a href="#">Inizia la ricerca</a>
+    </section>
+
+    <section>
+        <h2>Funzioni Social</h2>
+        <p>Connettiti con altri medici e professionisti del settore sanitario.</p>
+        <a href="#">Scopri di più</a>
+    </section>
+</main>
+
+
+<!-- Include footer -->
+<footer>
+    <th:block th:include="fragments/footer :: footer"></th:block>
+</footer>
+</body>
+</html>
