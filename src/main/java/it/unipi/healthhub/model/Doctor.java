@@ -7,10 +7,6 @@ import java.util.List;
 
 @Document(collection = "doctors")
 public class Doctor extends User {
-
-    @Id
-    private String id;
-
     private List<Service> services;
     private int endorsementCount;
     private List<Review> reviews;
