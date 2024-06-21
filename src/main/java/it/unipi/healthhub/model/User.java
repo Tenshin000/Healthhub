@@ -41,10 +41,10 @@ public class User {
 //  public String getPasswordHash() {return passwordHash;}
 //  public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
 
-    public int getBirthDate() {
+    public int getAge() {
         return age;
     }
-    public void setBirthDate(int age) {
+    public void setAge(int age) {
         this.age = age;
     }
 

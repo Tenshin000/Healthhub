@@ -2,22 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>HealthHub</title>
-    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
+<!-- Include header -->
 <header>
-    <h1>HealthHub</h1>
-    <p>Benvenuti su HealthHub, il sito di ricerca per medici con funzioni di social.</p>
+    <th:block th:include="fragments/header :: header"></th:block>
 </header>
-
-<nav>
-    <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/search">Ricerca Medici</a></li>
-        <li><a href="#">Social</a></li>
-        <li><a href="#">Contatti</a></li>
-    </ul>
-</nav>
 
 <main>
     <section>
@@ -33,8 +24,10 @@
     </section>
 </main>
 
+
+<!-- Include footer -->
 <footer>
-    <p>&copy; 2024 HealthHub. Tutti i diritti riservati.</p>
+    <th:block th:include="fragments/footer :: footer"></th:block>
 </footer>
 </body>
 </html>

@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Ricerca Medici - HealthHub</title>
-    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
     <script>
         async function searchDoctors(query) {
             const response = await fetch(`/api/doctors/search?query=${query}`);
@@ -13,7 +13,7 @@
                 const doctorElement = document.createElement('div');
                 doctorElement.innerHTML = `
                     <h4>${doctor.name}</h4>
-                    <p>Specialità: ${doctor.specialty}</p>
+                    <p>Specializzazioni: ${doctor.specializations}</p>
                     <p>Località: ${doctor.location}</p>
                 `;
                 resultsDiv.appendChild(doctorElement);
@@ -30,19 +30,10 @@
     </script>
 </head>
 <body>
+<!-- Include header -->
 <header>
-    <h1>HealthHub</h1>
-    <p>Benvenuti su HealthHub, il sito di ricerca per medici con funzioni di social.</p>
+    <th:block th:include="fragments/header :: header"></th:block>
 </header>
-
-<nav>
-    <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/search">Ricerca Medici</a></li>
-        <li><a href="#">Social</a></li>
-        <li><a href="#">Contatti</a></li>
-    </ul>
-</nav>
 
 <main>
     <h2>Ricerca Medici</h2>
@@ -57,8 +48,9 @@
     </section>
 </main>
 
+<!-- Include footer -->
 <footer>
-    <p>&copy; 2024 HealthHub. Tutti i diritti riservati.</p>
+    <th:block th:include="fragments/footer :: footer"></th:block>
 </footer>
 </body>
 </html>

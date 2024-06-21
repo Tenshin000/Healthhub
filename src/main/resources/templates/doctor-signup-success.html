@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Registrazione Successo - HealthHub</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<!-- Include header -->
+<header>
+    <th:block th:include="fragments/header :: header"></th:block>
+</header>
+
+<main>
+    <h2>Registrazione avvenuta con successo!</h2>
+    <p>Grazie per esserti registrato a HealthHub. Ora puoi accedere ai servizi riservati ai medici.</p>
+    <a href="/">Torna alla Home</a>
+</main>
+
+<!-- Include footer -->
+<footer>
+    <th:block th:include="fragments/footer :: footer"></th:block>
+</footer>
+</body>
+</html>
