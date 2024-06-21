@@ -12,6 +12,14 @@ import java.util.Optional;
 public class DoctorService {
     @Autowired
     private DoctorRepository doctorRepository;
+
+    public List<Doctor> searchDoctors(String query) {
+        if (query != null && !query.isEmpty()) {
+            return doctorRepository.findByNameContainingOrSpecializationsContainingOrAddressContaining(query, query, query);
+        } else {
+            return doctorRepository.findAll();
+        }
+    }
     public List<Doctor> getAllDoctor(){
         return doctorRepository.findAll();
     }

@@ -1,4 +1,4 @@
-package it.unipi.healthhub.controller;
+package it.unipi.healthhub.controller.api;
 
 import it.unipi.healthhub.model.Appointment;
 import it.unipi.healthhub.service.AppointmentService;
@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/appointments")
-public class AppointmentController {
+public class AppointmentAPI {
     @Autowired
     private AppointmentService appointmentService;
 

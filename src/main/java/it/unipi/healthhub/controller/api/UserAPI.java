@@ -1,4 +1,4 @@
-package it.unipi.healthhub.controller;
+package it.unipi.healthhub.controller.api;
 
 import it.unipi.healthhub.model.User;
 import it.unipi.healthhub.service.UserService;
@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
-public class UserController {
+public class UserAPI {
     @Autowired
     private UserService userService;
 
