@@ -1,6 +1,7 @@
 package it.unipi.healthhub.service;
 
 import it.unipi.healthhub.model.Doctor;
+import it.unipi.healthhub.model.User;
 import it.unipi.healthhub.repository.DoctorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,5 +45,17 @@ public class DoctorService {
 
     public void deleteDoctor(String id){
         doctorRepository.deleteById(id);
+    }
+
+    public Doctor loginDoctor(String username, String password) {
+        Doctor doctor = doctorRepository.findByUsername(username);
+        System.out.println(doctor);
+        System.out.println(username);
+
+        if (doctor != null && doctor.getPassword().equals(password)) {
+            return doctor;
+        }
+
+        return null;
     }
 }

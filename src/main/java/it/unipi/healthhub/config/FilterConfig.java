@@ -9,12 +9,13 @@ import org.springframework.context.annotation.Configuration;
 public class FilterConfig {
 
     @Bean
-    public FilterRegistrationBean<AuthFilter> loggingFilter() {
+    public FilterRegistrationBean<AuthFilter> logingFilter() {
         FilterRegistrationBean<AuthFilter> registrationBean = new FilterRegistrationBean<>();
 
         registrationBean.setFilter(new AuthFilter());
 
-        registrationBean.addUrlPatterns("/search/*");
+        registrationBean.addUrlPatterns("/doctor/*");
+        registrationBean.addUrlPatterns("/dashboard/*");
         //registrationBean.setOrder(2);
 
         return registrationBean;

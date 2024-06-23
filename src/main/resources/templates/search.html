@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ricerca Medici - HealthHub</title>
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/search.css}">
     <script>
         async function searchDoctors(query) {
             const response = await fetch(`/api/doctors/search?query=${query}`);
@@ -30,17 +32,35 @@
     </script>
 </head>
 <body>
-<!-- Include header -->
+<!-- Header -->
 <header>
-    <th:block th:include="fragments/header :: header"></th:block>
+    <div class="navbar">
+        <div class="logo">
+            <h1>HealthHub</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/login">Accedi</a></li>
+                <li><a href="/search">Cerca Medico</a></li>
+                <li><a href="/contact">Contatti</a></li>
+                <li><a href="/help">Aiuto</a></li>
+            </ul>
+        </nav>
+    </div>
 </header>
 
+<!-- Main Content -->
 <main>
-    <h2>Ricerca Medici</h2>
-    <form onsubmit="event.preventDefault(); searchDoctors(document.getElementById('query').value);">
-        <input type="text" id="query" placeholder="Cerca per nome, specialità, o località">
-        <button type="submit">Cerca</button>
-    </form>
+    <div class="hero">
+        <div class="hero-content">
+            <h2>Ricerca Medici</h2>
+            <form onsubmit="event.preventDefault(); searchDoctors(document.getElementById('query').value);">
+                <input type="text" id="query" placeholder="Cerca per nome, specialità, o località" class="search-input">
+                <button type="submit" class="search-button">Cerca</button>
+            </form>
+        </div>
+    </div>
 
     <section>
         <h3>Risultati della Ricerca</h3>
@@ -48,9 +68,17 @@
     </section>
 </main>
 
-<!-- Include footer -->
+<!-- Footer -->
 <footer>
-    <th:block th:include="fragments/footer :: footer"></th:block>
+    <div class="footer-content">
+        <p>&copy; 2024 HealthHub. Tutti i diritti riservati.</p>
+        <ul class="footer-links">
+            <li><a href="/terms">Termini di Servizio</a></li>
+            <li><a href="/privacy">Privacy</a></li>
+            <li><a href="/contact">Contatti</a></li>
+            <li><a href="/about">Chi Siamo</a></li>
+        </ul>
+    </div>
 </footer>
 </body>
 </html>

@@ -23,7 +23,7 @@ public class AuthFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
 
-        if (req.getSession().getAttribute("username") == null) {
+        if (req.getSession().getAttribute("role") == null) {
             res.sendRedirect(req.getContextPath() + "/login");
             return;
         }

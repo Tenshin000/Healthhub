@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthHub - Registrati come Medico</title>
+    <link rel="stylesheet" th:href="@{/css/register.css}">
+</head>
+<body>
+<header>
+    <div class="navbar">
+        <div class="logo">
+            <h1>HealthHub</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/login">Accedi</a></li>
+                <li><a href="/search">Cerca Medico</a></li>
+                <li><a href="/contact">Contatti</a></li>
+                <li><a href="/help">Aiuto</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+<main>
+    <div class="container">
+        <div class="register-form">
+            <h2>Registrati come Medico</h2>
+            <form action="/register-doctor" method="post">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="name">Nome</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Conferma Password</label>
+                    <input type="password" id="confirm-password" name="confirmPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="specialization">Specializzazione</label>
+                    <input type="text" id="specialization" name="specialization" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Numero di Telefono</label>
+                    <input type="text" id="phone" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="street">Via</label>
+                    <input type="text" id="street" name="street" required>
+                </div>
+                <div class="form-group">
+                    <label for="city">Città</label>
+                    <input type="text" id="city" name="city" required>
+                </div>
+                <div class="form-group">
+                    <label for="postal-code">CAP</label>
+                    <input type="text" id="postal-code" name="postalCode" required>
+                </div>
+                <div class="form-group">
+                    <label for="province">Provincia</label>
+                    <input type="text" id="province" name="province" required>
+                </div>
+                <div class="form-group">
+                    <label for="country">Paese</label>
+                    <input type="text" id="country" name="country" required>
+                </div>
+                <button type="submit" class="btn">Registrati</button>
+                <div class="links">
+                    <a href="/login">Hai già un account? Accedi</a>
+                    <a href="/register">Sei un paziente? Registrati qui</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+<footer>
+    <div class="footer-content">
+        <p>&copy; 2024 HealthHub. Tutti i diritti riservati.</p>
+        <ul class="footer-links">
+            <li><a href="/terms">Termini di Servizio</a></li>
+            <li><a href="/privacy">Privacy</a></li>
+            <li><a href="/contact">Contatti</a></li>
+            <li><a href="/about">Chi Siamo</a></li>
+        </ul>
+    </div>
+</footer>
+</body>
+</html>
