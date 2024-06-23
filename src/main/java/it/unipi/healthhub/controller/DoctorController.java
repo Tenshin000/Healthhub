@@ -8,29 +8,17 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
+@RequestMapping("/doctor")
 public class DoctorController {
 
     @Autowired
     private DoctorService doctorService;
-
-    @GetMapping("/doctor/signup")
-    public String showSignupForm(Model model) {
-        model.addAttribute("doctor", new Doctor());
-        return "doctor-signup";
+    @GetMapping("/dashboard")
+    public String search(Model model) {
+        return "dashboard";
     }
 
-    @PostMapping("/doctor/signup")
-    public String signupDoctor(@ModelAttribute Doctor doctor, Model model) {
-        doctorService.createDoctor(doctor);
-        model.addAttribute("message", "Registrazione avvenuta con successo");
-        return "redirect:/doctor/signup-success";
-    }
-
-    @GetMapping("/doctor/signup-success")
-    public String signupSuccess(Model model) {
-        model.addAttribute("message", "Registrazione avvenuta con successo");
-        return "doctor-signup-success";
-    }
 }
