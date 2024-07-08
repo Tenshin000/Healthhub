@@ -8,24 +8,7 @@
 </head>
 <body>
 <div class="container">
-    <aside>
-        <div class="profile">
-            <img src="doctor.jpg" alt="Dr. Marttin Deo">
-            <h2>Dr. Marttin Deo</h2>
-            <p>MBBS, FCPS - MD (Medicine), MCPS</p>
-        </div>
-        <nav>
-            <ul>
-                <li><a href="/doctor/dashboard">Dashboard</a></li>
-                <li><a href="/doctor/appointments">Appointments</a></li>
-                <li><a href="/doctor/profile">Profile</a></li>
-                <li><a href="/doctor/settings">Settings</a></li>
-                <li><a href="/doctor/reviews">Reviews</a></li>
-                <li><a href="/doctor/templates">Weekly Templates</a></li>
-                <li><a href="/doctor/logout">Logout</a></li>
-            </ul>
-        </nav>
-    </aside>
+    <aside th:replace="fragments/doctor-sidebar :: sidebar(${doctor})"></aside>
     <main>
         <header>
             <h1>Reviews Management</h1>

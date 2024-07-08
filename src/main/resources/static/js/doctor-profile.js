@@ -1,13 +1,5 @@
 // script.js
 
-// Function to save each field independently
-function saveField(fieldName, value) {
-    if (value !== '') {
-        // Simulate saving to backend (replace with actual backend integration)
-        console.log(`Saved ${fieldName}: ${value}`);
-    }
-}
-
 // Event listener for saving address
 const saveAddressButton = document.querySelector('button[data-field="address"]');
 saveAddressButton.addEventListener('click', () => {
@@ -15,9 +7,67 @@ saveAddressButton.addEventListener('click', () => {
     const cityValue = document.getElementById('city').value.trim();
     const stateValue = document.getElementById('state').value.trim();
     const zipValue = document.getElementById('zip').value.trim();
+    const province = document.getElementById('province').value.trim();
 
-    const fullAddress = `${streetValue}, ${cityValue}, ${stateValue} ${zipValue}`;
-    saveField('address', fullAddress);
+    const addressData = {
+        street: streetValue,
+        city: cityValue,
+        country: stateValue,
+        postalCode: zipValue,
+        province: province
+    };
+
+    fetch('/api/doctors/address', {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(addressData)
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    }).then(data => {
+            console.log('Address updated successfully:', data);
+            // Esegui altre azioni dopo l'aggiornamento dell'indirizzo
+    }).catch(error => {
+            console.error('Error updating address:', error);
+            // Gestisci l'errore, ad esempio mostrando un messaggio all'utente
+    });
+});
+
+const savePersonalInfoButton = document.querySelector('button[data-field="personal-info"]');
+savePersonalInfoButton.addEventListener('click', () => {
+    const fullName = document.getElementById('full-name').value.trim();
+    const birthDate = document.getElementById('birthdate').value.trim();
+    const gender = document.getElementById('gender').value;
+
+    const userDetails = {
+        fullName: fullName,
+        birthDate: birthDate,
+        gender: gender
+    };
+
+    fetch('/api/doctors/details', {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userDetails)
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    }).then(data => {
+        console.log('User details updated successfully:', data);
+        // Esegui altre azioni dopo l'aggiornamento dell'indirizzo
+    }).catch(error => {
+        console.error('Error updating user details:', error);
+        // Gestisci l'errore, ad esempio mostrando un messaggio all'utente
+    });
+
 });
 
 // Function to add phone number
@@ -26,58 +76,257 @@ function addPhoneNumber() {
     const phoneNumber = phoneInput.value.trim();
 
     if (phoneNumber !== '') {
-        const phoneList = document.getElementById('phone-list');
-        const phoneTag = document.createElement('div');
-        phoneTag.classList.add('phone-number');
-        phoneTag.textContent = phoneNumber;
-        phoneTag.addEventListener('click', () => {
-            phoneTag.remove();
-        });
-        phoneList.appendChild(phoneTag);
+        // Chiamata al backend per salvare il numero di telefono
+        fetch('/api/doctors/phones', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ phoneNumber: phoneNumber })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to add phone number');
+                }
+                return response.json(); // Estrai dati JSON dalla risposta
+            })
+            .then(data => {
+                // Aggiungi il numero di telefono all'interfaccia
+                const phoneList = document.getElementById('phone-list');
+                const phoneTag = document.createElement('div');
+                phoneTag.classList.add('phone-number');
+                phoneTag.setAttribute('data-index', data.index); // Aggiungi attributo data-index
+                phoneTag.textContent = data.phoneNumber; // Usiamo data.phoneNumber se il backend restituisce il numero aggiunto
+                phoneTag.addEventListener('click', handlePhoneTagClick);
+                phoneList.appendChild(phoneTag);
+
+                console.log('Phone number added successfully:', data.phoneNumber);
+            })
+            .catch(error => {
+                console.error('Error adding phone number:', error);
+                // Gestisci l'errore, ad esempio mostrando un messaggio all'utente
+            });
 
         // Clear input
         phoneInput.value = '';
     }
 }
 
+// Funzione esterna per gestire il click su phoneTag e rimuovere il numero di telefono
+function handlePhoneTagClick(event) {
+    const phoneTag = event.target; // Ottieni l'elemento su cui è stato cliccato
+    removePhoneNumber(phoneTag); // Chiamata alla funzione removePhoneNumber
+}
+
+// Funzione per rimuovere il numero di telefono chiamando il server
+function removePhoneNumber(phoneTag) {
+    const index = phoneTag.getAttribute('data-index');
+
+    fetch(`/api/doctors/phones/${index}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to delete phone number');
+            }
+            // Rimuovi l'elemento solo se la risposta del server è positiva
+            phoneTag.remove();
+            console.log('Phone number deleted successfully');
+        })
+        .catch(error => {
+            console.error('Error deleting phone number:', error);
+            // Gestisci l'errore, ad esempio mostrando un messaggio all'utente
+        });
+}
+
 // Event listener for adding phone number
 const addPhoneButton = document.getElementById('add-phone');
 addPhoneButton.addEventListener('click', addPhoneNumber);
 
-// Function to add specialization tag
 function addSpecialization() {
     const specializationInput = document.getElementById('specialization-input');
     const specializationValue = specializationInput.value.trim();
 
     if (specializationValue !== '') {
-        const specializationsContainer = document.getElementById('specializations');
-        const specializationTag = document.createElement('div');
-        specializationTag.classList.add('specialization');
-        specializationTag.textContent = specializationValue;
-        specializationTag.addEventListener('click', () => {
-            specializationTag.remove();
-        });
-        specializationsContainer.appendChild(specializationTag);
+        // Chiamata al backend per salvare il numero di telefono
+        fetch('/api/doctors/specializations', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ specialization: specializationValue })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to add specialization');
+                }
+                return response.json(); // Estrai dati JSON dalla risposta
+            })
+            .then(data => {
+                // Aggiungi la specializzazione all'interfaccia
+                const specializationsContainer = document.getElementById('specializations');
+                const specializationTag = document.createElement('div');
+                specializationTag.classList.add('specialization');
+                specializationTag.setAttribute('data-index', data.index); // Aggiungi attributo data-index
+                specializationTag.textContent = data.specialization;
+                specializationTag.addEventListener('click', handleSpecializationTagClick);
+                specializationsContainer.appendChild(specializationTag);
+
+                console.log('Phone number added successfully:', data.phoneNumber);
+            })
+            .catch(error => {
+                console.error('Error adding phone number:', error);
+                // Gestisci l'errore, ad esempio mostrando un messaggio all'utente
+            });
 
         // Clear input
         specializationInput.value = '';
     }
 }
 
+// Funzione esterna per gestire il click su phoneTag e rimuovere il numero di telefono
+function handleSpecializationTagClick(event) {
+    const specializationTag = event.target; // Ottieni l'elemento su cui è stato cliccato
+    removeSpecialization(specializationTag); // Chiamata alla funzione removePhoneNumber
+}
+
+// Funzione per rimuovere il numero di telefono chiamando il server
+function removeSpecialization(specializationTag) {
+    const index = specializationTag.getAttribute('data-index');
+
+    fetch(`/api/doctors/specializations/${index}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to delete specialization');
+            }
+            // Rimuovi l'elemento solo se la risposta del server è positiva
+            specializationTag.remove();
+            console.log('Specialization deleted successfully');
+        })
+        .catch(error => {
+            console.error('Error deleting specialization:', error);
+            // Gestisci l'errore, ad esempio mostrando un messaggio all'utente
+        });
+}
+
 // Event listener for adding specialization
 const addSpecializationButton = document.getElementById('add-specialization');
 addSpecializationButton.addEventListener('click', addSpecialization);
+
+
+function saveNewService(visitTypeInput, priceInput, serviceCardElement) {
+    const visitData = {
+        service: visitTypeInput,
+        price: priceInput
+    };
+
+    fetch('/api/doctors/services', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(visitData)
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to save new service');
+            }
+            return response.json(); // Estrai dati JSON dalla risposta
+        })
+        .then(data => {
+            console.log('New service saved successfully:', data);
+            serviceCardElement.setAttribute('data-index', data.index);
+        })
+        .catch(error => {
+            console.error('Error saving new service:', error);
+            throw error; // Rilancia l'errore per gestione superiore, se necessario
+        });
+}
+
+function updateService(dataIndex, visitTypeInput, priceInput) {
+    const visitData = {
+        service: visitTypeInput,
+        price: priceInput
+    };
+
+    // Effettua la richiesta al backend per aggiornare il tipo di visita
+    fetch(`/api/doctors/services/${dataIndex}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(visitData)
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to update service');
+            }
+            console.log('Service updated successfully');
+            // Esegui altre azioni dopo aver aggiornato il tipo di visita, se necessario
+        })
+        .catch(error => {
+            console.error('Error updating service:', error);
+            // Gestisci l'errore, ad esempio mostrando un messaggio all'utente
+        });
+}
+
+function saveServiceHandler(event) {
+    const serviceCardElement = event.target.closest('.visit-type');
+    const visitTypeInput = serviceCardElement.querySelector('input[type="text"]:first-of-type').value.trim();
+    const priceInput = serviceCardElement.querySelector('input[type="text"]:last-of-type').value.trim();
+    const dataIndex = serviceCardElement.getAttribute('data-index');
+
+    if (dataIndex === '-1' || !dataIndex) {
+        saveNewService(visitTypeInput, priceInput, serviceCardElement);
+    } else {
+        updateService(dataIndex, visitTypeInput, priceInput);
+    }
+}
+
+function removeServiceHandler(event) {
+    const serviceCardElement = event.target.closest('.visit-type');
+    const dataIndex = serviceCardElement.getAttribute('data-index');
+
+    // Esempio di richiesta al server per rimuovere il servizio
+    fetch(`/api/doctors/services/${dataIndex}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to delete service');
+            }
+            // Rimuovi l'elemento solo se la risposta del server è positiva
+            serviceCardElement.remove();
+            console.log('Service deleted successfully');
+        })
+        .catch(error => {
+            console.error('Error deleting service:', error);
+            // Gestisci l'errore, ad esempio mostrando un messaggio all'utente
+        });
+}
+
+
 
 // Function to add visit type card
 function addVisitType() {
     const visitTypesContainer = document.getElementById('visit-types');
     const visitTypeTemplate = `
-        <div class="visit-type">
+        <div class="visit-type" data-index="-1">
             <input type="text" placeholder="Visit type">
             <input type="text" placeholder="Price">
-            <button class="edit-visit-type">Edit</button>
-            <button class="save-visit-type">Save</button>
-            <button class="remove-visit-type">Remove</button>
+            <button class="save-visit-type" type="button">Save</button>
+            <button class="remove-visit-type" type="button">Remove</button>
         </div>
     `;
     const visitTypeElement = document.createElement('div');
@@ -85,27 +334,11 @@ function addVisitType() {
 
     // Add event listener to remove visit type
     const removeButton = visitTypeElement.querySelector('.remove-visit-type');
-    removeButton.addEventListener('click', () => {
-        visitTypeElement.remove();
-    });
+    removeButton.addEventListener('click', removeServiceHandler);
 
     // Add event listener to save visit type
     const saveButton = visitTypeElement.querySelector('.save-visit-type');
-    saveButton.addEventListener('click', () => {
-        const visitTypeInput = visitTypeElement.querySelector('input[type="text"]:first-of-type').value.trim();
-        const priceInput = visitTypeElement.querySelector('input[type="text"]:last-of-type').value.trim();
-
-        if (visitTypeInput !== '' && priceInput !== '') {
-            saveField('visit type', `${visitTypeInput} - ${priceInput}`);
-        }
-    });
-
-    // Add event listener to edit visit type
-    const editButton = visitTypeElement.querySelector('.edit-visit-type');
-    editButton.addEventListener('click', () => {
-        visitTypeElement.querySelector('input[type="text"]:first-of-type').disabled = false;
-        visitTypeElement.querySelector('input[type="text"]:last-of-type').disabled = false;
-    });
+    saveButton.addEventListener('click', saveServiceHandler);
 
     visitTypesContainer.appendChild(visitTypeElement);
 }

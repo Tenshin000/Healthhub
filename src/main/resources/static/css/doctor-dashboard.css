@@ -1,3 +1,5 @@
+@import url('doctor-sidebar.css');
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -7,33 +9,6 @@ body {
 
 .container {
     display: flex;
-}
-
-aside {
-    width: 250px;
-    background-color: #2e3a59;
-    color: white;
-    padding: 20px;
-    height: 100vh;
-}
-
-.profile {
-    text-align: center;
-}
-
-.profile img {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-}
-
-nav ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-nav ul li {
-    padding: 10px 0;
 }
 
 main {

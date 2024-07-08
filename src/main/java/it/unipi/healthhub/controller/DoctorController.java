@@ -2,6 +2,7 @@ package it.unipi.healthhub.controller;
 
 import it.unipi.healthhub.model.Doctor;
 import it.unipi.healthhub.service.DoctorService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,25 +18,55 @@ public class DoctorController {
     @Autowired
     private DoctorService doctorService;
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
+    public String dashboard(Model model, HttpSession session) {
+        model.addAttribute(
+                "doctor",
+                doctorService.getDoctorById(
+                        session.getAttribute("doctorId").toString()
+                ).get()
+        );
         return "doctor-dashboard";
     }
     @GetMapping("/appointments")
-    public String appointments(Model model) {
+    public String appointments(Model model, HttpSession session) {
+        model.addAttribute(
+                "doctor",
+                doctorService.getDoctorById(
+                        session.getAttribute("doctorId").toString()
+                ).get()
+        );
         return "doctor-appointments";
     }
 
     @GetMapping("/profile")
-    public String profile(Model model) {
+    public String profile(Model model, HttpSession session) {
+        model.addAttribute(
+                "doctor",
+                doctorService.getDoctorById(
+                        session.getAttribute("doctorId").toString()
+                ).get()
+        );
         return "doctor-profile";
     }
     @GetMapping("/reviews")
-    public String reviews(Model model) {
+    public String reviews(Model model, HttpSession session) {
+        model.addAttribute(
+                "doctor",
+                doctorService.getDoctorById(
+                        session.getAttribute("doctorId").toString()
+                ).get()
+        );
         return "doctor-reviews";
     }
 
     @GetMapping("/templates")
-    public String templates(Model model) {
+    public String templates(Model model, HttpSession session) {
+        model.addAttribute(
+                "doctor",
+                doctorService.getDoctorById(
+                        session.getAttribute("doctorId").toString()
+                ).get()
+        );
         return "doctor-templates";
     }
 

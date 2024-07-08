@@ -1,10 +1,12 @@
 package it.unipi.healthhub.service;
 
+import it.unipi.healthhub.dto.UserDetailsDTO;
 import it.unipi.healthhub.model.*;
 import it.unipi.healthhub.repository.DoctorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,38 +57,54 @@ public class DoctorService {
         return null;
     }
 
-    public it.unipi.healthhub.model.Service addService(String doctorId, it.unipi.healthhub.model.Service service) {
+    public Integer addService(String doctorId, it.unipi.healthhub.model.Service service) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
+
+            if (doctor.getServices() == null) {
+                doctor.setServices(new ArrayList<>());
+            }
+
+            int newIndex = doctor.getServices().size();
             doctor.getServices().add(service); // Add service to doctor's list
             doctorRepository.save(doctor); // Save updated doctor with the new service
-            return service;
+            return newIndex;
         }
         return null;
     }
 
-    public it.unipi.healthhub.model.Service updateService(String doctorId, Integer serviceId, it.unipi.healthhub.model.Service service) {
+    public boolean updateService(String doctorId, Integer index, it.unipi.healthhub.model.Service service) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
             List<it.unipi.healthhub.model.Service> services = doctor.getServices();
-            services.set(serviceId, service); // Update service
-            doctorRepository.save(doctor); // Save updated doctor with the updated service
-            return service;
+
+            if (index >= 0 && index < services.size()) {
+                services.set(index, service); // Aggiorna il servizio
+                doctorRepository.save(doctor); // Salva il dottore aggiornato con il servizio aggiornato
+                return true;
+            }
         }
-        return null;
+        return false;
     }
 
-    public void deleteService(String doctorId, Integer serviceId) {
+
+    public boolean deleteService(String doctorId, Integer index) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
             List<it.unipi.healthhub.model.Service> services = doctor.getServices();
-            services.remove(serviceId.intValue()); // Remove service
-            doctorRepository.save(doctor); // Save updated doctor without the removed service
+
+            if (index >= 0 && index < services.size()) {
+                services.remove(index.intValue()); // Remove service
+                doctorRepository.save(doctor); // Save updated doctor without the removed service
+                return true; // Indica che la rimozione è avvenuta con successo
+            }
         }
+        return false; // Indica che la rimozione non è avvenuta (es. indice non valido o dottore non trovato)
     }
+
 
     public List<Appointment> getAppointments(String doctorId) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
@@ -237,5 +255,94 @@ public class DoctorService {
         }
 
         return null;
+    }
+
+    public Address updateAddress(String doctorId, Address address) {
+        Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
+        if (doctorOpt.isPresent()) {
+            Doctor doctor = doctorOpt.get();
+            doctor.setAddress(address); // Update address
+            doctorRepository.save(doctor); // Save updated doctor with the updated address
+            return address;
+        }
+        return null;
+    }
+
+
+    public UserDetailsDTO updateUserDetails(String doctorId, UserDetailsDTO userDetails) {
+        Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
+        if (doctorOpt.isPresent()) {
+            Doctor doctor = doctorOpt.get();
+            doctor.setName(userDetails.getFullName());
+            doctor.setDob(userDetails.getBirthDate());
+            doctor.setGender(userDetails.getGender());
+            doctorRepository.save(doctor); // Save updated doctor with the updated user details
+            return userDetails;
+        }
+        return null;
+    }
+
+    public Integer addPhoneNumber(String doctorId, String number) {
+        Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
+        if (doctorOpt.isPresent()) {
+            Doctor doctor = doctorOpt.get();
+
+            if (doctor.getPhoneNumbers() == null) {
+                doctor.setPhoneNumbers(new ArrayList<>());
+            }
+
+            int newIndex = doctor.getPhoneNumbers().size(); // Ottieni l'indice del nuovo numero di telefono
+            doctor.getPhoneNumbers().add(number); // Aggiunge il numero di telefono alla lista del dottore
+            doctorRepository.save(doctor); // Salva il dottore aggiornato con il nuovo numero di telefono
+            return newIndex;
+        }
+        return null;
+    }
+
+
+    public boolean removePhoneNumber(String doctorId, Integer index) {
+        Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
+        if (doctorOpt.isPresent()) {
+            Doctor doctor = doctorOpt.get();
+            List<String> phoneNumbers = doctor.getPhoneNumbers();
+            if (index >= 0 && index < phoneNumbers.size()) {
+                phoneNumbers.remove(index.intValue());
+                doctorRepository.save(doctor); // Salva il dottore aggiornato senza il numero di telefono rimosso
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Integer addSpecialization(String doctorId, String specialization) {
+        Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
+        if (doctorOpt.isPresent()) {
+            Doctor doctor = doctorOpt.get();
+
+            if (doctor.getSpecializations() == null) {
+                doctor.setSpecializations(new ArrayList<>());
+            }
+
+            int newIndex = doctor.getSpecializations().size(); // Ottieni l'indice del nuovo numero di telefono
+            doctor.getSpecializations().add(specialization); // Aggiunge il numero di telefono alla lista del dottore
+            doctorRepository.save(doctor); // Salva il dottore aggiornato con il nuovo numero di telefono
+            return newIndex;
+        }
+        return null;
+    }
+
+
+    public boolean removeSpecialization(String doctorId, Integer index) {
+        Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
+        if (doctorOpt.isPresent()) {
+            Doctor doctor = doctorOpt.get();
+            List<String> specializations = doctor.getSpecializations();
+            if (index >= 0 && index < specializations.size()) {
+                specializations.remove(index.intValue());
+                doctorRepository.save(doctor);
+                return true;
+            }
+        }
+        return false;
     }
 }

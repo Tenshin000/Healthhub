@@ -1,7 +1,9 @@
 package it.unipi.healthhub.controller.api;
 
+import it.unipi.healthhub.dto.*;
 import it.unipi.healthhub.model.*;
 import it.unipi.healthhub.service.DoctorService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -59,16 +61,6 @@ public class DoctorAPI {
     @GetMapping("/{doctorId}/services")
     public ResponseEntity<List<Service>> getServices(@PathVariable String doctorId) {
         return ResponseEntity.ok(doctorService.getServices(doctorId));
-    }
-
-    @PostMapping("/{doctorId}/services")
-    public ResponseEntity<Service> addService(@PathVariable String doctorId, @RequestBody Service service) {
-        return ResponseEntity.ok(doctorService.addService(doctorId, service));
-    }
-
-    @PutMapping("/{doctorId}/services/{serviceId}")
-    public ResponseEntity<Service> updateService(@PathVariable String doctorId, @PathVariable Integer serviceId, @RequestBody Service service) {
-        return ResponseEntity.ok(doctorService.updateService(doctorId, serviceId, service));
     }
 
     @DeleteMapping("/{doctorId}/services/{serviceId}")
@@ -154,4 +146,122 @@ public class DoctorAPI {
         doctorService.deleteReview(doctorId, reviewId);
         return ResponseEntity.noContent().build();
     }
+
+    // Endpoints for address
+
+    @PutMapping("/address")
+    public ResponseEntity<Address> updateMyAddress(@RequestBody Address address, HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        return ResponseEntity.ok(doctorService.updateAddress(doctorId, address));
+    }
+
+    @PutMapping("/details")
+    public ResponseEntity<UserDetailsDTO> updateMyDetails(@RequestBody UserDetailsDTO userDetails, HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        return ResponseEntity.ok(doctorService.updateUserDetails(doctorId, userDetails));
+    }
+
+    @PostMapping("/phones")
+    public ResponseEntity<PhoneNumberDTO> addMyNumber(@RequestBody PhoneNumberDTO request, HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        String phoneNumber = request.getPhoneNumber();
+
+        Integer newIndex = doctorService.addPhoneNumber(doctorId, phoneNumber);
+
+        if (newIndex != null) {
+            PhoneNumberDTO response = new PhoneNumberDTO(phoneNumber, newIndex);
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @DeleteMapping("/phones/{index}")
+    public ResponseEntity<String> removePhoneNumber(@PathVariable Integer index, HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        boolean removed = doctorService.removePhoneNumber(doctorId,index);
+        if (removed) {
+            return ResponseEntity.ok("Phone number removed successfully");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/specializations")
+    public ResponseEntity<SpecializationDTO> addMySpecialization(@RequestBody SpecializationDTO request, HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        String specialization = request.getSpecialization();
+        System.out.println("Specialization: " + specialization);
+
+        Integer newIndex = doctorService.addSpecialization(doctorId, specialization);
+
+        if (newIndex != null) {
+            SpecializationDTO response = new SpecializationDTO(specialization, newIndex);
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @DeleteMapping("/specializations/{index}")
+    public ResponseEntity<String> removeSpecializations(@PathVariable Integer index, HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        boolean removed = doctorService.removeSpecialization(doctorId, index);
+        if (removed) {
+            return ResponseEntity.ok("Specialization removed successfully");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/services")
+    public ResponseEntity<ServiceDTO> addVisitType(@RequestBody ServiceDTO serviceDto, HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+
+        it.unipi.healthhub.model.Service service = new it.unipi.healthhub.model.Service();
+        service.setService(serviceDto.getService());
+        service.setPrice(serviceDto.getPrice());
+
+        Integer newIndex = doctorService.addService(doctorId, service);
+
+        if (newIndex != null) {
+            ServiceDTO responseDto = new ServiceDTO();
+            responseDto.setIndex(newIndex);
+            responseDto.setService(serviceDto.getService());
+            responseDto.setPrice(serviceDto.getPrice());
+
+            return ResponseEntity.ok(responseDto);
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+
+    @PutMapping("/services/{index}")
+    public ResponseEntity<String> updateVisitType(@PathVariable Integer index, @RequestBody ServiceDTO serviceDto, HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+
+        it.unipi.healthhub.model.Service service = new it.unipi.healthhub.model.Service();
+        service.setService(serviceDto.getService());
+        service.setPrice(serviceDto.getPrice());
+
+        boolean updated = doctorService.updateService(doctorId, index, service);
+        if (updated) {
+            return ResponseEntity.ok("Service updated successfully");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/services/{index}")
+    public ResponseEntity<String> removeService(@PathVariable Integer index, HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        boolean removed = doctorService.deleteService(doctorId, index);
+        if (removed) {
+            return ResponseEntity.ok("Service removed successfully");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }

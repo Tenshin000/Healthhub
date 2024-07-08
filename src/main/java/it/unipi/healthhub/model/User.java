@@ -3,26 +3,32 @@ package it.unipi.healthhub.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Document(collection = "users")
 public class User {
     @Id
-    private String id;
-    
-    private String username;
-//  private String fiscalCode;
-    private String name;
-    private String password;
-    private int age;
-    private String gender;
+    protected String id;
+
+    protected String username;
+    //private String fiscalCode;
+    protected String name;
+    protected String password;
+    protected int age;
+    protected LocalDate dob;
+    protected String gender;
 //  private List<String> phoneNumbers;
-    private String email;
-    private Address address;
+    protected String email;
+    protected Address address;
 
 
 //  public String getFiscalCode() { return fiscalCode; }
 //  public void setFiscalCode(String fiscalCode) { this.fiscalCode = fiscalCode; }
+
+    public String getId() {
+        return id;
+    }
 
     public String getName() {
         return name;
@@ -78,6 +84,13 @@ public class User {
     }
 
     //public static User parseDocument(){}
+
+    public void setDob(LocalDate dob) {
+        this.dob = dob;
+    }
+    public LocalDate getDob() {
+        return dob;
+    }
 
     public String toString() {
         return "User{" +

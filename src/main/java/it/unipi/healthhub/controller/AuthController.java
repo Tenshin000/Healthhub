@@ -48,6 +48,7 @@ public class AuthController {
         if (doctor != null) {
             // Imposta l'utente in sessione come medico
             session.setAttribute("user", doctor);
+            session.setAttribute("doctorId", doctor.getId());
             session.setAttribute("role", "doctor");
             return "redirect:/doctor/dashboard"; // Redirect dopo il login
         }

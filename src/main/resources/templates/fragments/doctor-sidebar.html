@@ -1,0 +1,16 @@
+<aside th:fragment="sidebar (doctor)">
+  <div class="profile">
+    <h2 th:text="${'Dr. ' + doctor.name}"></h2>
+    <p th:text="${doctor.specializations}"></p>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="/doctor/dashboard">Dashboard</a></li>
+      <li><a href="/doctor/appointments">Appointments</a></li>
+      <li><a href="/doctor/profile">Profile</a></li>
+      <li><a href="/doctor/reviews">Reviews</a></li>
+      <li><a href="/doctor/templates">Weekly Templates</a></li>
+      <li><a href="/doctor/logout">Logout</a></li>
+    </ul>
+  </nav>
+</aside>
