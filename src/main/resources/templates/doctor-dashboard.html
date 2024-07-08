@@ -1,189 +1,145 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Dashboard Medico</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
     <link rel="stylesheet" th:href="@{/css/doctor-dashboard.css}">
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-<!-- Include header -->
-<header>
-    <th:block th:include="fragments/header :: header"></th:block>
-</header>
-<main>
-    <h1>Dashboard Medico</h1>
-
-    <div class="stats">
-        <div class="stat">
-            <h2 th:text="${appointmentsCount}">0</h2>
-            <p>Appuntamenti totali</p>
+<div class="container">
+    <aside>
+        <div class="profile">
+            <img src="doctor.jpg" alt="Dr. Marttin Deo">
+            <h2>Dr. Marttin Deo</h2>
+            <p>MBBS, FCPS - MD (Medicine), MCPS</p>
         </div>
-        <div class="stat">
-            <h2 th:text="${cancellationsCount}">0</h2>
-            <p>Appuntamenti cancellati</p>
-        </div>
-        <div class="stat">
-            <h2 th:text="${newPatientsCount}">0</h2>
-            <p>Nuovi pazienti</p>
-        </div>
-        <div class="stat">
-            <h2 th:text="${averageWaitingTime}">0</h2>
-            <p>Tempo medio di attesa (minuti)</p>
-        </div>
-    </div>
-
-    <div class="charts">
-        <div class="chart" id="appointmentTypesChart">
-            <h3>Tipologia di Appuntamenti</h3>
-            <canvas id="appointmentTypesCanvas"></canvas>
-        </div>
-
-        <div class="chart" id="patientDemographicsChart">
-            <h3>Demografia dei Pazienti</h3>
-            <canvas id="patientDemographicsCanvas"></canvas>
-        </div>
-    </div>
-
-    <div id="services" class="section">
-        <h2>Gestisci Servizi e Prezzi</h2>
-        <form id="serviceForm">
-            <div>
-                <label for="serviceName">Nome Servizio:</label>
-                <input type="text" id="serviceName" name="serviceName" required>
+        <nav>
+            <ul>
+                <li><a href="/doctor/dashboard">Dashboard</a></li>
+                <li><a href="/doctor/appointments">Appointments</a></li>
+                <li><a href="/doctor/profile">Profile</a></li>
+                <li><a href="/doctor/settings">Settings</a></li>
+                <li><a href="/doctor/reviews">Reviews</a></li>
+                <li><a href="/doctor/templates">Weekly Templates</a></li>
+                <li><a href="/doctor/logout">Logout</a></li>
+            </ul>
+        </nav>
+    </aside>
+    <main>
+        <header>
+            <h1>Dashboard</h1>
+            <div class="header-right">
+                <input type="search" placeholder="Search">
+                <button>🔔</button>
+                <button>✉️</button>
             </div>
-            <div>
-                <label for="servicePrice">Prezzo:</label>
-                <input type="number" id="servicePrice" name="servicePrice" step="0.01" required>
+        </header>
+        <section class="stats">
+            <div class="stat">
+                <h3>Endorsements</h3>
+                <p>120</p>
             </div>
-            <div>
-                <input type="hidden" id="serviceId" name="serviceId">
-                <button type="button" onclick="saveService()">Aggiungi/Modifica Servizio</button>
+            <div class="stat">
+                <h3>New Patients This Month</h3>
+                <p>45</p>
             </div>
-        </form>
-
-        <h3>Lista Servizi</h3>
-        <div class="services-list">
-            <div class="services-list-header">
-                <div class="service-name">Nome Servizio</div>
-                <div class="service-price">Prezzo</div>
-                <div class="service-actions">Azioni</div>
+            <div class="stat">
+                <h3>Appointments Today</h3>
+                <p>85</p>
             </div>
-            <div class="services-list-body" id="servicesListBody">
-                <!-- Servizi saranno popolati dinamicamente -->
+            <div class="stat">
+                <h3>Cancellation Rate</h3>
+                <p>5%</p>
             </div>
-        </div>
-    </div>
-
-</main>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var appointmentTypesData = /*[[${appointmentTypes}]]*/ {};
-        var patientDemographicsData = /*[[${patientDemographics}]]*/ {};
-
-        // Utilizza Chart.js per visualizzare i grafici
-        var ctx1 = document.getElementById('appointmentTypesCanvas').getContext('2d');
-        new Chart(ctx1, {
-            type: 'pie',
-            data: {
-                labels: Object.keys(appointmentTypesData),
-                datasets: [{
-                    data: Object.values(appointmentTypesData),
-                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
-                }]
-            }
-        });
-
-        var ctx2 = document.getElementById('patientDemographicsCanvas').getContext('2d');
-        new Chart(ctx2, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(patientDemographicsData),
-                datasets: [{
-                    data: Object.values(patientDemographicsData),
-                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
-                }]
-            }
-        });
-
-        fetchServices();
-    });
-
-    function fetchServices() {
-        fetch('/services')
-            .then(response => response.json())
-            .then(data => {
-                const servicesListBody = document.getElementById('servicesListBody');
-                servicesListBody.innerHTML = '';
-                data.forEach(service => {
-                    const serviceItem = document.createElement('div');
-                    serviceItem.classList.add('service-item');
-                    serviceItem.innerHTML = `
-                        <div class="service-name">${service.name}</div>
-                        <div class="service-price">${service.price.toFixed(2)}</div>
-                        <div class="service-actions">
-                            <button onclick="editService('${service.id}', '${service.name}', ${service.price})">Modifica</button>
-                            <button onclick="deleteService('${service.id}')">X</button>
+        </section>
+        <section class="main-content">
+            <div class="chart">
+                <h3>Patients Summary December 2021</h3>
+                <canvas id="patientsChart"></canvas>
+            </div>
+            <div class="appointments">
+                <h3>Today's Appointments</h3>
+                <ul>
+                    <li>
+                        <div class="appointment-detail">
+                            <p class="appointment-name">M.J. Mical</p>
+                            <p class="appointment-time">On Going</p>
+                            <p class="appointment-type">Health Checkup</p>
                         </div>
-                    `;
-                    servicesListBody.appendChild(serviceItem);
-                });
-            });
-    }
+                    </li>
+                    <li>
+                        <div class="appointment-detail">
+                            <p class="appointment-name">Sanath Deo</p>
+                            <p class="appointment-time">12:30 PM</p>
+                            <p class="appointment-type">Health Checkup</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="appointment-detail">
+                            <p class="appointment-name">Loeara Phanj</p>
+                            <p class="appointment-time">01:00 PM</p>
+                            <p class="appointment-type">Report</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="appointment-detail">
+                            <p class="appointment-name">Komola Haris</p>
+                            <p class="appointment-time">01:30 PM</p>
+                            <p class="appointment-type">Common Cold</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="next-patient">
+                <h3>Next Patient Details</h3>
+                <div class="patient-info">
+                    <div class="patient-row">
+                        <span class="patient-label">Name:</span>
+                        <span class="patient-data">Sanath Deo</span>
+                    </div>
+                    <div class="patient-row">
+                        <span class="patient-label">Diagnosis:</span>
+                        <span class="patient-data">Health Checkup</span>
+                    </div>
+                    <div class="patient-row">
+                        <span class="patient-label">Patient ID:</span>
+                        <span class="patient-data">022009220005</span>
+                    </div>
+                    <div class="patient-row">
+                        <span class="patient-label">D.O.B:</span>
+                        <span class="patient-data">15 January 1989</span>
+                    </div>
+                    <div class="patient-row">
+                        <span class="patient-label">Sex:</span>
+                        <span class="patient-data">Male</span>
+                    </div>
+                    <div class="patient-row">
+                        <span class="patient-label">Weight:</span>
+                        <span class="patient-data">59 Kg</span>
+                    </div>
+                    <div class="patient-row">
+                        <span class="patient-label">Last Appointment:</span>
+                        <span class="patient-data">15 Dec 2021</span>
+                    </div>
+                    <div class="patient-row">
+                        <span class="patient-label">Height:</span>
+                        <span class="patient-data">172 cm</span>
+                    </div>
+                    <div class="patient-row">
+                        <span class="patient-label">Reg. Date:</span>
+                        <span class="patient-data">10 Dec 2021</span>
+                    </div>
+                </div>
+                <div class="patient-buttons">
+                    <button>Document</button>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+<script th:src="@{/js/doctor-dashboard.js}"></script>
 
-    function saveService() {
-        const serviceId = document.getElementById('serviceId').value;
-        const serviceName = document.getElementById('serviceName').value;
-        const servicePrice = document.getElementById('servicePrice').value;
-
-        const service = {
-            name: serviceName,
-            price: parseFloat(servicePrice)
-        };
-
-        let url = '/services';
-        let method = 'POST';
-
-        if (serviceId) {
-            url += `/${serviceId}`;
-            method = 'PUT';
-        }
-
-        fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(service)
-        })
-            .then(response => response.json())
-            .then(data => {
-                fetchServices();
-                document.getElementById('serviceForm').reset();
-                document.getElementById('serviceId').value = '';
-            });
-    }
-
-    function editService(id, name, price) {
-        document.getElementById('serviceId').value = id;
-        document.getElementById('serviceName').value = name;
-        document.getElementById('servicePrice').value = price;
-    }
-
-    function deleteService(serviceId) {
-        fetch(`/services/${serviceId}`, {
-            method: 'DELETE'
-        })
-            .then(() => {
-                fetchServices();
-            });
-    }
-</script>
-
-<!-- Include footer -->
-<footer>
-    <th:block th:include="fragments/footer :: footer"></th:block>
-</footer>
 </body>
 </html>

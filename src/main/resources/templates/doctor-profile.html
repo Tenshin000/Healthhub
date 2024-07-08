@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Profile</title>
+    <link rel="stylesheet" th:href="@{/css/doctor-profile.css}">
+</head>
+<body>
+<div class="container">
+    <aside>
+        <div class="profile">
+            <img src="doctor.jpg" alt="Dr. Marttin Deo">
+            <h2>Dr. Marttin Deo</h2>
+            <p>MBBS, FCPS - MD (Medicine), MCPS</p>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="/doctor/dashboard">Dashboard</a></li>
+                <li><a href="/doctor/appointments">Appointments</a></li>
+                <li><a href="/doctor/profile">Profile</a></li>
+                <li><a href="/doctor/settings">Settings</a></li>
+                <li><a href="/doctor/reviews">Reviews</a></li>
+                <li><a href="/doctor/templates">Weekly Templates</a></li>
+                <li><a href="/doctor/logout">Logout</a></li>
+            </ul>
+        </nav>
+    </aside>
+    <main>
+        <header>
+            <h1>Doctor Profile</h1>
+        </header>
+        <div class="profile-section">
+            <h2>Personal Information</h2>
+            <form id="profile-form">
+                <div class="form-group">
+                    <label for="street">Street:</label>
+                    <input type="text" id="street" name="street" placeholder="Street name">
+                </div>
+                <div class="form-group">
+                    <label for="city">City:</label>
+                    <input type="text" id="city" name="city" placeholder="City">
+                </div>
+                <div class="form-group">
+                    <label for="state">State:</label>
+                    <input type="text" id="state" name="state" placeholder="State">
+                </div>
+                <div class="form-group">
+                    <label for="zip">ZIP Code:</label>
+                    <input type="text" id="zip" name="zip" placeholder="ZIP Code">
+                </div>
+                <button type="button" class="save-btn" data-field="address">Save Address</button>
+
+                <div class="form-group">
+                    <h3>Phone Numbers:</h3>
+                    <div id="phone-list"></div>
+                    <input type="tel" id="phone" name="phone" placeholder="Enter phone number">
+                    <button type="button" id="add-phone">Add Phone Number</button>
+                </div>
+                <div class="form-group">
+                    <h3>Specializations:</h3>
+                    <div id="specializations">
+                        <!-- Here goes dynamically generated list of specializations as tags -->
+                    </div>
+                    <input type="text" id="specialization-input" placeholder="Add specialization">
+                    <button type="button" id="add-specialization">Add</button>
+                </div>
+                <div class="form-group">
+                    <h3>Types of Visits and Prices:</h3>
+                    <div id="visit-types">
+                        <!-- Here goes dynamically generated list of visit types -->
+                    </div>
+                    <button type="button" id="add-visit-type">Add Visit Type</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/doctor-profile.js}"></script>
+
+</body>
+</html>

@@ -2,135 +2,155 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    background-color: #f4f4f9;
 }
 
-header {
-    background-color: #007bff;
-    color: white;
-    padding: 20px 0;
-}
-
-.navbar {
+.container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
 }
 
-.navbar .logo h1 {
-    margin: 0;
+aside {
+    width: 250px;
+    background-color: #2e3a59;
+    color: white;
+    padding: 20px;
+    height: 100vh;
 }
 
-.navbar nav ul {
-    list-style: none;
-    margin: 0;
+.profile {
+    text-align: center;
+}
+
+.profile img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+}
+
+nav ul {
+    list-style-type: none;
     padding: 0;
-    display: flex;
 }
 
-.navbar nav ul li {
-    margin-left: 20px;
-}
-
-.navbar nav ul li a {
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-.navbar nav ul li a:hover {
-    text-decoration: underline;
+nav ul li {
+    padding: 10px 0;
 }
 
 main {
-    max-width: 1200px;
-    margin: 0 auto;
+    flex-grow: 1;
     padding: 20px;
 }
 
-.stats, .charts, .section {
-    margin-top: 20px;
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-right {
+    display: flex;
+    gap: 10px;
+}
+
+.stats {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    margin: 20px 0;
 }
 
 .stat {
     background-color: white;
     padding: 20px;
+    border-radius: 10px;
+    width: 23%;
     text-align: center;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    margin: 10px;
-    display: inline-block;
-    width: 22%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.chart {
+.main-content {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.chart, .appointments, .next-patient {
     background-color: white;
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    margin: 10px;
+    border-radius: 10px;
+    width: 30%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.services-list {
-    margin-top: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
+.appointments ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
 }
 
-.services-list-header {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
-    background-color: #f2f2f2;
-    padding: 10px;
-    font-weight: bold;
+.appointments li {
+    margin-bottom: 10px;
 }
 
-.services-list-body .service-item {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
-    padding: 10px;
-    border-top: 1px solid #ddd;
-}
-
-.service-item:nth-child(odd) {
-    background-color: #fafafa;
-}
-
-.service-name {
+.appointment-detail {
+    border-left: 4px solid #007bff;
     padding-left: 10px;
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.service-price {
-    text-align: right;
-    padding-right: 10px;
+.appointment-name {
+    font-weight: bold;
+    font-size: 1.1em;
 }
 
-.service-actions {
-    text-align: center;
+.appointment-time {
+    color: #888;
+    font-size: 0.9em;
 }
 
-.service-actions button {
-    margin-left: 5px;
-    background-color: #ff0000;
+.appointment-type {
+    font-size: 0.9em;
+    color: #555;
+}
+
+.next-patient .patient-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.next-patient .patient-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+}
+
+.next-patient .patient-label {
+    font-weight: bold;
+    color: #555;
+}
+
+.next-patient .patient-data {
+    color: #333;
+}
+
+.patient-buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.patient-buttons button {
+    background-color: #007bff;
     color: white;
     border: none;
-    padding: 5px 10px;
+    padding: 10px;
+    border-radius: 5px;
     cursor: pointer;
-    border-radius: 4px;
 }
 
-.service-actions button:hover {
-    background-color: #cc0000;
-}
-
-.service-actions button:nth-child(1) {
-    background-color: #007bff;
-}
-
-.service-actions button:nth-child(1):hover {
+.patient-buttons button:hover {
     background-color: #0056b3;
 }

@@ -17,8 +17,26 @@ public class DoctorController {
     @Autowired
     private DoctorService doctorService;
     @GetMapping("/dashboard")
-    public String search(Model model) {
-        return "dashboard";
+    public String dashboard(Model model) {
+        return "doctor-dashboard";
+    }
+    @GetMapping("/appointments")
+    public String appointments(Model model) {
+        return "doctor-appointments";
+    }
+
+    @GetMapping("/profile")
+    public String profile(Model model) {
+        return "doctor-profile";
+    }
+    @GetMapping("/reviews")
+    public String reviews(Model model) {
+        return "doctor-reviews";
+    }
+
+    @GetMapping("/templates")
+    public String templates(Model model) {
+        return "doctor-templates";
     }
 
 }
