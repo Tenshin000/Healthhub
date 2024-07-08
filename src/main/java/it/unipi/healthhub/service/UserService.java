@@ -38,5 +38,18 @@ public class UserService {
     public void deleteUser(String id){
         userRepository.deleteById(id);
     }
+
+    public User loginUser(String username, String password) {
+        User user = userRepository.findByUsername(username);
+        System.out.println(user);
+        System.out.println(username);
+
+        if (user != null && user.getPassword().equals(password)) {
+            System.out.println("User found");
+            return user;
+        }
+
+        return null;
+    }
     
 }

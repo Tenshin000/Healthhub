@@ -13,7 +13,7 @@ public class User {
     private String username;
 //  private String fiscalCode;
     private String name;
-//  private String passwordHash;
+    private String password;
     private int age;
     private String gender;
 //  private List<String> phoneNumbers;
@@ -69,6 +69,21 @@ public class User {
         this.address = address;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     //public static User parseDocument(){}
+
+    public String toString() {
+        return "User{" +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", age=" + age + "}";
+    }
 }
 

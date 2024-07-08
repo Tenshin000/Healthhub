@@ -74,4 +74,11 @@ public class Doctor extends User {
         this.phoneNumbers = phoneNumbers;
     }
 
+    public String toString() {
+        return "User{" +
+                ", username='" + getUsername() + '\'' +
+                ", password='" + getPassword() + '\'' +
+                ", age=" + getAge() + "}";
+    }
+
 }

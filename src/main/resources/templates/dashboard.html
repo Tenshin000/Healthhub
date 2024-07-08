@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+</head>
+<body>
+<h2>Welcome to the Dashboard, <span th:text="${username}"></span>!</h2>
+
+<div>
+  <!-- Contenuto della dashboard -->
+  <p>This is your personalized dashboard.</p>
+  <p>Feel free to customize it with your own content.</p>
+</div>
+
+<div>
+  <!-- Link per il logout -->
+  <form action="/logout" method="get">
+    <button type="submit">Logout</button>
+  </form>
+</div>
+</body>
+</html>

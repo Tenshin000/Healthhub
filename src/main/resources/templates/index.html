@@ -1,30 +1,51 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
-    <title>HealthHub</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthHub - Home</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
-<!-- Include header -->
 <header>
-    <th:block th:include="fragments/header :: header"></th:block>
+    <div class="navbar">
+        <div class="logo">
+            <h1>HealthHub</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="/login">Accedi</a></li>
+                <li><a href="/register">Registrati</a></li>
+                <li><a href="/search">Cerca Medico</a></li>
+                <li><a href="/contact">Contatti</a></li>
+                <li><a href="/help">Aiuto</a></li>
+            </ul>
+        </nav>
+    </div>
 </header>
-
 <main>
-    <section>
-        <h2>Ricerca Medici</h2>
-        <p>Utilizza la nostra funzione di ricerca per trovare medici e specialisti nella tua zona.</p>
-        <a href="#">Inizia la ricerca</a>
+    <section class="hero">
+        <div class="hero-content">
+            <h2>Benvenuto su HealthHub</h2>
+            <p>Trova i migliori medici e prenota i tuoi appuntamenti in modo semplice e veloce.</p>
+            <a href="/search" class="btn">Cerca Medico</a>
+        </div>
     </section>
-
-    <section>
-        <h2>Funzioni Social</h2>
-        <p>Connettiti con altri medici e professionisti del settore sanitario.</p>
-        <a href="#">Scopri di più</a>
+    <section class="features">
+        <div class="feature">
+            <h3>Ricerca Medici</h3>
+            <p>Cerca medici specializzati vicino a te per qualsiasi esigenza.</p>
+        </div>
+        <div class="feature">
+            <h3>Prenotazione Facile</h3>
+            <p>Prenota i tuoi appuntamenti con pochi click e gestisci tutto online.</p>
+        </div>
+        <div class="feature">
+            <h3>Recensioni e Valutazioni</h3>
+            <p>Leggi le recensioni di altri pazienti e scegli il medico giusto per te.</p>
+        </div>
     </section>
 </main>
-
-
 <!-- Include footer -->
 <footer>
     <th:block th:include="fragments/footer :: footer"></th:block>
