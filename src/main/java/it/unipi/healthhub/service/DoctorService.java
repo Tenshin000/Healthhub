@@ -1,5 +1,6 @@
 package it.unipi.healthhub.service;
 
+import it.unipi.healthhub.dto.SpecializationDTO;
 import it.unipi.healthhub.dto.UserDetailsDTO;
 import it.unipi.healthhub.model.*;
 import it.unipi.healthhub.repository.DoctorRepository;
@@ -70,6 +71,15 @@ public class DoctorService {
             doctor.getServices().add(service); // Add service to doctor's list
             doctorRepository.save(doctor); // Save updated doctor with the new service
             return newIndex;
+        }
+        return null;
+    }
+
+    public List<it.unipi.healthhub.model.Service> getMyServices(String doctorId) {
+        Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
+        if(doctorOpt.isPresent()){
+            Doctor doctor = doctorOpt.get();
+            return doctor.getServices();
         }
         return null;
     }
@@ -299,6 +309,14 @@ public class DoctorService {
         return null;
     }
 
+    public List<String> getMyPhoneNumbers(String doctorId) {
+        Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
+        if(doctorOpt.isPresent()){
+            Doctor doctor = doctorOpt.get();
+            return doctor.getPhoneNumbers();
+        }
+        return null;
+    }
 
     public boolean removePhoneNumber(String doctorId, Integer index) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
@@ -345,4 +363,20 @@ public class DoctorService {
         }
         return false;
     }
+
+    public List<SpecializationDTO> getSpecializations(String doctorId) {
+        Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
+        if(doctorOpt.isPresent()){
+            Doctor doctor = doctorOpt.get();
+            List<String> specializations = doctor.getSpecializations();
+            List<SpecializationDTO> specializationDTOs = new ArrayList<>();
+            for (int i = 0; i < specializations.size(); i++) {
+                specializationDTOs.add(new SpecializationDTO(specializations.get(i), i));
+            }
+            return specializationDTOs;
+        }
+        return null;
+    }
+
+
 }

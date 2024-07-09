@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -176,6 +177,23 @@ public class DoctorAPI {
         }
     }
 
+    @GetMapping("/phones")
+    public ResponseEntity<List<PhoneNumberDTO>> getMyNumbers(HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        List<String> phoneNumbers = doctorService.getMyPhoneNumbers(doctorId);
+
+        if (phoneNumbers != null) {
+            List<PhoneNumberDTO> response = new ArrayList<>();
+            for (int i = 0; i < phoneNumbers.size(); i++) {
+                response.add(new PhoneNumberDTO(phoneNumbers.get(i), i));
+            }
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
     @DeleteMapping("/phones/{index}")
     public ResponseEntity<String> removePhoneNumber(@PathVariable Integer index, HttpSession session) {
         String doctorId = (String) session.getAttribute("doctorId");
@@ -191,7 +209,6 @@ public class DoctorAPI {
     public ResponseEntity<SpecializationDTO> addMySpecialization(@RequestBody SpecializationDTO request, HttpSession session) {
         String doctorId = (String) session.getAttribute("doctorId");
         String specialization = request.getSpecialization();
-        System.out.println("Specialization: " + specialization);
 
         Integer newIndex = doctorService.addSpecialization(doctorId, specialization);
 
@@ -200,6 +217,18 @@ public class DoctorAPI {
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/specializations")
+    public ResponseEntity<List<SpecializationDTO>> getSpecializations(HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        List<SpecializationDTO> specializations = doctorService.getSpecializations(doctorId);
+
+        if (specializations != null) {
+            return ResponseEntity.ok(specializations);
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -235,6 +264,27 @@ public class DoctorAPI {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @GetMapping("/services")
+    public ResponseEntity<List<ServiceDTO>> getMyServices(HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        List<it.unipi.healthhub.model.Service> services = doctorService.getMyServices(doctorId);
+
+        if (services != null) {
+            List<ServiceDTO> response = new ArrayList<>();
+            for (int i = 0; i < services.size(); i++) {
+                ServiceDTO serviceDto = new ServiceDTO();
+                serviceDto.setIndex(i);
+                serviceDto.setService(services.get(i).getService());
+                serviceDto.setPrice(services.get(i).getPrice());
+                response.add(serviceDto);
+            }
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 
 
     @PutMapping("/services/{index}")
