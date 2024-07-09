@@ -3,13 +3,17 @@ package it.unipi.healthhub.controller.api;
 import it.unipi.healthhub.dto.*;
 import it.unipi.healthhub.model.*;
 import it.unipi.healthhub.service.DoctorService;
+
+import it.unipi.healthhub.util.TemplateConverter;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/doctors")
@@ -98,10 +102,7 @@ public class DoctorAPI {
         return ResponseEntity.ok(doctorService.addTemplate(doctorId, template));
     }
 
-    @PutMapping("/{doctorId}/templates/{templateId}")
-    public ResponseEntity<CalendarTemplate> updateTemplate(@PathVariable String doctorId, @PathVariable Integer templateId, @RequestBody CalendarTemplate template) {
-        return ResponseEntity.ok(doctorService.updateTemplate(doctorId, templateId, template));
-    }
+
 
     @DeleteMapping("/{doctorId}/templates/{templateId}")
     public ResponseEntity<Void> deleteTemplate(@PathVariable String doctorId, @PathVariable String templateId) {
@@ -309,6 +310,84 @@ public class DoctorAPI {
         boolean removed = doctorService.deleteService(doctorId, index);
         if (removed) {
             return ResponseEntity.ok("Service removed successfully");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/templates")
+    public ResponseEntity<TemplateDTO> addTemplate(@RequestBody TemplateDTO templateDto, HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+
+        CalendarTemplate template = new CalendarTemplate();
+        template.setName(templateDto.getName());
+
+        Map<String, List<TemplateDTO.Slot>> dtoSlots = templateDto.getSlots();
+        Map<String, List<Slot>> modelSlots = TemplateConverter.convertToModelSlots(dtoSlots);
+
+        template.setSlots(modelSlots);
+
+        System.out.println("template: " + template);
+
+        CalendarTemplate newTemplate = doctorService.addTemplate(doctorId, template);
+        if (newTemplate != null) {
+            modelSlots = newTemplate.getSlots();
+            dtoSlots = TemplateConverter.convertToDtoSlots(modelSlots);
+
+            TemplateDTO response = new TemplateDTO(newTemplate.getId(), newTemplate.getName(), dtoSlots);
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().build();
+    }
+
+    @PutMapping("/templates/{templateId}")
+    public ResponseEntity<String> updateTemplate(@PathVariable String templateId, @RequestBody TemplateDTO templateDto, HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+
+        CalendarTemplate template = new CalendarTemplate();
+        template.setName(templateDto.getName());
+
+        Map<String, List<TemplateDTO.Slot>> dtoSlots = templateDto.getSlots();
+        Map<String, List<Slot>> modelSlots = TemplateConverter.convertToModelSlots(dtoSlots);
+
+        template.setSlots(modelSlots);
+        template.setId(templateId);
+
+        CalendarTemplate updated = doctorService.updateTemplate(doctorId, template);
+        if (updated != null) {
+            return ResponseEntity.ok("Template updated successfully");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/templates")
+    public ResponseEntity<List<TemplateDTO>> getMyTemplates(HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        List<CalendarTemplate> templates = doctorService.getMyTemplates(doctorId);
+
+        if (templates != null) {
+            List<TemplateDTO> response = new ArrayList<>();
+            for (CalendarTemplate template : templates) {
+                Map<String, List<Slot>> modelSlots = template.getSlots();
+                Map<String, List<TemplateDTO.Slot>> dtoSlots = TemplateConverter.convertToDtoSlots(modelSlots);
+
+                TemplateDTO templateDto = new TemplateDTO(template.getId(), template.getName(), dtoSlots);
+                response.add(templateDto);
+            }
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/templates/{templateId}")
+    public ResponseEntity<String> removeTemplate(@PathVariable String templateId, HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        boolean removed = doctorService.deleteTemplate(doctorId, templateId);
+        if (removed) {
+            return ResponseEntity.ok("Template removed successfully");
         } else {
             return ResponseEntity.notFound().build();
         }

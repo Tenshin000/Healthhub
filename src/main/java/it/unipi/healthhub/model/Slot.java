@@ -1,18 +1,18 @@
 package it.unipi.healthhub.model;
 
 public class Slot {
-    private String day;
     private String start;
     private String end;
 
-    public String getDay() {
-        return day;
+    // Constructor
+    public Slot() {}
+
+    public Slot(String start, String end) {
+        this.start = start;
+        this.end = end;
     }
 
-    public void setDay(String day) {
-        this.day = day;
-    }
-
+    // Getters and Setters
     public String getStart() {
         return start;
     }
@@ -29,5 +29,11 @@ public class Slot {
         this.end = end;
     }
 
+    public String toString() {
+        return "Slot{" +
+                "start='" + start + '\'' +
+                ", end='" + end + '\'' +
+                '}';
+    }
 }
 
