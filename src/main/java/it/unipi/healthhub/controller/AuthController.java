@@ -36,7 +36,6 @@ public class AuthController {
         // Verifica se l'utente è un paziente
         User user = userService.loginUser(username, password);
         if (user != null) {
-            System.out.println("User: " + user);
             // Imposta l'utente in sessione come paziente
             session.setAttribute("user", user);
             session.setAttribute("role", "patient");

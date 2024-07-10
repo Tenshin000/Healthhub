@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="container">
-    <aside th:replace="fragments/doctor-sidebar :: sidebar(${doctor})"></aside>
+    <aside th:replace="~{fragments/doctor-sidebar :: sidebar(${doctor})}"></aside>
     <main>
         <header>
             <h1>Reviews Management</h1>

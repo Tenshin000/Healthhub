@@ -3,6 +3,15 @@ package it.unipi.healthhub.model;
 public class PrenotableSlot extends Slot{
     private boolean taken;
 
+    public PrenotableSlot() {
+        super();
+    }
+
+    public PrenotableSlot(String start, String end, boolean taken) {
+        super(start, end);
+        this.taken = taken;
+    }
+
     public boolean isTaken() {
         return taken;
     }

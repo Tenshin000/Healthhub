@@ -86,14 +86,6 @@ function fetchUpdatedTemplates() {
         });
 }
 
-// Function to assign a template to a week
-function assignTemplate() {
-    const template = document.getElementById('select-template').value;
-    const week = document.getElementById('select-week').value;
-    console.log('Assign Template:', template, 'to Week:', week);
-    // Add your AJAX call or fetch API call here to save the data
-}
-
 // Function to render templates list
 function renderTemplates() {
     const templateList = document.getElementById('template-list');

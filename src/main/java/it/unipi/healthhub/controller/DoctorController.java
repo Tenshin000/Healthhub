@@ -70,4 +70,15 @@ public class DoctorController {
         return "doctor-templates";
     }
 
+    @GetMapping("/week")
+    public String week(Model model, HttpSession session) {
+        model.addAttribute(
+                "doctor",
+                doctorService.getDoctorById(
+                        session.getAttribute("doctorId").toString()
+                ).get()
+        );
+        return "doctor-week";
+    }
+
 }

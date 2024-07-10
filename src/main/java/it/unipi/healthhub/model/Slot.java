@@ -1,8 +1,8 @@
 package it.unipi.healthhub.model;
 
 public class Slot {
-    private String start;
-    private String end;
+    protected String start;
+    protected String end;
 
     // Constructor
     public Slot() {}

@@ -8,6 +8,8 @@ import it.unipi.healthhub.repository.TemplateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -226,6 +228,26 @@ public class DoctorService {
         return false;
     }
 
+    public boolean setDefaultTemplate(String doctorId, String templateId) {
+        Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
+        if (doctorOpt.isPresent()) {
+            Doctor doctor = doctorOpt.get();
+            List<String> templateIds = doctor.getCalendarTemplates();
+            if (templateIds.contains(templateId)) {
+                for (String id : templateIds) {
+                    Optional<CalendarTemplate> templateOpt = templateRepository.findById(id);
+                    if (templateOpt.isPresent()) {
+                        CalendarTemplate template = templateOpt.get();
+                        template.setActive(id.equals(templateId));
+                        templateRepository.save(template);
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
     public List<Schedule> getCalendars(String doctorId) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if(doctorOpt.isPresent()){
@@ -239,6 +261,11 @@ public class DoctorService {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
+
+            if (doctor.getSchedule() == null) {
+                doctor.setSchedule(new ArrayList<>());
+            }
+
             doctor.getSchedule().add(calendar);
             doctorRepository.save(doctor); // Save updated doctor with the new appointment
             return calendar;
@@ -258,14 +285,22 @@ public class DoctorService {
         return null;
     }
 
-    public void deleteCalendar(String doctorId, Integer calendarId) {
+    public boolean deleteCalendar(String doctorId, LocalDate calendarDate) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
             List<Schedule> calendars = doctor.getSchedule();
-            calendars.remove(calendarId.intValue()); // Remove calendar
-            doctorRepository.save(doctor); // Save updated doctor without the removed calendar
+            for (int i = 0; i < calendars.size(); i++) {
+                System.out.println(calendars.get(i).getWeek());
+                System.out.println(calendarDate);
+                if (calendars.get(i).getWeek().equals(calendarDate)) {
+                    calendars.remove(i); // Remove calendar
+                    doctorRepository.save(doctor); // Save updated doctor without the removed calendar
+                    return true;
+                }
+            }
         }
+        return false;
     }
 
     public List<Review> getReviews(String doctorId) {

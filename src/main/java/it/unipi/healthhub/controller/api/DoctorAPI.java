@@ -4,13 +4,13 @@ import it.unipi.healthhub.dto.*;
 import it.unipi.healthhub.model.*;
 import it.unipi.healthhub.service.DoctorService;
 
+import it.unipi.healthhub.util.ScheduleConverter;
 import it.unipi.healthhub.util.TemplateConverter;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -124,12 +124,6 @@ public class DoctorAPI {
     @PutMapping("/{doctorId}/calendars/{calendarId}")
     public ResponseEntity<Schedule> updateCalendar(@PathVariable String doctorId, @PathVariable Integer calendarId, @RequestBody Schedule calendar) {
         return ResponseEntity.ok(doctorService.updateCalendar(doctorId, calendarId, calendar));
-    }
-
-    @DeleteMapping("/{doctorId}/calendars/{calendarId}")
-    public ResponseEntity<Void> deleteCalendar(@PathVariable String doctorId, @PathVariable Integer calendarId) {
-        doctorService.deleteCalendar(doctorId, calendarId);
-        return ResponseEntity.noContent().build();
     }
 
     // Endpoints for reviews
@@ -322,14 +316,12 @@ public class DoctorAPI {
         CalendarTemplate template = new CalendarTemplate();
         template.setName(templateDto.getName());
 
-        Map<String, List<TemplateDTO.Slot>> dtoSlots = templateDto.getSlots();
+        Map<String, List<TemplateDTO.SlotDTO>> dtoSlots = templateDto.getSlots();
         Map<String, List<Slot>> modelSlots = TemplateConverter.convertToModelSlots(dtoSlots);
-
         template.setSlots(modelSlots);
 
-        System.out.println("template: " + template);
-
         CalendarTemplate newTemplate = doctorService.addTemplate(doctorId, template);
+
         if (newTemplate != null) {
             modelSlots = newTemplate.getSlots();
             dtoSlots = TemplateConverter.convertToDtoSlots(modelSlots);
@@ -348,7 +340,7 @@ public class DoctorAPI {
         CalendarTemplate template = new CalendarTemplate();
         template.setName(templateDto.getName());
 
-        Map<String, List<TemplateDTO.Slot>> dtoSlots = templateDto.getSlots();
+        Map<String, List<TemplateDTO.SlotDTO>> dtoSlots = templateDto.getSlots();
         Map<String, List<Slot>> modelSlots = TemplateConverter.convertToModelSlots(dtoSlots);
 
         template.setSlots(modelSlots);
@@ -357,6 +349,18 @@ public class DoctorAPI {
         CalendarTemplate updated = doctorService.updateTemplate(doctorId, template);
         if (updated != null) {
             return ResponseEntity.ok("Template updated successfully");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/templates/default")
+    public ResponseEntity<String> setDefaultTemplate(@RequestBody TemplateDTO templateDto, HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        String templateId = templateDto.getId();
+        boolean updated = doctorService.setDefaultTemplate(doctorId, templateId);
+        if (updated) {
+            return ResponseEntity.ok("Default template updated successfully");
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -371,9 +375,9 @@ public class DoctorAPI {
             List<TemplateDTO> response = new ArrayList<>();
             for (CalendarTemplate template : templates) {
                 Map<String, List<Slot>> modelSlots = template.getSlots();
-                Map<String, List<TemplateDTO.Slot>> dtoSlots = TemplateConverter.convertToDtoSlots(modelSlots);
+                Map<String, List<TemplateDTO.SlotDTO>> dtoSlots = TemplateConverter.convertToDtoSlots(modelSlots);
 
-                TemplateDTO templateDto = new TemplateDTO(template.getId(), template.getName(), dtoSlots);
+                TemplateDTO templateDto = new TemplateDTO(template.getId(), template.getName(), dtoSlots, template.isActive());
                 response.add(templateDto);
             }
             return ResponseEntity.ok(response);
@@ -393,4 +397,59 @@ public class DoctorAPI {
         }
     }
 
+    @PostMapping("/schedules")
+    public ResponseEntity<ScheduleDTO> addSchedule(@RequestBody ScheduleDTO scheduleDto, HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+
+        Schedule schedule = new Schedule();
+        schedule.setWeek(scheduleDto.getWeek());
+
+        Map<String, List<ScheduleDTO.PrenotableSlotDTO>> dtoSlots = scheduleDto.getSlots();
+        Map<String, List<PrenotableSlot>> modelSlots = ScheduleConverter.convertToModelSlots(dtoSlots);
+        schedule.setSlots(modelSlots);
+
+        Schedule newSchedule = doctorService.addCalendar(doctorId, schedule);
+
+        if (newSchedule != null) {
+            modelSlots = newSchedule.getSlots();
+            dtoSlots = ScheduleConverter.convertToDtoSlots(modelSlots);
+
+            ScheduleDTO response = new ScheduleDTO(newSchedule.getWeek(), dtoSlots);
+
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/schedules")
+    public ResponseEntity<List<ScheduleDTO>> getMySchedules(HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        List<Schedule> schedules = doctorService.getCalendars(doctorId);
+
+        if (schedules != null) {
+            List<ScheduleDTO> response = new ArrayList<>();
+            for (Schedule schedule : schedules) {
+                Map<String, List<PrenotableSlot>> modelSlots = schedule.getSlots();
+                Map<String, List<ScheduleDTO.PrenotableSlotDTO>> dtoSlots = ScheduleConverter.convertToDtoSlots(modelSlots);
+
+                ScheduleDTO scheduleDto = new ScheduleDTO(schedule.getWeek(), dtoSlots);
+                response.add(scheduleDto);
+            }
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/schedules")
+    public ResponseEntity<String> removeSchedule(@RequestBody ScheduleDTO scheduleDto, HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        boolean removed = doctorService.deleteCalendar(doctorId, scheduleDto.getWeek());
+        if (removed) {
+            return ResponseEntity.ok("Schedule removed successfully");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

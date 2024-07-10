@@ -41,8 +41,6 @@ public class UserService {
 
     public User loginUser(String username, String password) {
         User user = userRepository.findByUsername(username);
-        System.out.println(user);
-        System.out.println(username);
 
         if (user != null && user.getPassword().equals(password)) {
             System.out.println("User found");

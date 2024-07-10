@@ -1,22 +1,27 @@
 package it.unipi.healthhub.model;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 public class Schedule {
-    private String week;
-    private List<PrenotableSlot> slotList;
+    private LocalDate week;
+    private Map<String, List<PrenotableSlot>> slots;
 
-    public String getWeek() {
+    // Getters and Setters
+    public LocalDate getWeek() {
         return week;
     }
-    public void setWeek(String week) {
+
+    public void setWeek(LocalDate week) {
         this.week = week;
     }
 
-    public List<PrenotableSlot> getSlotList() {
-        return slotList;
+    public Map<String, List<PrenotableSlot>> getSlots() {
+        return slots;
     }
-    public void setSlotList(List<PrenotableSlot> slotList) {
-        this.slotList = slotList;
+
+    public void setSlots(Map<String, List<PrenotableSlot>> slots) {
+        this.slots = slots;
     }
 }
