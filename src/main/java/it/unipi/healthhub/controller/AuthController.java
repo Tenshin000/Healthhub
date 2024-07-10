@@ -39,7 +39,7 @@ public class AuthController {
             // Imposta l'utente in sessione come paziente
             session.setAttribute("user", user);
             session.setAttribute("role", "patient");
-            return "redirect:/dashboard"; // Redirect dopo il login
+            return "redirect:/index"; // Redirect dopo il login
         }
 
         // Verifica se l'utente è un medico
@@ -49,7 +49,7 @@ public class AuthController {
             session.setAttribute("user", doctor);
             session.setAttribute("doctorId", doctor.getId());
             session.setAttribute("role", "doctor");
-            return "redirect:/doctor/dashboard"; // Redirect dopo il login
+            return "redirect:/doctors/dashboard"; // Redirect dopo il login
         }
 
         // Se nessun utente o medico trovato, mostra un messaggio di errore

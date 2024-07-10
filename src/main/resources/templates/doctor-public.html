@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthHub - Profilo Medico</title>
+    <link rel="stylesheet" th:href="@{/css/doctor-public.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+<header>
+    <div class="navbar">
+        <div class="logo">
+            <h1>HealthHub</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="/login">Accedi</a></li>
+                <li><a href="/register">Registrati</a></li>
+                <li><a href="/search">Cerca Medico</a></li>
+                <li><a href="/contact">Contatti</a></li>
+                <li><a href="/help">Aiuto</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <div class="content">
+        <section class="doctor-intro">
+            <div class="doctor-info">
+                <img src="doctor.jpg" alt="Dr. Mario Rossi">
+                <div>
+                    <h2>Dr. [[${doctor?.name}]]</h2>
+                    <p>Specialista in
+                        <span th:each="specialization,iterStat : ${doctor?.specializations}"
+                              th:text="${specialization} + ${!iterStat.last ? ', ' : ''}"></span>
+                    </p>
+                    <p>Valutazione: ⭐⭐⭐⭐⭐</p>
+                </div>
+            </div>
+            <div class="endorsements">
+                <p>Endorsements: <span id="endorsementCount" th:text="${doctor?.endorsementCount}">0</span></p>
+                <button id="endorsementButton" onclick="toggleEndorsement()">
+                    <i class="far fa-thumbs-up"></i>  Endorse
+                </button>
+            </div>
+        </section>
+
+        <section class="contact-info">
+            <h3>Recapiti</h3>
+            <p><strong>Indirizzo:</strong> Via Roma 1, Milano</p>
+            <p><strong>Telefono:</strong> +39 02 1234567</p>
+            <p><strong>Email:</strong> mario.rossi@esempio.com</p>
+            <button>Mostra mappa</button>
+        </section>
+
+        <section class="services">
+            <h3>Prestazioni e prezzi</h3>
+            <ul>
+                <li>Visita cardiologica - €150</li>
+                <li>ECG - €50</li>
+                <li>Holter - €200</li>
+            </ul>
+        </section>
+
+        <section class="reviews">
+            <h3>Recensioni</h3>
+            <textarea id="newReview" placeholder="Lascia una recensione..."></textarea>
+            <button onclick="addReview()">Invia Recensione</button>
+            <div id="reviewList">
+                <!-- Le recensioni verranno inserite qui -->
+            </div>
+        </section>
+    </div>
+    <aside class="appointment">
+        <h3>Prenota una visita</h3>
+        <form id="appointmentForm">
+            <label for="location">Visita in studio</label>
+            <input type="text" id="location" value="Via Roma 1, Milano" disabled>
+
+            <label for="service">Scegli il tipo di visita</label>
+            <select id="service" name="service" required>
+                <option value="Visita cardiologica">Visita cardiologica - €150</option>
+                <option value="ECG">ECG - €50</option>
+                <option value="Holter">Holter - €200</option>
+            </select>
+
+            <label for="calendar">Data appuntamento</label>
+            <div id="calendar">
+                <div class="calendar-nav">
+                    <button id="prevBtn" class="nav-btn"><i class="fas fa-chevron-left"></i></button>
+                    <div class="week-info">Jul 8-14, 2024</div>
+                    <button id="nextBtn" class="nav-btn"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="days">
+                    <div class="day">
+                        <div class="datelabel">
+                            <div class="day-of-week"><strong>Mon</strong></div>
+                            <div class="day-and-month">Aug 23</div>
+                        </div>
+                        <div class="timeslot">9:00</div>
+                        <div class="timeslot">9:30</div>
+                        <div class="timeslot">10:00</div>
+                        <div class="timeslot">10:30</div>
+                    </div>
+                    <div class="day">
+                        <div class="datelabel">
+                            <div class="day-of-week"><strong>Tue</strong></div>
+                            <div class="day-and-month">Aug 24</div>
+                        </div>
+                        <div class="timeslot">10:30</div>
+                    </div>
+                    <div class="day">
+                        <div class="datelabel">
+                            <div class="day-of-week"><strong>Wed</strong></div>
+                            <div class="day-and-month">Aug 23</div>
+                        </div>
+                        <div class="timeslot">10:30</div>
+                    </div>
+                    <div class="day">
+                        <div class="datelabel">
+                            <div class="day-of-week"><strong>Thu</strong></div>
+                            <div class="day-and-month">Aug 23</div>
+                        </div>
+                        <div class="timeslot">10:30</div>
+                    </div>
+                    <div class="day">
+                        <div class="datelabel">
+                            <div class="day-of-week"><strong>Fri</strong></div>
+                            <div class="day-and-month">Aug 23</div>
+                        </div>
+                        <div class="timeslot">10:30</div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit">Prenota</button>
+        </form>
+    </aside>
+</main>
+
+<footer>
+    <th:block th:insert="~{fragments/footer :: footer}"></th:block>
+</footer>
+
+<script th:src="@{/js/doctor-public.js}"></script>
+</body>
+</html>

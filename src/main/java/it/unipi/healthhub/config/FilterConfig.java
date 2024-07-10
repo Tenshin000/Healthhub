@@ -14,7 +14,7 @@ public class FilterConfig {
 
         registrationBean.setFilter(new AuthFilter());
 
-        registrationBean.addUrlPatterns("/doctor/*");
+        registrationBean.addUrlPatterns("/doctor/dashboard/*");
         registrationBean.addUrlPatterns("/dashboard/*");
         //registrationBean.setOrder(2);
 

@@ -1,84 +1,36 @@
 package it.unipi.healthhub.controller;
 
+import it.unipi.healthhub.controller.api.DoctorAPI;
 import it.unipi.healthhub.model.Doctor;
 import it.unipi.healthhub.service.DoctorService;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.Optional;
+
+
 @Controller
-@RequestMapping("/doctor")
+@RequestMapping("/doctors")
 public class DoctorController {
 
     @Autowired
     private DoctorService doctorService;
-    @GetMapping("/dashboard")
-    public String dashboard(Model model, HttpSession session) {
-        model.addAttribute(
-                "doctor",
-                doctorService.getDoctorById(
-                        session.getAttribute("doctorId").toString()
-                ).get()
-        );
-        return "doctor-dashboard";
-    }
-    @GetMapping("/appointments")
-    public String appointments(Model model, HttpSession session) {
-        model.addAttribute(
-                "doctor",
-                doctorService.getDoctorById(
-                        session.getAttribute("doctorId").toString()
-                ).get()
-        );
-        return "doctor-appointments";
-    }
 
-    @GetMapping("/profile")
-    public String profile(Model model, HttpSession session) {
-        model.addAttribute(
-                "doctor",
-                doctorService.getDoctorById(
-                        session.getAttribute("doctorId").toString()
-                ).get()
-        );
-        return "doctor-profile";
+    @GetMapping("/{id}")
+    public String doctorPublicProfile(@PathVariable String id, Model model) {
+        // Get doctor by id
+        Optional<Doctor> doctorOpt = doctorService.getDoctorById(id);
+        if (doctorOpt.isPresent()) {
+            Doctor doctor = doctorOpt.get();
+            System.out.println(doctor);
+            model.addAttribute("doctor", doctor);
+            return "doctor-public";
+        }
+        return "doctor-public";
     }
-    @GetMapping("/reviews")
-    public String reviews(Model model, HttpSession session) {
-        model.addAttribute(
-                "doctor",
-                doctorService.getDoctorById(
-                        session.getAttribute("doctorId").toString()
-                ).get()
-        );
-        return "doctor-reviews";
-    }
-
-    @GetMapping("/templates")
-    public String templates(Model model, HttpSession session) {
-        model.addAttribute(
-                "doctor",
-                doctorService.getDoctorById(
-                        session.getAttribute("doctorId").toString()
-                ).get()
-        );
-        return "doctor-templates";
-    }
-
-    @GetMapping("/week")
-    public String week(Model model, HttpSession session) {
-        model.addAttribute(
-                "doctor",
-                doctorService.getDoctorById(
-                        session.getAttribute("doctorId").toString()
-                ).get()
-        );
-        return "doctor-week";
-    }
-
 }

@@ -1,38 +1,40 @@
-/* Header Styles */
+
 header {
-    background-color: #4CAF50;
-    padding: 1em;
+    background-color: #007bff;
     color: white;
-    text-align: center;
+    padding: 20px 0;
 }
 
-header h1 {
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.navbar .logo h1 {
     margin: 0;
 }
 
-nav ul {
-    list-style-type: none;
+.navbar nav ul {
+    list-style: none;
+    margin: 0;
     padding: 0;
+    display: flex;
 }
 
-nav ul li {
-    display: inline;
-    margin-right: 1em;
+.navbar nav ul li {
+    margin-left: 20px;
 }
 
-nav ul li a {
+.navbar nav ul li a {
     color: white;
     text-decoration: none;
+    font-weight: bold;
 }
 
-nav ul li a:hover {
+.navbar nav ul li a:hover {
     text-decoration: underline;
-}
-
-/* Responsive Design */
-@media (max-width: 600px) {
-    nav ul li {
-        display: block;
-        margin: 0.5em 0;
-    }
 }
