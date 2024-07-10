@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -129,12 +130,28 @@ public class DoctorAPI {
     // Endpoints for reviews
     @GetMapping("/{doctorId}/reviews")
     public ResponseEntity<List<Review>> getReviews(@PathVariable String doctorId) {
-        return ResponseEntity.ok(doctorService.getReviews(doctorId));
+        List<Review> reviews = doctorService.getReviews(doctorId);
+        if (reviews != null) {
+            return ResponseEntity.ok(reviews);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping("/{doctorId}/reviews")
-    public ResponseEntity<Review> addReview(@PathVariable String doctorId, @RequestBody Review review) {
-        return ResponseEntity.ok(doctorService.addReview(doctorId, review));
+    public ResponseEntity<Review> addReview(@PathVariable String doctorId, @RequestBody ReviewDTO review, HttpSession session) {
+        // Set the current date and the name of the user
+        LocalDate currentDate = LocalDate.now();
+        review.setDate(currentDate);
+        String name = (String) session.getAttribute("username");
+        review.setName(name);
+
+        Review newReview = doctorService.addReview(doctorId, review);
+        if (newReview != null) {
+            return ResponseEntity.ok(newReview);
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @DeleteMapping("/{doctorId}/reviews/{reviewId}")
@@ -448,6 +465,28 @@ public class DoctorAPI {
         boolean removed = doctorService.deleteCalendar(doctorId, scheduleDto.getWeek());
         if (removed) {
             return ResponseEntity.ok("Schedule removed successfully");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/reviews")
+    public ResponseEntity<List<Review>> getMyReviews(HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        List<Review> reviews = doctorService.getReviews(doctorId);
+        if (reviews != null) {
+            return ResponseEntity.ok(reviews);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/reviews/{index}")
+    public ResponseEntity<String> removeReview(@PathVariable Integer index, HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        boolean removed = doctorService.deleteReview(doctorId, index);
+        if (removed) {
+            return ResponseEntity.ok("Review removed successfully");
         } else {
             return ResponseEntity.notFound().build();
         }

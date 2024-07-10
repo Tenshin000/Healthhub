@@ -1,5 +1,6 @@
 package it.unipi.healthhub.service;
 
+import it.unipi.healthhub.dto.ReviewDTO;
 import it.unipi.healthhub.dto.SpecializationDTO;
 import it.unipi.healthhub.dto.UserDetailsDTO;
 import it.unipi.healthhub.model.*;
@@ -9,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -312,25 +312,37 @@ public class DoctorService {
         return null;
     }
 
-    public Review addReview(String doctorId, Review review) {
+    public Review addReview(String doctorId, ReviewDTO review) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
-            doctor.getReviews().add(review); // Add review to doctor's list
+
+            if (doctor.getReviews() == null) {
+                doctor.setReviews(new ArrayList<>());
+            }
+
+            Review modelReview = new Review();
+            modelReview.setName(review.getName());
+            modelReview.setText(review.getText());
+            modelReview.setDate(review.getDate());
+
+            doctor.getReviews().add(modelReview); // Add review to doctor's list
             doctorRepository.save(doctor); // Save updated doctor with the new review
-            return review;
+            return modelReview;
         }
         return null;
     }
 
-    public void deleteReview(String doctorId, Integer reviewId) {
+    public boolean deleteReview(String doctorId, Integer reviewIndex) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
             List<Review> reviews = doctor.getReviews();
-            reviews.remove(reviewId.intValue()); // Remove review
+            reviews.remove(reviewIndex.intValue()); // Remove review
             doctorRepository.save(doctor); // Save updated doctor without the removed review
+            return true;
         }
+        return false;
     }
 
     public Doctor loginDoctor(String username, String password) {

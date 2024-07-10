@@ -1,32 +1,31 @@
 package it.unipi.healthhub.model;
 
-import org.springframework.data.mongodb.core.mapping.DBRef;
+import java.time.LocalDate;
 
 public class Review {
-    @DBRef
-    public User name;
-    public String review;
-    public String time;
+    public String name;
+    public String text;
+    public LocalDate date;
 
-    public User getName() {
+    public String getName() {
         return name;
     }
-    public void setName(User name) {
+    public void setName(String name) {
         this.name = name;
     }
 
-    public String getReview() {
-        return review;
+    public String getText() {
+        return text;
     }
-    public void setReview(String review) {
-        this.review = review;
+    public void setText(String text) {
+        this.text = text;
     }
 
-    public String getTime() {
-        return time;
+    public LocalDate getDate() {
+        return date;
     }
-    public void setTime(String time) {
-        this.time = time;
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 
 

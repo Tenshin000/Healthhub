@@ -37,7 +37,7 @@ public class AuthController {
         User user = userService.loginUser(username, password);
         if (user != null) {
             // Imposta l'utente in sessione come paziente
-            session.setAttribute("user", user);
+            session.setAttribute("username", user.getUsername());
             session.setAttribute("role", "patient");
             return "redirect:/index"; // Redirect dopo il login
         }
@@ -46,7 +46,7 @@ public class AuthController {
         Doctor doctor = doctorService.loginDoctor(username, password);
         if (doctor != null) {
             // Imposta l'utente in sessione come medico
-            session.setAttribute("user", doctor);
+            session.setAttribute("username", doctor.getUsername());
             session.setAttribute("doctorId", doctor.getId());
             session.setAttribute("role", "doctor");
             return "redirect:/doctors/dashboard"; // Redirect dopo il login
