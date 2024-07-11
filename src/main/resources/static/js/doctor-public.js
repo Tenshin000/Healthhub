@@ -6,24 +6,88 @@ document.addEventListener('DOMContentLoaded', function(){
     let hasEndorsed = false;
 
     const doctorId = document.getElementById('doctor-info').getAttribute('data-doctor-id');
+    const calendar = new DoctorScheduleCalendar('calendar', doctorId);
 
-    function toggleEndorsement() {
-        hasEndorsed = !hasEndorsed;
+// Funzione per ottenere lo stato iniziale degli endorsement
+    async function fetchInitialEndorsementState() {
+        try {
+            const response = await fetch(`/api/doctors/${doctorId}/endorsements`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const data = await response.json();
+            endorsementCount = data.endorsementCount;
+            hasEndorsed = data.hasEndorsed;
+
+            updateUIWithEndorsementState();
+        } catch (error) {
+            console.error('Error fetching initial endorsement state:', error);
+            // Gestisci gli errori in modo appropriato, ad esempio mostrando un messaggio all'utente
+        }
+    }
+
+// Funzione per aggiornare l'interfaccia utente con lo stato degli endorsement corrente
+    function updateUIWithEndorsementState() {
+        endorsementElement.textContent = endorsementCount;
         if (hasEndorsed) {
-            endorsementCount++;
             endorsementButton.innerHTML = '<i class="fas fa-thumbs-up"></i> Endorsed';
         } else {
-            endorsementCount--;
             endorsementButton.innerHTML = '<i class="far fa-thumbs-up"></i> Endorse';
         }
-        endorsementElement.textContent = endorsementCount;
+    }
+
+// Funzione per gestire l'endorsement
+    async function toggleEndorsement() {
+        hasEndorsed = !hasEndorsed;
+        try {
+            const response = await fetch(`/api/doctors/${doctorId}/endorsements`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ endorsed: hasEndorsed })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            endorsementCount = data.endorsementCount;
+            hasEndorsed = data.hasEndorsed;
+
+            updateUIWithEndorsementState();
+        } catch (error) {
+            console.error('Error endorsing doctor:', error);
+            // Gestisci gli errori in modo appropriato, ad esempio mostrando un messaggio all'utente
+        }
     }
     endorsementButton.addEventListener('click', toggleEndorsement);
 
-    let reviewButton = document.getElementById('reviewButton');
+
+    function sendEndorsement() {
+        fetch(`/api/doctors/${doctorId}/endorsements`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                endorsed: hasEndorsed
+            })
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Endorsement sent!');
+                }
+            })
+            .catch(error => {
+                console.error('Error sending endorsement:', error);
+            });
+    }
 
 
     // REVIEW CODE
+    let reviewButton = document.getElementById('reviewButton');
 
     async function sendReview() {
         const reviewText = document.getElementById('newReview').value;
@@ -113,9 +177,46 @@ document.addEventListener('DOMContentLoaded', function(){
 
     reviewButton.addEventListener('click', sendReview);
 
-    fetchReviews(doctorId);  // Recupera le recensioni al caricamento della pagina
+    // Appuntamento
 
-// CALENDARIO
+    function bookAppointment() {
+
+        const selectedSlot = calendar.getSelectedSlot();
+        const service = document.getElementById('service').value;
+        const patientNotes = document.getElementById('notes').value;
+
+        const appointment = {
+            date: selectedSlot.date,
+            slot: selectedSlot.slot,
+            service: service,
+            patientNotes: patientNotes
+        };
+
+        fetch(`/api/doctors/${doctorId}/appointments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(appointment)
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Appointment booked!');
+                    calendar.updateWeekInfo();
+                }
+            })
+            .catch(error => {
+                console.error('Error booking appointment:', error);
+            });
+    }
+
+    document.getElementById('bookButton').addEventListener('click', bookAppointment);
+
+
+    // Recupera dati iniziali
+    fetchReviews(doctorId);  // Recupera le recensioni al caricamento della pagina
+    fetchInitialEndorsementState();
+
 
 
 

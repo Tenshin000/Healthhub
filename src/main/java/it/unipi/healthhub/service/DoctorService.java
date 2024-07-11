@@ -1,17 +1,25 @@
 package it.unipi.healthhub.service;
 
+import it.unipi.healthhub.dto.AppointmentDTO;
 import it.unipi.healthhub.dto.ReviewDTO;
 import it.unipi.healthhub.dto.SpecializationDTO;
 import it.unipi.healthhub.dto.UserDetailsDTO;
 import it.unipi.healthhub.model.*;
+import it.unipi.healthhub.repository.AppointmentRepository;
 import it.unipi.healthhub.repository.DoctorRepository;
 import it.unipi.healthhub.repository.TemplateRepository;
+import it.unipi.healthhub.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -21,6 +29,12 @@ public class DoctorService {
 
     @Autowired
     private TemplateRepository templateRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private AppointmentRepository appointmentRepository;
 
     public List<Doctor> searchDoctors(String query) {
         if (query != null && !query.isEmpty()) {
@@ -125,31 +139,78 @@ public class DoctorService {
     public List<Appointment> getAppointments(String doctorId) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if(doctorOpt.isPresent()){
-            Doctor doctor = doctorOpt.get();
-            return doctor.getAppointments();
+            return null;
         }
         return null;
     }
 
-    public Appointment addAppointment(String doctorId, Appointment appointment) {
+    public boolean bookAnAppointment(String doctorId, AppointmentDTO appointmentDto, String patientId) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
-        if (doctorOpt.isPresent()) {
+        Optional<User> patientOpt = userRepository.findById(patientId);
+        if (doctorOpt.isPresent() && patientOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
-            doctor.getAppointments().add(appointment); // Add appointment to doctor's list
-            doctorRepository.save(doctor); // Save updated doctor with the new appointment
-            return appointment;
+            User patient = patientOpt.get();
+
+            // check the slot in the schedule
+            Pair<Schedule, Integer> response = getSchedule(
+                    doctorId,
+                    appointmentDto.getDate().getYear(),
+                    appointmentDto.getDate().get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
+            );
+            if(response == null){
+                return false;
+            }
+            Schedule schedule = response.getFirst();
+
+            String keyDay = appointmentDto.getDate().getDayOfWeek().toString().toLowerCase();
+            if(!schedule.getSlots().containsKey(keyDay)){
+                return false;
+            }
+
+            List<PrenotableSlot> slots = schedule.getSlots().get(keyDay);
+            boolean slotFound = false;
+            for (PrenotableSlot slot : slots) {
+                if (slot.getStart().equals(appointmentDto.getSlot())) {
+                    slotFound = true;
+                    if(slot.isTaken()){
+                        return false;
+                    }
+                    slot.setTaken(true);
+                    break;
+                }
+            }
+            if (!slotFound) {
+                return false;
+            }
+
+            updateSchedule(doctorId, response.getSecond(), schedule);
+
+            Appointment appointment = createAppointment(appointmentDto, patient, doctor);
+
+            //appointmentRepository.save(appointment); // Save appointment
+
+            return true;
         }
-        return null;
+        return false;
+    }
+
+    private static Appointment createAppointment(AppointmentDTO appointmentDto, User patient, Doctor doctor) {
+        Appointment appointment = new Appointment();
+
+        LocalTime timeSlot = LocalTime.parse(appointmentDto.getSlot());
+        LocalDateTime appointmentDateTime = appointmentDto.getDate().atTime(timeSlot);
+
+        appointment.setAppointmentDateTime(appointmentDateTime);
+        appointment.setDoctorInfo(new Appointment.DoctorInfo(doctor.getId(), doctor.getName()));
+        appointment.setPatientInfo(new Appointment.PatientInfo(patient.getId(), patient.getName()));
+        appointment.setVisitType(appointmentDto.getService());
+        appointment.setPatientNotes(appointmentDto.getPatientNotes());
+        return appointment;
     }
 
     public void deleteAppointment(String doctorId, String appointmentId) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
-        if (doctorOpt.isPresent()) {
-            Doctor doctor = doctorOpt.get();
-            List<Appointment> appointments = doctor.getAppointments();
-            appointments.removeIf(appointment -> appointment.getId().equals(appointmentId)); // Remove appointment
-            doctorRepository.save(doctor); // Save updated doctor without the removed appointment
-        }
+
     }
 
     public List<CalendarTemplate> getTemplates(String doctorId) {
@@ -248,7 +309,26 @@ public class DoctorService {
         return false;
     }
 
-    public List<Schedule> getCalendars(String doctorId) {
+    public Pair<Schedule, Integer> getSchedule(String doctorId, Integer year, Integer week) {
+        Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
+        if(doctorOpt.isPresent()){
+            Doctor doctor = doctorOpt.get();
+            List<Schedule> schedules = doctor.getSchedule();
+            for (Schedule schedule : schedules) {
+                WeekFields weekFields = WeekFields.of(Locale.getDefault());
+                // Again we need to add 1 to the week number because of the issue with the time zones
+                Integer scheduleWeek = schedule.getWeek().get(weekFields.weekOfWeekBasedYear()) + 1;
+                Integer scheduleYear = schedule.getWeek().getYear();
+
+                if (scheduleYear.equals(year) && scheduleWeek.equals(week)) {
+                    return Pair.of(schedule, schedules.indexOf(schedule));
+                }
+            }
+        }
+        return null;
+    }
+
+    public List<Schedule> getSchedules(String doctorId) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if(doctorOpt.isPresent()){
             Doctor doctor = doctorOpt.get();
@@ -257,7 +337,7 @@ public class DoctorService {
         return null;
     }
 
-    public Schedule addCalendar(String doctorId, Schedule calendar) {
+    public Schedule addSchedule(String doctorId, Schedule calendar) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
@@ -273,12 +353,12 @@ public class DoctorService {
         return null;
     }
 
-    public Schedule updateCalendar(String doctorId, Integer calendarId, Schedule calendar) {
+    public Schedule updateSchedule(String doctorId, Integer scheduleIndex, Schedule calendar) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
             List<Schedule> calendars = doctor.getSchedule();
-            calendars.set(calendarId, calendar); // Update calendar
+            calendars.set(scheduleIndex, calendar); // Update calendar
             doctorRepository.save(doctor); // Save updated doctor with the updated calendar
             return calendar;
         }
@@ -466,5 +546,43 @@ public class DoctorService {
             return specializationDTOs;
         }
         return null;
+    }
+
+    public Integer getEndorsements(String doctorId) {
+        Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
+        if(doctorOpt.isPresent()){
+            Doctor doctor = doctorOpt.get();
+            return doctor.getEndorsementCount();
+        }
+        return null;
+    }
+
+    public boolean toggleEndorsement(String doctorId, String patientId) {
+        Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
+        Optional<User> patientOpt = userRepository.findById(patientId);
+        if (doctorOpt.isPresent() && patientOpt.isPresent()) {
+            Doctor doctor = doctorOpt.get();
+            User patient = patientOpt.get();
+
+            if(patient.getEndorsedDoctors() == null){
+                patient.setEndorsedDoctors(new ArrayList<>());
+            }
+
+            if (!patient.getEndorsedDoctors().contains(doctorId)) {
+                patient.getEndorsedDoctors().add(doctorId);
+                userRepository.save(patient);
+                doctor.setEndorsementCount(doctor.getEndorsementCount() + 1);
+                doctorRepository.save(doctor);
+                return true;
+            }
+            else {
+                patient.getEndorsedDoctors().remove(doctorId);
+                userRepository.save(patient);
+                doctor.setEndorsementCount(doctor.getEndorsementCount() - 1);
+                doctorRepository.save(doctor);
+                return false;
+            }
+        }
+        return false;
     }
 }

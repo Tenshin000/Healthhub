@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(savedSchedule => {
-                console.log('Schedule saved successfully:', savedSchedule);
+                console.log('Schedule saved successfully:', JSON.stringify(savedSchedule));
                 fetchUpdatedTemplates();
             })
             .then(() => {
@@ -201,6 +201,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         start: start.toISOString(),
                         end: end.toISOString(),
                     };
+
+                    if(slot.taken){
+                        event.backgroundColor = 'lightcoral';
+                    }
 
                     events.push(event);
                 });

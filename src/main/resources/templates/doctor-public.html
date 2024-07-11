@@ -81,59 +81,55 @@
 
             <label for="service">Scegli il tipo di visita</label>
             <select id="service" name="service" required>
-                <option th:each="service, index : ${doctor?.services}" th:value="${index}" th:text="${service.service}"></option>
+                <option th:each="service, index : ${doctor?.services}" th:value="${service.service}" th:text="${service.service}"></option>
             </select>
+
+            <label for="notes">Note del Paziente</label>
+            <input id="notes" name="notes" type="text" placeholder="Note del paziente">
 
             <label for="calendar">Data appuntamento</label>
             <div id="calendar">
                 <div class="calendar-nav">
                     <button type="button" id="prevBtn" class="nav-btn"><i class="fas fa-chevron-left"></i></button>
-                    <div class="week-info">Jul 8-14, 2024</div>
+                    <div class="week-info" id="week-info">Jul 8-14, 2024</div>
                     <button type="button" id="nextBtn" class="nav-btn"><i class="fas fa-chevron-right"></i></button>
                 </div>
-                <div class="days">
+                <div class="days" id="days">
                     <div class="day">
                         <div class="datelabel">
                             <div class="day-of-week"><strong>Mon</strong></div>
                             <div class="day-and-month">Aug 23</div>
                         </div>
-                        <div class="timeslot">9:00</div>
-                        <div class="timeslot">9:30</div>
-                        <div class="timeslot">10:00</div>
-                        <div class="timeslot">10:30</div>
+                        <!-- <div class="timeslot">10:30</div> -->
                     </div>
                     <div class="day">
                         <div class="datelabel">
                             <div class="day-of-week"><strong>Tue</strong></div>
                             <div class="day-and-month">Aug 24</div>
                         </div>
-                        <div class="timeslot">10:30</div>
                     </div>
                     <div class="day">
                         <div class="datelabel">
                             <div class="day-of-week"><strong>Wed</strong></div>
                             <div class="day-and-month">Aug 23</div>
                         </div>
-                        <div class="timeslot">10:30</div>
                     </div>
                     <div class="day">
                         <div class="datelabel">
                             <div class="day-of-week"><strong>Thu</strong></div>
                             <div class="day-and-month">Aug 23</div>
                         </div>
-                        <div class="timeslot">10:30</div>
                     </div>
                     <div class="day">
                         <div class="datelabel">
                             <div class="day-of-week"><strong>Fri</strong></div>
                             <div class="day-and-month">Aug 23</div>
                         </div>
-                        <div class="timeslot">10:30</div>
                     </div>
                 </div>
             </div>
 
-            <button type="button">Prenota</button>
+            <button type="button" id="bookButton">Prenota</button>
         </form>
     </aside>
 </main>
@@ -142,6 +138,7 @@
     <th:block th:insert="~{fragments/footer :: footer}"></th:block>
 </footer>
 
+<script th:src="@{/js/slot-calendar.js}"></script>
 <script th:src="@{/js/doctor-public.js}"></script>
 </body>
 </html>

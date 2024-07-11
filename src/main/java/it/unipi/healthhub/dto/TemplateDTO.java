@@ -1,5 +1,6 @@
 package it.unipi.healthhub.dto;
 
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 

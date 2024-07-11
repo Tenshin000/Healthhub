@@ -4,10 +4,13 @@ import it.unipi.healthhub.dto.*;
 import it.unipi.healthhub.model.*;
 import it.unipi.healthhub.service.DoctorService;
 
+import it.unipi.healthhub.service.UserService;
 import it.unipi.healthhub.util.ScheduleConverter;
 import it.unipi.healthhub.util.TemplateConverter;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +25,9 @@ public class DoctorAPI {
 
     @Autowired
     private DoctorService doctorService;
+
+    @Autowired
+    private UserService userService;
 
     // Metodo per la ricerca dei medici
     @GetMapping("/search")
@@ -82,14 +88,15 @@ public class DoctorAPI {
     }
 
     @PostMapping("/{doctorId}/appointments")
-    public ResponseEntity<Appointment> addAppointment(@PathVariable String doctorId, @RequestBody Appointment appointment) {
-        return ResponseEntity.ok(doctorService.addAppointment(doctorId, appointment));
-    }
-
-    @DeleteMapping("/{doctorId}/appointments/{appointmentId}")
-    public ResponseEntity<Void> deleteAppointment(@PathVariable String doctorId, @PathVariable String appointmentId) {
-        doctorService.deleteAppointment(doctorId, appointmentId);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<AppointmentDTO> bookAnAppointment(@PathVariable String doctorId, @RequestBody AppointmentDTO appointmentDto, HttpSession session) {
+        // usata da un paziente per prenotare un appuntamento
+        String patientId = (String) session.getAttribute("patientId");
+        boolean booked = doctorService.bookAnAppointment(doctorId, appointmentDto, patientId);
+        if (booked) {
+            return ResponseEntity.ok(appointmentDto);
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     // Endpoints for templates
@@ -111,21 +118,49 @@ public class DoctorAPI {
         return ResponseEntity.noContent().build();
     }
 
-    // Endpoints for calendars
-    @GetMapping("/{doctorId}/calendars")
-    public ResponseEntity<List<Schedule>> getCalendars(@PathVariable String doctorId) {
-        return ResponseEntity.ok(doctorService.getCalendars(doctorId));
+    // Endpoints for schedules
+    @GetMapping("/{doctorId}/schedules/week")
+    public ResponseEntity<ScheduleDTO> getSchedule(@PathVariable String doctorId, @RequestParam Integer year, @RequestParam Integer week) {
+        Pair<Schedule, Integer> response = doctorService.getSchedule(doctorId, year, week);
+        if (response != null) {
+            Schedule schedule = (Schedule) response.getFirst();
+            Map<String, List<PrenotableSlot>> modelSlots = schedule.getSlots();
+            Map<String, List<ScheduleDTO.PrenotableSlotDTO>> dtoSlots = ScheduleConverter.convertToDtoSlots(modelSlots);
+            ScheduleDTO scheduleDto = new ScheduleDTO(schedule.getWeek(), dtoSlots);
+            return ResponseEntity.ok(scheduleDto);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            //return ResponseEntity.notFound().build();
+        }
     }
 
-    @PostMapping("/{doctorId}/calendars")
-    public ResponseEntity<Schedule> addCalendar(@PathVariable String doctorId, @RequestBody Schedule calendar) {
-        return ResponseEntity.ok(doctorService.addCalendar(doctorId, calendar));
+    // Endpoints for endorse
+
+    @GetMapping("/{doctorId}/endorsements")
+    public ResponseEntity<EndorsementDTO> getEndorsements(@PathVariable String doctorId, HttpSession session) {
+        Integer endorsements = doctorService.getEndorsements(doctorId);
+        String patientId = (String) session.getAttribute("patientId");
+        boolean hasEndorsed = false;
+        if(patientId != null) {
+            hasEndorsed = userService.hasEndorsed(patientId, doctorId);
+        }
+        if (endorsements != null) {
+            EndorsementDTO endorsementDto = new EndorsementDTO(endorsements, hasEndorsed);
+            return ResponseEntity.ok(endorsementDto);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    @PutMapping("/{doctorId}/calendars/{calendarId}")
-    public ResponseEntity<Schedule> updateCalendar(@PathVariable String doctorId, @PathVariable Integer calendarId, @RequestBody Schedule calendar) {
-        return ResponseEntity.ok(doctorService.updateCalendar(doctorId, calendarId, calendar));
+    @PostMapping("/{doctorId}/endorsements")
+    public ResponseEntity<EndorsementDTO> endorseDoctor(@PathVariable String doctorId, HttpSession session) {
+        String patientId = (String) session.getAttribute("patientId");
+        boolean hasEndorsed = doctorService.toggleEndorsement(doctorId, patientId); // Metodo che gestisce aggiunta/rimozione endorsement
+        Integer endorsementCount = doctorService.getEndorsements(doctorId); // Ottiene il conteggio aggiornato degli endorsement
+        EndorsementDTO endorsementDto = new EndorsementDTO(endorsementCount, hasEndorsed);
+        return ResponseEntity.ok(endorsementDto);
     }
+
 
     // Endpoints for reviews
     @GetMapping("/{doctorId}/reviews")
@@ -425,7 +460,7 @@ public class DoctorAPI {
         Map<String, List<PrenotableSlot>> modelSlots = ScheduleConverter.convertToModelSlots(dtoSlots);
         schedule.setSlots(modelSlots);
 
-        Schedule newSchedule = doctorService.addCalendar(doctorId, schedule);
+        Schedule newSchedule = doctorService.addSchedule(doctorId, schedule);
 
         if (newSchedule != null) {
             modelSlots = newSchedule.getSlots();
@@ -442,7 +477,7 @@ public class DoctorAPI {
     @GetMapping("/schedules")
     public ResponseEntity<List<ScheduleDTO>> getMySchedules(HttpSession session) {
         String doctorId = (String) session.getAttribute("doctorId");
-        List<Schedule> schedules = doctorService.getCalendars(doctorId);
+        List<Schedule> schedules = doctorService.getSchedules(doctorId);
 
         if (schedules != null) {
             List<ScheduleDTO> response = new ArrayList<>();

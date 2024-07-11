@@ -38,6 +38,7 @@ public class AuthController {
         if (user != null) {
             // Imposta l'utente in sessione come paziente
             session.setAttribute("username", user.getUsername());
+            session.setAttribute("patientId", user.getId());
             session.setAttribute("role", "patient");
             return "redirect:/index"; // Redirect dopo il login
         }

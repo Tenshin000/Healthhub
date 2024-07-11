@@ -1,5 +1,7 @@
 package it.unipi.healthhub.model;
 
+import java.time.LocalTime;
+
 public class PrenotableSlot extends Slot{
     private boolean taken;
 

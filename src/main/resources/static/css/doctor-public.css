@@ -223,7 +223,6 @@ textarea {
     padding: 5px;
     min-height: 230px;
     background-color: #efeff6;
-    padding: auto;
     float:left;
     display: flex;
     flex-direction: column;
@@ -237,7 +236,7 @@ textarea {
 
 .day-and-month {
     font-size: small;
-    color: gray;
+    color: rgb(128, 128, 128);
 }
 
 .timeslot {
@@ -253,6 +252,14 @@ textarea {
 .timeslot:hover {
     background-color: #2CA893;
     cursor: pointer;
+}
+
+.timeslot.selected {
+    background-color: #007BFF;
+}
+
+.timeslot.booked {
+    background-color: #ccc;
 }
 
 .calendar-nav {

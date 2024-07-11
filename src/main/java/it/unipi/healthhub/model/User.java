@@ -4,6 +4,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Document(collection = "users")
@@ -21,6 +23,7 @@ public class User {
 //  private List<String> phoneNumbers;
     protected String email;
     protected Address address;
+    protected List<String> endorsedDoctors;
 
 
 //  public String getFiscalCode() { return fiscalCode; }
@@ -97,6 +100,14 @@ public class User {
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 ", age=" + age + "}";
+    }
+
+    public List<String> getEndorsedDoctors() {
+        return endorsedDoctors;
+    }
+
+    public void setEndorsedDoctors(List<String> endorsedDoctors) {
+        this.endorsedDoctors = endorsedDoctors;
     }
 }
 
