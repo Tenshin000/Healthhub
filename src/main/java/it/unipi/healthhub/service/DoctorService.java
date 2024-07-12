@@ -350,6 +350,9 @@ public class DoctorService {
         if(doctorOpt.isPresent()){
             Doctor doctor = doctorOpt.get();
             List<Schedule> schedules = doctor.getSchedule();
+            if (schedules == null) {
+                return null;
+            }
             for (Schedule schedule : schedules) {
                 WeekFields weekFields = WeekFields.of(Locale.getDefault());
                 // Again we need to add 1 to the week number because of the issue with the time zones
