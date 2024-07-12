@@ -7,10 +7,13 @@ import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.thymeleaf.util.DateUtils;
 
+import java.text.DateFormatSymbols;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class CustomAppointmentRepositoryImpl implements CustomAppointmentRepository{
@@ -53,5 +56,42 @@ public class CustomAppointmentRepositoryImpl implements CustomAppointmentReposit
         }
 
         return visitsCountByType;
+    }
+
+    @Override
+    public Map<String, Double> getEarningsByYearForDoctor(String doctorId, Integer year) {
+
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("doctorInfo.doctorId").is(doctorId)
+                .and("appointmentDateTime")
+                .gte(LocalDate.of(year, 1, 1).atStartOfDay())
+                .lt(LocalDate.of(year + 1, 1, 1).atStartOfDay())
+        );
+        ProjectionOperation projectMonth = Aggregation.project().andExpression("month(appointmentDateTime)").as("month").and("price").as("price");
+        GroupOperation groupOperation = Aggregation.group("month").sum("price").as("total");
+        ProjectionOperation projectionOperation = Aggregation.project("total").and("month").previousOperation();
+
+        Aggregation aggregation = Aggregation.newAggregation(
+                matchOperation,
+                projectMonth,
+                groupOperation,
+                projectionOperation
+        );
+
+        AggregationResults<DBObject> results = mongoTemplate.aggregate(aggregation, Appointment.class, DBObject.class);
+
+        // Problemi di casting
+        // Da verificare una volta che il database è popolato
+        Map<String, Double> earningsByYear = new HashMap<>();
+        for (DBObject doc : results.getMappedResults()) {
+            Integer month = (Integer) doc.get("month");
+            String monthString = new DateFormatSymbols(Locale.ENGLISH).getMonths()[month-1].toLowerCase();
+            Double total = (Double) doc.get("total");
+            System.out.println(month);
+            System.out.println(monthString);
+            System.out.println(total);
+            earningsByYear.put(monthString, total);
+        }
+
+        return earningsByYear;
     }
 }

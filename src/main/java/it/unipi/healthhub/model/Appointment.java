@@ -12,6 +12,7 @@ public class Appointment {
     private PatientInfo patientInfo;
     private String visitType;
     private String patientNotes;
+    private double price;
 
     // Costruttori
     public Appointment() {}
@@ -72,6 +73,14 @@ public class Appointment {
 
     public void setPatientNotes(String patientNotes) {
         this.patientNotes = patientNotes;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
+    public double getPrice() {
+        return price;
     }
 
     // Inner class DoctorInfo

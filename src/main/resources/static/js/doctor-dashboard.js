@@ -27,10 +27,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let earningsChartData = {
         type: 'line',
             data: {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'Dicember'],
+        labels: ['January', 'February', 'March', 'April', 'May', 'June'],
             datasets: [{
             label: 'Earnings',
-            data: [1000, 1200, 1500, 1700, 1600, 1900, 2000, 2100, 1800, 2200, 2400, 2500],
+            data: [1000, 1200, 1500, 1700, 1600, 1900],
             backgroundColor: 'rgba(75, 192, 192, 0.2)',
             borderColor: 'rgba(75, 192, 192, 1)',
             borderWidth: 1,
@@ -77,40 +77,47 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function addData(chart, label, newData) {
-        chart.data.labels.push(label);
-        chart.data.datasets.forEach((dataset) => {
-            dataset.data.push(newData);
-        });
-        chart.update();
+    async function fetchEarningsData() {
+        try {
+            const response = await fetch('/api/doctor/analytics/earnings');
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            // Supponiamo che i dati siano un array di numeri, uno per ogni mese
+            return await response.json();
+        } catch (error) {
+            console.error('Errore nel recupero dei dati:', error);
+            return null;
+        }
     }
-
-    function removeData(chart) {
-        chart.data.labels.pop();
-        chart.data.datasets.forEach((dataset) => {
-            dataset.data.pop();
-        });
-        chart.update();
-    }
-
 
     fetchVisitsData().then(visitsData => {
         if (visitsData) {
-            console.log(visitsChartData.data.datasets[0].data);
-            console.log(visitsChartData.data.labels);
-
             visitsChartData.data.datasets[0].data = Object.values(visitsData);
             visitsChartData.data.labels = Object.keys(visitsData);
-
-            console.log(visitsChartData.data.datasets[0].data);
-            console.log(visitsChartData.data.labels);
-
             const visitsChart = new Chart(visitsCanvas, visitsChartData);
         }
-
     });
-    const earningsChart = new Chart(earningsCanvas, earningsChartData);
 
+    fetchEarningsData().then(earningsData => {
+        let months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        if (earningsData) {
+            earningsData = {...earningsData};
+            let orderedData = [];
+            for (let i = 0; i < months.length; i++) {
+                let month = months[i].toLowerCase()
+                if (earningsData[month]) {
+                    orderedData.push(earningsData[month]);
+                }
+                else {
+                    orderedData.push(0);
+                }
+            }
+            earningsChartData.data.datasets[0].data = orderedData
+            earningsChartData.data.labels = months;
+            const earningsChart = new Chart(earningsCanvas, earningsChartData);
+        }
+    });
 });
 
 

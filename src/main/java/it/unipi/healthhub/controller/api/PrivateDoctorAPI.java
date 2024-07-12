@@ -395,4 +395,18 @@ public class PrivateDoctorAPI {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/analytics/earnings")
+    public ResponseEntity<Map<String,Double>> getEarningsAnalytics(HttpSession session, @RequestParam(value = "year", required = false) Integer year) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        if (year == null) {
+            year = LocalDate.now().getYear();
+        }
+        Map<String,Double> earningsData = doctorService.getEarningsAnalytics(doctorId, year);
+        if (earningsData != null) {
+            return ResponseEntity.ok(earningsData);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

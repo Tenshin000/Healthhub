@@ -9,5 +9,5 @@ import java.util.Map;
 public interface CustomAppointmentRepository {
     public List<Appointment> findByDoctorIdAndDay(String doctorId, LocalDate day);
     public Map<String, Integer> getVisitsCountByTypeForDoctor(String doctorId);
-
+    public Map<String, Double> getEarningsByYearForDoctor(String doctorId, Integer year);
 }

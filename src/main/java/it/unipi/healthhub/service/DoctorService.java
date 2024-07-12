@@ -201,6 +201,13 @@ public class DoctorService {
         appointment.setDoctorInfo(new Appointment.DoctorInfo(doctor.getId(), doctor.getName()));
         appointment.setPatientInfo(new Appointment.PatientInfo(patient.getId(), patient.getName()));
         appointment.setVisitType(appointmentDto.getService());
+        List<it.unipi.healthhub.model.Service> services = doctor.getServices();
+        for (it.unipi.healthhub.model.Service service : services) {
+            if (service.getService().equals(appointmentDto.getService())) {
+                appointment.setPrice(service.getPrice());
+                break;
+            }
+        }
         appointment.setPatientNotes(appointmentDto.getPatientNotes());
         return appointment;
     }
@@ -627,5 +634,9 @@ public class DoctorService {
 
     public Map<String, Integer> getVisitsAnalytics(String doctorId) {
         return appointmentRepository.getVisitsCountByTypeForDoctor(doctorId);
+    }
+
+    public Map<String, Double> getEarningsAnalytics(String doctorId, Integer year) {
+        return appointmentRepository.getEarningsByYearForDoctor(doctorId, year);
     }
 }
