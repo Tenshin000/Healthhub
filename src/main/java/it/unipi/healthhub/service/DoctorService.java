@@ -187,7 +187,7 @@ public class DoctorService {
 
             Appointment appointment = createAppointment(appointmentDto, patient, doctor);
 
-            //appointmentRepository.save(appointment); // Save appointment
+            appointmentRepository.save(appointment); // Save appointment
 
             return true;
         }
@@ -208,8 +208,47 @@ public class DoctorService {
         return appointment;
     }
 
-    public void deleteAppointment(String doctorId, String appointmentId) {
+    public boolean deleteAppointment(String doctorId, String appointmentId) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
+        Optional<Appointment> appointmentOpt = appointmentRepository.findById(appointmentId);
+        if (doctorOpt.isPresent() && appointmentOpt.isPresent()) {
+            Doctor doctor = doctorOpt.get();
+            Appointment appointment = appointmentOpt.get();
+            LocalDateTime dateTimeSlot = appointment.getAppointmentDateTime();
+            Pair<Schedule, Integer> response = getSchedule(doctorId,
+                    dateTimeSlot.getYear(),
+                    dateTimeSlot.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear()));
+            if(response == null){
+                return false;
+            }
+            Schedule schedule = response.getFirst();
+            String keyDay = dateTimeSlot.getDayOfWeek().toString().toLowerCase();
+            if(!schedule.getSlots().containsKey(keyDay)){
+                return false;
+            }
+            List<PrenotableSlot> slots = schedule.getSlots().get(keyDay);
+            boolean slotFound = false;
+            for (PrenotableSlot slot : slots) {
+                if (slot.getStart().equals(dateTimeSlot.toLocalTime().toString())) {
+                    slotFound = true;
+                    slot.setTaken(false);
+                    break;
+                }
+            }
+
+            // Mi interessa che sia stato trovato?
+            // Non ne sono sicuro, problemi di inconsistenza
+            if (!slotFound) {
+                return false;
+            }
+
+            updateSchedule(doctorId, response.getSecond(), schedule);
+            appointmentRepository.deleteById(appointmentId);
+
+            return true;
+
+        }
+        return false;
 
     }
 

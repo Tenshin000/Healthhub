@@ -75,7 +75,12 @@ class DoctorScheduleCalendar {
 
             const dayDiv = document.createElement('div');
             dayDiv.classList.add('day');
-            dayDiv.setAttribute('data-date', day.toISOString().split('T')[0]);
+
+            // workaround per il formato della data
+            let year = day.getFullYear();
+            let month = (day.getMonth() + 1).toString().padStart(2, '0');
+            let dayOfMonth = day.getDate().toString().padStart(2, '0');
+            dayDiv.setAttribute('data-date', `${year}-${month}-${dayOfMonth}`);
 
             const dateLabel = document.createElement('div');
             dateLabel.classList.add('datelabel');

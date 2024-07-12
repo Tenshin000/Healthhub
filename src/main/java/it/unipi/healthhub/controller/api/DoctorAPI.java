@@ -2,6 +2,7 @@ package it.unipi.healthhub.controller.api;
 
 import it.unipi.healthhub.dto.*;
 import it.unipi.healthhub.model.*;
+import it.unipi.healthhub.service.AppointmentService;
 import it.unipi.healthhub.service.DoctorService;
 
 import it.unipi.healthhub.service.UserService;
@@ -10,14 +11,17 @@ import it.unipi.healthhub.util.TemplateConverter;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/doctors")
@@ -28,6 +32,9 @@ public class DoctorAPI {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private AppointmentService appointmentService;
 
     // Metodo per la ricerca dei medici
     @GetMapping("/search")
@@ -96,6 +103,33 @@ public class DoctorAPI {
             return ResponseEntity.ok(appointmentDto);
         } else {
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/appointments")
+    public ResponseEntity<List<Appointment>> getMyAppointments(
+            HttpSession session,
+            @RequestParam(value = "date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        if (date == null) {
+            date = LocalDate.now();
+        }
+        List<Appointment> appointments = appointmentService.getAppointmentsForDay(doctorId, date);
+        if (appointments != null) {
+            return ResponseEntity.ok(appointments);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/appointments/{appointmentId}")
+    public ResponseEntity<Void> deleteAppointment(@PathVariable String appointmentId, HttpSession session) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        boolean deleted = doctorService.deleteAppointment(doctorId, appointmentId);
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 

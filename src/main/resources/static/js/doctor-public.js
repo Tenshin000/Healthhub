@@ -192,6 +192,8 @@ document.addEventListener('DOMContentLoaded', function(){
             patientNotes: patientNotes
         };
 
+        console.log(JSON.stringify(appointment));
+
         fetch(`/api/doctors/${doctorId}/appointments`, {
             method: 'POST',
             headers: {
@@ -216,8 +218,5 @@ document.addEventListener('DOMContentLoaded', function(){
     // Recupera dati iniziali
     fetchReviews(doctorId);  // Recupera le recensioni al caricamento della pagina
     fetchInitialEndorsementState();
-
-
-
 
 });
