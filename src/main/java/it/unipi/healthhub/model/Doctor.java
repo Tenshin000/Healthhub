@@ -10,9 +10,8 @@ public class Doctor extends User {
     private List<Service> services;
     private int endorsementCount;
     private List<Review> reviews;
-    private List<Appointment> appointments;
     private List<Schedule> schedule;
-    private List<String> calendarTemplates; // List of references (foreign keys) to CalendarTemplate
+    private List<String> calendarTemplates;
     private List<String> specializations;
     @Field("phone_numbers")
     private List<String> phoneNumbers;
@@ -37,13 +36,6 @@ public class Doctor extends User {
     }
     public void setReviews(List<Review> reviews) {
         this.reviews = reviews;
-    }
-
-    public List<Appointment> getAppointments() {
-        return appointments;
-    }
-    public void setAppointments(List<Appointment> appointments) {
-        this.appointments = appointments;
     }
 
     public List<Schedule> getSchedule() {
@@ -72,6 +64,10 @@ public class Doctor extends User {
     }
     public void setPhoneNumbers(List<String> phoneNumbers) {
         this.phoneNumbers = phoneNumbers;
+    }
+
+    public String getId(){
+        return super.getId();
     }
 
     public String toString() {

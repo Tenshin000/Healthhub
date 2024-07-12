@@ -1,0 +1,188 @@
+@import url('doctor-sidebar.css');
+
+/* Reset some default styles */
+body, h1, h2, h3, p, ul, li, input, button {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+}
+
+.container {
+    display: flex;
+}
+
+main {
+    flex-grow: 1;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h1 {
+    font-size: 2em;
+}
+
+.template-container {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.form-section,
+.template-list-section {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    width: 50%;
+}
+
+.form-section h2,
+.template-list-section h2 {
+    margin-top: 0;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="week"],
+select {
+    width: calc(100% - 10px);
+    padding: 8px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 5px;
+}
+
+input[type="checkbox"] {
+    margin-left: 10px;
+}
+
+button.save-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+button.save-btn:hover {
+    background-color: #0056b3;
+}
+
+.day-slots {
+    margin-bottom: 20px;
+}
+
+.slot {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.slot input {
+    width: calc(50% - 10px);
+    margin-right: 10px;
+    padding: 8px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.add-slot-btn,
+.remove-slot-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.add-slot-btn:hover {
+    background-color: #218838;
+}
+
+.remove-slot-btn {
+    background-color: #dc3545;
+}
+
+.remove-slot-btn:hover {
+    background-color: #c82333;
+}
+
+#template-list {
+    list-style: none;
+    padding: 0;
+}
+
+#template-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f9f9f9;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+#template-list li button {
+    padding: 5px 10px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+#template-list li button:hover {
+    background-color: #0056b3;
+}
+
+#template-list li .edit-btn {
+    background-color: #ffc107;
+}
+
+#template-list li .edit-btn:hover {
+    background-color: #e0a800;
+}
+
+#template-list li .delete-btn {
+    background-color: #dc3545;
+}
+
+#template-list li .delete-btn:hover {
+    background-color: #c82333;
+}
+
+/* Styles for disabled elements */
+input:disabled,
+select:disabled,
+button:disabled,
+textarea:disabled {
+    background-color: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+    border-color: #ddd;
+}

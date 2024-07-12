@@ -5,6 +5,7 @@ import it.unipi.healthhub.repository.AppointmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,5 +38,9 @@ public class AppointmentService {
 
     public void deleteAppointment(String id){
         appointmentRepository.deleteById(id);
+    }
+
+    public List<Appointment> getAppointmentsForDay(String doctorId, LocalDate day) {
+        return appointmentRepository.findByDoctorIdAndDay(doctorId, day);
     }
 }

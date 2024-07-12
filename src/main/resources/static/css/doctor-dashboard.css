@@ -1,0 +1,139 @@
+@import url('doctor-sidebar.css');
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
+}
+
+.container {
+    display: flex;
+}
+
+main {
+    flex-grow: 1;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-right {
+    display: flex;
+    gap: 10px;
+}
+
+.stats {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    margin: 20px 0;
+}
+
+.stat {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 23%;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.main-content {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.pie-chart, .appointments, .next-patient {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 30%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.line-chart {
+    background-color: white;
+    padding: 20px;
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.appointments ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.appointments li {
+    margin-bottom: 10px;
+}
+
+.appointment-detail {
+    border-left: 4px solid #007bff;
+    padding-left: 10px;
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.appointment-name {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.appointment-time {
+    color: #888;
+    font-size: 0.9em;
+}
+
+.appointment-type {
+    font-size: 0.9em;
+    color: #555;
+}
+
+.next-patient .patient-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.next-patient .patient-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+}
+
+.next-patient .patient-label {
+    font-weight: bold;
+    color: #555;
+}
+
+.next-patient .patient-data {
+    color: #333;
+}
+
+.patient-buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.patient-buttons button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.patient-buttons button:hover {
+    background-color: #0056b3;
+}

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviews Management</title>
+    <link rel="stylesheet" th:href="@{/css/doctor-reviews.css}">
+</head>
+<body>
+<div class="container">
+    <aside th:replace="~{fragments/doctor-sidebar :: sidebar(${doctor})}"></aside>
+    <main>
+        <header>
+            <h1>Reviews Management</h1>
+            <div class="header-right">
+                <input type="search" placeholder="Search">
+                <button>🔔</button>
+                <button>✉️</button>
+            </div>
+        </header>
+        <section class="reviews" id="reviews">
+            <!-- Add more reviews as needed -->
+        </section>
+    </main>
+</div>
+<script th:src="@{/js/doctor-reviews.js}"></script>
+</body>
+</html>

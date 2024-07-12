@@ -48,4 +48,12 @@ public class Address {
     public void setCountry(String country) {
         this.country = country;
     }
+
+    public String toString() {
+        return street + ", " + city + ", " + province + ", " + postalCode + ", " + country;
+    }
+
+    public String toShortString() {
+        return street + ", " + city;
+    }
 }

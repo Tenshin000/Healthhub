@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appointments Management</title>
+  <link rel="stylesheet" th:href="@{/css/doctor-appointments.css}">
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.9.0/main.min.css" rel="stylesheet">
+  <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.9.0/main.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script th:src="@{/js/doctor-appointments.js}"></script>
+</head>
+<body>
+<div class="container">
+  <aside th:replace="~{fragments/doctor-sidebar :: sidebar(${doctor})}"></aside>
+  <main>
+    <header>
+      <h1>Appointments Management</h1>
+      <div class="header-right">
+        <input type="search" placeholder="Search">
+        <button>🔔</button>
+        <button>✉️</button>
+      </div>
+    </header>
+    <div class="content">
+      <div class="left-section">
+        <div class="small-box date-picker-section">
+          <div id="datepicker"></div> <!-- Date picker container -->
+        </div>
+        <div class="small-box app-distr-graph">
+          <canvas id="app-distr-chart"></canvas> <!-- Grafico per la distribuzione degli appuntamenti -->
+        </div>
+      </div>
+      <div class="right-section">
+        <div class="large-box appointments" id="appointments">
+          <h2>Today's Appointments</h2>
+          <div class="appointment">
+            <div class="appointment-header">
+              <div>
+                <h3>John Doe</h3>
+                <p>Health Checkup</p>
+              </div>
+              <p>10:00 AM</p>
+            </div>
+            <p class="appointment-notes">Notes: Patient experiencing mild symptoms of cold.</p>
+            <div class="appointment-actions">
+              <button>View</button>
+              <button>Edit</button>
+              <button>Cancel</button>
+            </div>
+          </div>
+          <div class="appointment">
+            <div class="appointment-header">
+              <div>
+                <h3>Jane Smith</h3>
+                <p>Follow-up</p>
+              </div>
+              <p>11:30 AM</p>
+            </div>
+            <p class="appointment-notes">Notes: Follow-up on blood test results.</p>
+            <div class="appointment-actions">
+              <button>View</button>
+              <button>Edit</button>
+              <button>Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

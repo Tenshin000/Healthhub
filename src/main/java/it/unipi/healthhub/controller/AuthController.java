@@ -36,20 +36,21 @@ public class AuthController {
         // Verifica se l'utente è un paziente
         User user = userService.loginUser(username, password);
         if (user != null) {
-            System.out.println("User: " + user);
             // Imposta l'utente in sessione come paziente
-            session.setAttribute("user", user);
+            session.setAttribute("username", user.getUsername());
+            session.setAttribute("patientId", user.getId());
             session.setAttribute("role", "patient");
-            return "redirect:/dashboard"; // Redirect dopo il login
+            return "redirect:/index"; // Redirect dopo il login
         }
 
         // Verifica se l'utente è un medico
         Doctor doctor = doctorService.loginDoctor(username, password);
         if (doctor != null) {
             // Imposta l'utente in sessione come medico
-            session.setAttribute("user", doctor);
+            session.setAttribute("username", doctor.getUsername());
+            session.setAttribute("doctorId", doctor.getId());
             session.setAttribute("role", "doctor");
-            return "redirect:/doctor/dashboard"; // Redirect dopo il login
+            return "redirect:/doctors/dashboard"; // Redirect dopo il login
         }
 
         // Se nessun utente o medico trovato, mostra un messaggio di errore

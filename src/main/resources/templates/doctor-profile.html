@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Profile</title>
+    <link rel="stylesheet" th:href="@{/css/doctor-profile.css}">
+</head>
+<body>
+<div class="container">
+    <aside th:replace="~{fragments/doctor-sidebar :: sidebar(${doctor})}"></aside>
+    <main>
+        <header>
+            <h1>Doctor Profile</h1>
+        </header>
+        <div class="profile-section">
+            <form id="profile-form">
+                <!-- Personal Information Section -->
+                <div class="section">
+                    <h3>Personal Details</h3>
+                    <div class="form-group">
+                        <label for="full-name">Full Name:</label>
+                        <input type="text" id="full-name" name="full-name" placeholder="Full Name" th:value="${doctor.name}">
+                    </div>
+                    <div class="form-group">
+                        <label for="birthdate">Date of Birth:</label>
+                        <input type="date" id="birthdate" name="birthdate" placeholder="Date of Birth" th:value="${doctor.dob}">
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender:</label>
+                        <select id="gender" name="gender" th:field="*{doctor.gender}">
+                            <option value="" disabled>Select your gender</option>
+                            <option value="male" th:selected="${doctor.gender == 'male'}">Male</option>
+                            <option value="female" th:selected="${doctor.gender == 'female'}">Female</option>
+                            <option value="other" th:selected="${doctor.gender == 'other'}">Other</option>
+                        </select>
+                    </div>
+                    <button type="button" class="save-btn" data-field="personal-info">Save</button>
+                </div>
+
+                <!-- Office Address Section -->
+                <div class="section">
+                    <h3>Office Address</h3>
+                    <div class="form-group">
+                        <label for="street">Street:</label>
+                        <input type="text" id="street" name="street" placeholder="Street name" th:value="${doctor.address?.street}">
+                    </div>
+                    <div class="form-group">
+                        <label for="city">City:</label>
+                        <input type="text" id="city" name="city" placeholder="City" th:value="${doctor.address?.city}">
+                    </div>
+                    <div class="form-group">
+                        <label for="state">Province:</label>
+                        <input type="text" id="province" name="province" placeholder="Province" th:value="${doctor.address?.province}">
+                    </div>
+                    <div class="form-group">
+                        <label for="zip">ZIP Code:</label>
+                        <input type="text" id="zip" name="zip" placeholder="ZIP Code" th:value="${doctor.address?.postalCode}">
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State:</label>
+                        <input type="text" id="state" name="state" placeholder="State" th:value="${doctor.address?.country}">
+                    </div>
+                    <button type="button" class="save-btn" data-field="address">Save</button>
+                </div>
+
+                <!-- Phone Numbers Section -->
+                <div class="section">
+                    <h3>Phone Numbers</h3>
+                    <div id="phone-list">
+                        <div th:each="phoneNumber, index : ${doctor.phoneNumbers}"
+                             class="phone-number"
+                             th:text="${phoneNumber}"
+                             th:attr="data-index=${index.index}"
+                             onclick="removePhoneNumber(this)">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <input type="tel" id="phone" name="phone" placeholder="Enter phone number">
+                        <button type="button" id="add-phone">Add</button>
+                    </div>
+                </div>
+
+                <!-- Specializations Section -->
+                <div class="section">
+                    <h3>Specializations</h3>
+                    <div id="specializations">
+                        <div th:each="specialization, index : ${doctor.specializations}"
+                             class="specialization"
+                             th:text="${specialization}"
+                             th:attr="data-index=${index.index}"
+                             onclick="removeSpecialization(this)">
+                        </div>
+                        <!-- Here goes dynamically generated list of specializations as tags -->
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="specialization-input" placeholder="Add specialization">
+                        <button type="button" id="add-specialization">Add</button>
+                    </div>
+                </div>
+
+                <!-- Types of Visits and Prices Section -->
+                <div class="section">
+                    <h3>Types of Visits and Prices</h3>
+                    <div id="visit-types">
+                        <!-- Here goes dynamically generated list of visit types -->
+                        <div th:each="service, index : ${doctor.services}" class="visit-type" th:attr="data-index=${index.index}">
+                            <input type="text" th:value="${service.service}">
+                            <input type="text" th:value="${service.price}">
+                            <button class="save-visit-type" type="button" onclick="saveServiceHandler(event)">Save</button>
+                            <button class="remove-visit-type" type="button" onclick="removeServiceHandler(event)">Remove</button>
+                        </div>
+                    </div>
+                    <button type="button" id="add-visit-type">Add</button>
+                </div>
+            </form>
+        </div>
+
+    </main>
+</div>
+<script th:src="@{/js/doctor-profile.js}"></script>
+
+</body>
+</html>

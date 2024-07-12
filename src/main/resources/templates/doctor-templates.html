@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Templates</title>
+    <link rel="stylesheet" th:href="@{/css/doctor-templates.css}">
+</head>
+<body>
+<div class="container">
+    <aside th:replace="~{fragments/doctor-sidebar :: sidebar(${doctor})}"></aside>
+    <main>
+        <header>
+            <h1>Weekly Templates</h1>
+        </header>
+        <div class="template-container">
+            <div class="template-list-section">
+                <h2>Existing Templates</h2>
+                <ul id="template-list">
+                    <!-- Template items will be populated dynamically -->
+                </ul>
+                <form id="new-template-form">
+                    <div class="form-group">
+                        <label for="new-template-name">Template Name:</label>
+                        <input type="text" id="new-template-name" name="new-template-name" placeholder="Template Name">
+                    </div>
+                    <button type="button" class="save-btn" id="new-template" onclick="newTemplate()">New Template</button>
+                </form>
+            </div>
+            <div class="form-section">
+                <h2>Create/Edit Weekly Template</h2>
+                <form id="template-form">
+                    <div class="form-group">
+                        <label>Template Name:</label>
+                        <span id="template-name"></span>
+                    </div>
+                    <div id="weekdays">
+                        <!-- Days of the week with time slots -->
+                        <div class="form-group day-slots" id="monday">
+                            <label>Monday:</label>
+                            <button type="button" class="add-slot-btn" onclick="addSlot('monday')">Add Slot</button>
+                        </div>
+                        <div class="form-group day-slots" id="tuesday">
+                            <label>Tuesday:</label>
+                            <button type="button" class="add-slot-btn" onclick="addSlot('tuesday')">Add Slot</button>
+                        </div>
+                        <div class="form-group day-slots" id="wednesday">
+                            <label>Wednesday:</label>
+                            <button type="button" class="add-slot-btn" onclick="addSlot('wednesday')">Add Slot</button>
+                        </div>
+                        <div class="form-group day-slots" id="thursday">
+                            <label>Thursday:</label>
+                            <button type="button" class="add-slot-btn" onclick="addSlot('thursday')">Add Slot</button>
+                        </div>
+                        <div class="form-group day-slots" id="friday">
+                            <label>Friday:</label>
+                            <button type="button" class="add-slot-btn" onclick="addSlot('friday')">Add Slot</button>
+                        </div>
+                        <div class="form-group day-slots" id="saturday">
+                            <label>Saturday:</label>
+                            <button type="button" class="add-slot-btn" onclick="addSlot('saturday')">Add Slot</button>
+                        </div>
+                        <div class="form-group day-slots" id="sunday">
+                            <label>Sunday:</label>
+                            <button type="button" class="add-slot-btn" onclick="addSlot('sunday')">Add Slot</button>
+                        </div>
+                    </div>
+                    <button type="button" class="save-btn" id="save-template">Save Template</button>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script th:src="@{/js/doctor-templates.js}"></script>
+</body>
+</html>

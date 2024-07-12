@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Schedule</title>
+    <link rel="stylesheet" th:href="@{/css/doctor-week.css}">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <aside th:replace="~{fragments/doctor-sidebar :: sidebar(${doctor})}"></aside>
+    <main>
+        <header>
+            <h1>Weekly Schedule</h1>
+            <div class="header-right">
+                <input type="search" placeholder="Search">
+                <button>🔔</button>
+                <button>✉️</button>
+            </div>
+        </header>
+        <div class="content">
+            <div class="left-section">
+                <div class="large-box schedule-view">
+                    <div id='calendar'></div>
+                </div>
+            </div>
+            <div class="right-section">
+                <div class="small-box week-selection">
+                    <div class="template-list" id="template-list">
+                    </div>
+                    <div class="template-buttons">
+                        <button id="only-this-week" type="button">Only this Week</button>
+                        <button id="set-default-template" type="button">Set as Default</button>
+                    </div>
+                    <div class="template-buttons">
+                        <button id="delete-this-week" type="button">Delete</button>
+                        <button id="clear-template" type="button">Clear</button>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<script th:src="@{/js/doctor-week.js}"></script>
+</body>
+</html>

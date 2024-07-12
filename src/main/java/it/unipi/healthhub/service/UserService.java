@@ -41,8 +41,6 @@ public class UserService {
 
     public User loginUser(String username, String password) {
         User user = userRepository.findByUsername(username);
-        System.out.println(user);
-        System.out.println(username);
 
         if (user != null && user.getPassword().equals(password)) {
             System.out.println("User found");
@@ -51,5 +49,12 @@ public class UserService {
 
         return null;
     }
-    
+
+    public boolean hasEndorsed(String patientId, String doctorId) {
+        Optional<User> patient = userRepository.findById(patientId);
+        if (patient.isPresent()) {
+            return patient.get().getEndorsedDoctors().contains(doctorId);
+        }
+        return false;
+    }
 }
