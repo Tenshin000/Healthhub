@@ -17,7 +17,7 @@ saveAddressButton.addEventListener('click', () => {
         province: province
     };
 
-    fetch('/api/doctors/address', {
+    fetch('/api/doctor/address', {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -49,7 +49,7 @@ savePersonalInfoButton.addEventListener('click', () => {
         gender: gender
     };
 
-    fetch('/api/doctors/details', {
+    fetch('/api/doctor/details', {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -77,7 +77,7 @@ function addPhoneNumber() {
 
     if (phoneNumber !== '') {
         // Chiamata al backend per salvare il numero di telefono
-        fetch('/api/doctors/phones', {
+        fetch('/api/doctor/phones', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -127,7 +127,7 @@ function handlePhoneTagClick(event) {
 function removePhoneNumber(phoneTag) {
     const index = phoneTag.getAttribute('data-index');
 
-    fetch(`/api/doctors/phones/${index}`, {
+    fetch(`/api/doctor/phones/${index}`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
@@ -148,7 +148,7 @@ function removePhoneNumber(phoneTag) {
 
 
 function fetchUpdatedPhoneNumbers() {
-    return fetch('/api/doctors/phones')
+    return fetch('/api/doctor/phones')
         .then(response => {
             if (!response.ok) {
                 throw new Error('Failed to fetch updated phone numbers');
@@ -182,7 +182,7 @@ function addSpecialization() {
 
     if (specializationValue !== '') {
         // Chiamata al backend per salvare il numero di telefono
-        fetch('/api/doctors/specializations', {
+        fetch('/api/doctor/specializations', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -232,7 +232,7 @@ function handleSpecializationTagClick(event) {
 function removeSpecialization(specializationTag) {
     const index = specializationTag.getAttribute('data-index');
 
-    fetch(`/api/doctors/specializations/${index}`, {
+    fetch(`/api/doctor/specializations/${index}`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
@@ -255,7 +255,7 @@ function removeSpecialization(specializationTag) {
 }
 
 function fetchUpdatedSpecializations() {
-    return fetch('/api/doctors/specializations')
+    return fetch('/api/doctor/specializations')
         .then(response => {
             if (!response.ok) {
                 throw new Error('Failed to fetch updated specializations');
@@ -290,7 +290,7 @@ function saveNewService(visitTypeInput, priceInput, serviceCardElement) {
         price: priceInput
     };
 
-    fetch('/api/doctors/services', {
+    fetch('/api/doctor/services', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -320,7 +320,7 @@ function updateService(dataIndex, visitTypeInput, priceInput) {
     };
 
     // Effettua la richiesta al backend per aggiornare il tipo di visita
-    fetch(`/api/doctors/services/${dataIndex}`, {
+    fetch(`/api/doctor/services/${dataIndex}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -358,7 +358,7 @@ function removeServiceHandler(event) {
     const dataIndex = serviceCardElement.getAttribute('data-index');
 
     // Esempio di richiesta al server per rimuovere il servizio
-    fetch(`/api/doctors/services/${dataIndex}`, {
+    fetch(`/api/doctor/services/${dataIndex}`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
@@ -380,7 +380,7 @@ function removeServiceHandler(event) {
 }
 
 function fetchUpdatedServices() {
-    return fetch('/api/doctors/services')
+    return fetch('/api/doctor/services')
         .then(response => {
             if (!response.ok) {
                 throw new Error('Failed to fetch updated services');

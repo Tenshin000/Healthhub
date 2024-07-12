@@ -69,7 +69,7 @@ function saveTemplate() {
 }
 
 function fetchUpdatedTemplates() {
-    fetch('/api/doctors/templates')
+    fetch('/api/doctor/templates')
         .then(response => {
             if (!response.ok) {
                 throw new Error('Failed to fetch templates: ' + response.statusText);
@@ -125,7 +125,7 @@ function editTemplate(index) {
 // Function to delete template
 function deleteTemplate(index) {
     // Send delete request to the server and update the local template list
-    fetch(`/api/doctors/templates/${templates[index].id}`, {
+    fetch(`/api/doctor/templates/${templates[index].id}`, {
         method: 'DELETE'
     })
         .then(response => {
@@ -148,7 +148,7 @@ function newTemplate() {
         slots: {}
     };
 
-    fetch('/api/doctors/templates', {
+    fetch('/api/doctor/templates', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

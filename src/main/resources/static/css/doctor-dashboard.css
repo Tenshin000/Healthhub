@@ -49,11 +49,19 @@ header {
     gap: 20px;
 }
 
-.chart, .appointments, .next-patient {
+.pie-chart, .appointments, .next-patient {
     background-color: white;
     padding: 20px;
     border-radius: 10px;
     width: 30%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.line-chart {
+    background-color: white;
+    padding: 20px;
+    width: 100%;
+    border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 

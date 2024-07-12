@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
     async function fetchReviews() {
         try {
-            const response = await fetch(`/api/doctors/reviews`, {
+            const response = await fetch(`/api/doctor/reviews`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
     async function deleteReview(reviewIndex) {
         try {
-            const response = await fetch(`/api/doctors/reviews/${reviewIndex}`, {
+            const response = await fetch(`/api/doctor/reviews/${reviewIndex}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'

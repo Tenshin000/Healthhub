@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
             slots: templateSelected.slots
         }
 
-        fetch('/api/doctors/schedules', {
+        fetch('/api/doctor/schedules', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         // Invia la richiesta DELETE utilizzando fetch
-        fetch('/api/doctors/schedules', {
+        fetch('/api/doctor/schedules', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
@@ -246,7 +246,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     function fetchUpdatedTemplates() {
-        fetch('/api/doctors/templates')
+        fetch('/api/doctor/templates')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Failed to fetch templates: ' + response.statusText);
@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function fetchUpdatedSchedules() {
-        fetch('/api/doctors/schedules')
+        fetch('/api/doctor/schedules')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Failed to fetch schedules: ' + response.statusText);
@@ -322,7 +322,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (template) {
                 // Esegui una richiesta PUT per impostare il template predefinito
-                const putUrl = `/api/doctors/templates/default`;
+                const putUrl = `/api/doctor/templates/default`;
                 fetch(putUrl, {
                     method: 'PUT',
                     headers: {

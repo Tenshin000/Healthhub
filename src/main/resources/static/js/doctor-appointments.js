@@ -19,8 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
             datasets: [{
                 label: 'Appointments',
                 data: [12, 19, 3, 5, 2],
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: ['rgba(54, 162, 235, 0.2)',],
+                borderColor: ['rgba(54, 162, 235, 1)',],
                 borderWidth: 1
             }]
         },
@@ -39,7 +39,7 @@ async function fetchAppointments(dateJQuery = null) {
     const dateStr = formatDate(date);
 
     try {
-        const response = await fetch(`/api/doctors/appointments?date=${dateStr}`);
+        const response = await fetch(`/api/doctor/appointments?date=${dateStr}`);
         const data = await response.json();
         console.log(JSON.stringify(data));
         renderAppointments(data);
@@ -58,6 +58,11 @@ function formatDate(date) {
 function renderAppointments(appointments) {
     const appointmentsContainer = document.getElementById('appointments');
     appointmentsContainer.innerHTML = '';
+
+    const dayTitle = document.createElement('h2');
+    dayTitle.textContent = 'Appointments for ' + formatDate($('#datepicker').datepicker('getDate'));
+    appointmentsContainer.appendChild(dayTitle);
+
     appointments.forEach(appointment => {
         const appointmentElement = createAppointmentElement(appointment);
         appointmentsContainer.appendChild(appointmentElement);
@@ -114,7 +119,7 @@ function createAppointmentElement(appointment) {
 
 async function deleteAppointment(appointmentId) {
     try {
-        const response = await fetch(`/api/doctors/appointments/${appointmentId}`, {
+        const response = await fetch(`/api/doctor/appointments/${appointmentId}`, {
             method: 'DELETE'
         });
 

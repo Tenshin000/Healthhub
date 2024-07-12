@@ -17,10 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.WeekFields;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class DoctorService {
@@ -623,5 +620,9 @@ public class DoctorService {
             }
         }
         return false;
+    }
+
+    public Map<String, Integer> getVisitsAnalytics(String doctorId) {
+        return appointmentRepository.getVisitsCountByTypeForDoctor(doctorId);
     }
 }
