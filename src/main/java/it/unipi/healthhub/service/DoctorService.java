@@ -141,12 +141,45 @@ public class DoctorService {
         return null;
     }
 
+    public boolean bookAnAppointment2(String doctorId, AppointmentDTO appointmentDto, String patientId) {
+        Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
+        Optional<User> patientOpt = userRepository.findById(patientId);
+        if (doctorOpt.isPresent() && patientOpt.isPresent()) {
+            Doctor doctor = doctorOpt.get();
+            User patient = patientOpt.get();
+
+            Integer year = appointmentDto.getDate().getYear();
+            Integer week = appointmentDto.getDate().get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
+            String keyDay = appointmentDto.getDate().getDayOfWeek().toString().toLowerCase();
+
+
+            // la funzione prova ad aggiornare il parametro taaken dello slot nella schedule
+            // se non riesce a trovare la schedule, ritorna false
+            // se non riesce a trovare il giorno nella schedule, ritorna false
+            // se non riesce a trovare lo slot nella schedule, ritorna false
+            // se lo slot è già occupato, ritorna false
+            // se riesce a prenotare l'appuntamento, ritorna true
+            boolean res = doctorRepository.updateScheduleSlot(doctorId, year, week, keyDay, true);
+
+            if(res){
+                Appointment appointment = createAppointment(appointmentDto, patient, doctor);
+                appointmentRepository.save(appointment); // Save appointment
+                return true;
+            }
+
+        }
+        return false;
+    }
+
     public boolean bookAnAppointment(String doctorId, AppointmentDTO appointmentDto, String patientId) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         Optional<User> patientOpt = userRepository.findById(patientId);
         if (doctorOpt.isPresent() && patientOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
             User patient = patientOpt.get();
+
+            System.out.println(appointmentDto.getDate());
+            System.out.println(appointmentDto.getDate().get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear()));
 
             // check the slot in the schedule
             Pair<Schedule, Integer> response = getSchedule(
@@ -155,12 +188,14 @@ public class DoctorService {
                     appointmentDto.getDate().get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
             );
             if(response == null){
+                System.out.println("Schedule not found");
                 return false;
             }
             Schedule schedule = response.getFirst();
 
             String keyDay = appointmentDto.getDate().getDayOfWeek().toString().toLowerCase();
             if(!schedule.getSlots().containsKey(keyDay)){
+                System.out.println("Day not found");
                 return false;
             }
 
@@ -170,6 +205,7 @@ public class DoctorService {
                 if (slot.getStart().equals(appointmentDto.getSlot())) {
                     slotFound = true;
                     if(slot.isTaken()){
+                        System.out.println("Slot already taken");
                         return false;
                     }
                     slot.setTaken(true);
@@ -177,13 +213,16 @@ public class DoctorService {
                 }
             }
             if (!slotFound) {
+                System.out.println("Slot not found");
                 return false;
             }
 
-            updateSchedule(doctorId, response.getSecond(), schedule);
 
             Appointment appointment = createAppointment(appointmentDto, patient, doctor);
-
+            if (appointment == null) {
+                return false;
+            }
+            updateSchedule(doctorId, response.getSecond(), schedule);
             appointmentRepository.save(appointment); // Save appointment
 
             return true;
@@ -202,6 +241,9 @@ public class DoctorService {
         appointment.setPatientInfo(new Appointment.PatientInfo(patient.getId(), patient.getName()));
         appointment.setVisitType(appointmentDto.getService());
         List<it.unipi.healthhub.model.Service> services = doctor.getServices();
+        if (services == null) {
+            return null;
+        }
         for (it.unipi.healthhub.model.Service service : services) {
             if (service.getService().equals(appointmentDto.getService())) {
                 appointment.setPrice(service.getPrice());
@@ -212,7 +254,7 @@ public class DoctorService {
         return appointment;
     }
 
-    public boolean deleteAppointment(String doctorId, String appointmentId) {
+    public boolean cancelAnAppointment(String doctorId, String appointmentId) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         Optional<Appointment> appointmentOpt = appointmentRepository.findById(appointmentId);
         if (doctorOpt.isPresent() && appointmentOpt.isPresent()) {
@@ -358,18 +400,22 @@ public class DoctorService {
             Doctor doctor = doctorOpt.get();
             List<Schedule> schedules = doctor.getSchedule();
             if (schedules == null) {
+                System.out.println("Schedules not found");
                 return null;
             }
+            // Schedule typically is a 4 weeks schedule
+            // passed schedule are removed at the end of the week
             for (Schedule schedule : schedules) {
                 WeekFields weekFields = WeekFields.of(Locale.getDefault());
                 // Again we need to add 1 to the week number because of the issue with the time zones
-                Integer scheduleWeek = schedule.getWeek().get(weekFields.weekOfWeekBasedYear()) + 1;
+                Integer scheduleWeek = schedule.getWeek().get(weekFields.weekOfWeekBasedYear());
                 Integer scheduleYear = schedule.getWeek().getYear();
 
                 if (scheduleYear.equals(year) && scheduleWeek.equals(week)) {
                     return Pair.of(schedule, schedules.indexOf(schedule));
                 }
             }
+            System.out.println("Schedule not found in list");
         }
         return null;
     }
@@ -417,8 +463,6 @@ public class DoctorService {
             Doctor doctor = doctorOpt.get();
             List<Schedule> calendars = doctor.getSchedule();
             for (int i = 0; i < calendars.size(); i++) {
-                System.out.println(calendars.get(i).getWeek());
-                System.out.println(calendarDate);
                 if (calendars.get(i).getWeek().equals(calendarDate)) {
                     calendars.remove(i); // Remove calendar
                     doctorRepository.save(doctor); // Save updated doctor without the removed calendar
@@ -473,8 +517,6 @@ public class DoctorService {
 
     public Doctor loginDoctor(String username, String password) {
         Doctor doctor = doctorRepository.findByUsername(username);
-        System.out.println(doctor);
-        System.out.println(username);
 
         if (doctor != null && doctor.getPassword().equals(password)) {
             return doctor;

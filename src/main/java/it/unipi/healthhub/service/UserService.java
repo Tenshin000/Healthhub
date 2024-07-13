@@ -53,6 +53,12 @@ public class UserService {
     public boolean hasEndorsed(String patientId, String doctorId) {
         Optional<User> patient = userRepository.findById(patientId);
         if (patient.isPresent()) {
+            List<String> endDoc = patient.get().getEndorsedDoctors();
+
+            if (endDoc == null) {
+                return false;
+            }
+
             return patient.get().getEndorsedDoctors().contains(doctorId);
         }
         return false;

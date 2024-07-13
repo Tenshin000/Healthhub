@@ -46,7 +46,7 @@ public class PrivateDoctorAPI {
     @DeleteMapping("/appointments/{appointmentId}")
     public ResponseEntity<Void> deleteAppointment(@PathVariable String appointmentId, HttpSession session) {
         String doctorId = (String) session.getAttribute("doctorId");
-        boolean deleted = doctorService.deleteAppointment(doctorId, appointmentId);
+        boolean deleted = doctorService.cancelAnAppointment(doctorId, appointmentId);
         if (deleted) {
             return ResponseEntity.noContent().build();
         } else {
@@ -388,7 +388,6 @@ public class PrivateDoctorAPI {
     public ResponseEntity<Map<String,Integer>> getVisitsAnalytics(HttpSession session) {
         String doctorId = (String) session.getAttribute("doctorId");
         Map<String,Integer> visitData = doctorService.getVisitsAnalytics(doctorId);
-        System.out.println(visitData);
         if (visitData != null) {
             return ResponseEntity.ok(visitData);
         } else {

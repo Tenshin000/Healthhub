@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface CustomAppointmentRepository {
-    public List<Appointment> findByDoctorIdAndDay(String doctorId, LocalDate day);
-    public Map<String, Integer> getVisitsCountByTypeForDoctor(String doctorId);
-    public Map<String, Double> getEarningsByYearForDoctor(String doctorId, Integer year);
+    List<Appointment> findByDoctorIdAndDay(String doctorId, LocalDate day);
+    Map<String, Integer> getVisitsCountByTypeForDoctor(String doctorId);
+    Map<String, Double> getEarningsByYearForDoctor(String doctorId, Integer year);
 }

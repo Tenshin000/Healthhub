@@ -24,6 +24,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     calendar.render();
 
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Aggiunge lo zero se il mese è inferiore a 10
+        const day = date.getDate().toString().padStart(2, '0'); // Aggiunge lo zero se il giorno è inferiore a 10
+        return `${year}-${month}-${day}`;
+    }
+
     function saveSchedule(){
         if (!templateSelected) {
             alert('Select a template first.');
@@ -33,9 +40,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let date = new Date(weekSelected);
         let schedule = {
-            week: date,
+            week: formatDate(date),
             slots: templateSelected.slots
         }
+
+        console.log(formatDate(date), templateSelected.slots);
 
         fetch('/api/doctor/schedules', {
             method: 'POST',
@@ -105,12 +114,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Ottieni la data della settimana attiva dal calendario
         let date = new Date(calendar.view.activeStart);
 
-        // Formatta la data nel formato desiderato per l'API, ad esempio ISO 8601
-        let formattedDate = date.toISOString();
+        console.log(formatDate(date));
 
         // Costruisci l'oggetto di schedule da inviare
         let schedule = {
-            week: formattedDate
+            week: formatDate(date)
         };
 
         // Invia la richiesta DELETE utilizzando fetch

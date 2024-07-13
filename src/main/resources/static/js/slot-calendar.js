@@ -51,8 +51,11 @@ class DoctorScheduleCalendar {
     }
 
     updateWeekInfo() {
+        console.log(this.getWeekNumber(this.currentDate));
         const year = this.currentDate.getFullYear();
         const week = this.getWeekNumber(this.currentDate);
+        console.log(year, week)
+        console.log(this.currentDate);
 
         this.weekInfo.textContent = this.getWeekRange(this.currentDate);
 
@@ -64,6 +67,7 @@ class DoctorScheduleCalendar {
     updateDays(scheduleData = null) {
         const startOfWeek = new Date(this.currentDate);
         startOfWeek.setDate(this.currentDate.getDate() - this.currentDate.getDay() + 1);
+        console.log(startOfWeek);
 
         this.daysContainer.innerHTML = '';
 
@@ -137,7 +141,7 @@ class DoctorScheduleCalendar {
         const millisecondsInDay = 86400000; // 1000 * 60 * 60 * 24
         const startOfWeek = firstDayOfYear.getTime() - (firstDayOfYear.getDay() * millisecondsInDay);
         const dayOfYear = (date.getTime() - startOfWeek) / millisecondsInDay;
-        return Math.ceil((dayOfYear + firstDayOfYear.getDay()) / 7);
+        return Math.ceil((dayOfYear + firstDayOfYear.getDay()) / 7)-1;
     }
 
     getSelectedSlot() {

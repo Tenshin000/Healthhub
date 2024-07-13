@@ -27,7 +27,6 @@ public class DoctorController {
         Optional<Doctor> doctorOpt = doctorService.getDoctorById(id);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
-            System.out.println(doctor);
             model.addAttribute("doctor", doctor);
             return "doctor-public";
         }

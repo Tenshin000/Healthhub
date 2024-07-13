@@ -45,7 +45,7 @@ function saveTemplate() {
 
     const templateId = templates.find(template => template.name === templateName).id;
 
-    fetch(`/api/doctors/templates/${templateId}`, {
+    fetch(`/api/doctor/templates/${templateId}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json'

@@ -86,9 +86,6 @@ public class CustomAppointmentRepositoryImpl implements CustomAppointmentReposit
             Integer month = (Integer) doc.get("month");
             String monthString = new DateFormatSymbols(Locale.ENGLISH).getMonths()[month-1].toLowerCase();
             Double total = (Double) doc.get("total");
-            System.out.println(month);
-            System.out.println(monthString);
-            System.out.println(total);
             earningsByYear.put(monthString, total);
         }
 

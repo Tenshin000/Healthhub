@@ -202,10 +202,11 @@ document.addEventListener('DOMContentLoaded', function(){
             body: JSON.stringify(appointment)
         })
             .then(response => {
-                if (response.ok) {
-                    console.log('Appointment booked!');
-                    calendar.updateWeekInfo();
+                if (!response.ok) {
+                    throw new Error('Failed to book appointment: ' + response.status);
                 }
+                console.log('Appointment booked!');
+                calendar.updateWeekInfo();
             })
             .catch(error => {
                 console.error('Error booking appointment:', error);

@@ -2,12 +2,13 @@ package it.unipi.healthhub.repository;
 
 import it.unipi.healthhub.model.Doctor;
 
+import it.unipi.healthhub.repository.doctor.CustomDoctorRepository;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
 
-public interface DoctorRepository extends MongoRepository<Doctor, String> {
+public interface DoctorRepository extends MongoRepository<Doctor, String>, CustomDoctorRepository {
     Doctor findByUsername(String username);
     Doctor findById(ObjectId id);
     List<Doctor> findBySpecializations(String specialization);
