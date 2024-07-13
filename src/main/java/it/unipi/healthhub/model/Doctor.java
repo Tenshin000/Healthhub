@@ -1,5 +1,4 @@
 package it.unipi.healthhub.model;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -10,7 +9,7 @@ public class Doctor extends User {
     private List<Service> services;
     private int endorsementCount;
     private List<Review> reviews;
-    private List<Schedule> schedule;
+    private List<Schedule> schedules;
     private List<String> calendarTemplates;
     private List<String> specializations;
     @Field("phone_numbers")
@@ -38,11 +37,11 @@ public class Doctor extends User {
         this.reviews = reviews;
     }
 
-    public List<Schedule> getSchedule() {
-        return schedule;
+    public List<Schedule> getSchedules() {
+        return schedules;
     }
-    public void setSchedule(List<Schedule> schedule) {
-        this.schedule = schedule;
+    public void setSchedules(List<Schedule> schedules) {
+        this.schedules = schedules;
     }
 
     public List<String> getCalendarTemplates() {

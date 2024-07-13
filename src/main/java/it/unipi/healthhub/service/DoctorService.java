@@ -178,9 +178,6 @@ public class DoctorService {
             Doctor doctor = doctorOpt.get();
             User patient = patientOpt.get();
 
-            System.out.println(appointmentDto.getDate());
-            System.out.println(appointmentDto.getDate().get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear()));
-
             // check the slot in the schedule
             Pair<Schedule, Integer> response = getSchedule(
                     doctorId,
@@ -398,7 +395,7 @@ public class DoctorService {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if(doctorOpt.isPresent()){
             Doctor doctor = doctorOpt.get();
-            List<Schedule> schedules = doctor.getSchedule();
+            List<Schedule> schedules = doctor.getSchedules();
             if (schedules == null) {
                 System.out.println("Schedules not found");
                 return null;
@@ -424,7 +421,7 @@ public class DoctorService {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if(doctorOpt.isPresent()){
             Doctor doctor = doctorOpt.get();
-            return doctor.getSchedule();
+            return doctor.getSchedules();
         }
         return null;
     }
@@ -434,11 +431,11 @@ public class DoctorService {
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
 
-            if (doctor.getSchedule() == null) {
-                doctor.setSchedule(new ArrayList<>());
+            if (doctor.getSchedules() == null) {
+                doctor.setSchedules(new ArrayList<>());
             }
 
-            doctor.getSchedule().add(calendar);
+            doctor.getSchedules().add(calendar);
             doctorRepository.save(doctor); // Save updated doctor with the new appointment
             return calendar;
         }
@@ -449,7 +446,7 @@ public class DoctorService {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
-            List<Schedule> calendars = doctor.getSchedule();
+            List<Schedule> calendars = doctor.getSchedules();
             calendars.set(scheduleIndex, calendar); // Update calendar
             doctorRepository.save(doctor); // Save updated doctor with the updated calendar
             return calendar;
@@ -461,7 +458,7 @@ public class DoctorService {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
-            List<Schedule> calendars = doctor.getSchedule();
+            List<Schedule> calendars = doctor.getSchedules();
             for (int i = 0; i < calendars.size(); i++) {
                 if (calendars.get(i).getWeek().equals(calendarDate)) {
                     calendars.remove(i); // Remove calendar
@@ -680,5 +677,10 @@ public class DoctorService {
 
     public Map<String, Double> getEarningsAnalytics(String doctorId, Integer year) {
         return appointmentRepository.getEarningsByYearForDoctor(doctorId, year);
+    }
+
+    public Map<String, Integer> getVisitsAnalyticsWeek(String doctorId, Integer week, Integer year) {
+        // return the distribution of the visits by day for the given week
+        return appointmentRepository.getVisitsCountByDayForDoctorWeek(doctorId, week, year);
     }
 }

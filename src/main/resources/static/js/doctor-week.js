@@ -317,7 +317,7 @@ document.addEventListener('DOMContentLoaded', function() {
     fetchUpdatedTemplates();
     fetchUpdatedSchedules();
 
-
+    
     // Imposta il template predefinito
     document.getElementById('set-default-template').addEventListener('click', function() {
         const selectedTemplate = document.querySelector('.template-item.selected');

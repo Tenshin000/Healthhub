@@ -1,38 +1,25 @@
+let distributionChart = null;
 $(document).ready(() => {
     // Inizializzazione del datepicker con jQuery UI
     $("#datepicker").datepicker({
         onSelect: (dateText) => {
-            fetchAppointments(dateText);
+            fetchAppointments(dateText).then((appointments) => renderAppointments(appointments));
+            fetchAppointmentsAnalytics(dateText).then((appointmentDistribution) => renderAppointmentsAnalytics(appointmentDistribution));
         }
     });
-
     // Chiamata iniziale per recuperare gli appuntamenti della data corrente
-    fetchAppointments();
+    fetchAppointments().then((appointments) => renderAppointments(appointments));
+    fetchAppointmentsAnalytics().then((appointmentDistribution) => renderAppointmentsAnalytics(appointmentDistribution));
+
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    const ctx = document.getElementById('app-distr-chart').getContext('2d');
-    const myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-            datasets: [{
-                label: 'Appointments',
-                data: [12, 19, 3, 5, 2],
-                backgroundColor: ['rgba(54, 162, 235, 0.2)',],
-                borderColor: ['rgba(54, 162, 235, 1)',],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-});
+function getWeekNumber(date) {
+    const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+    const millisecondsInDay = 86400000; // 1000 * 60 * 60 * 24
+    const startOfWeek = firstDayOfYear.getTime() - (firstDayOfYear.getDay() * millisecondsInDay);
+    const dayOfYear = (date.getTime() - startOfWeek) / millisecondsInDay;
+    return Math.ceil((dayOfYear + firstDayOfYear.getDay()) / 7);
+}
 
 async function fetchAppointments(dateJQuery = null) {
     const date = dateJQuery ? new Date(dateJQuery) : new Date();
@@ -40,9 +27,7 @@ async function fetchAppointments(dateJQuery = null) {
 
     try {
         const response = await fetch(`/api/doctor/appointments?date=${dateStr}`);
-        const data = await response.json();
-        console.log(JSON.stringify(data));
-        renderAppointments(data);
+        return await response.json();
     } catch (error) {
         console.error('Errore nel recupero degli appuntamenti:', error);
     }
@@ -131,5 +116,80 @@ async function deleteAppointment(appointmentId) {
         }
     } catch (error) {
         console.error('Errore nella cancellazione dell\'appuntamento:', error);
+    }
+}
+
+async function fetchAppointmentsAnalytics(dayText = null) {
+    try {
+        const params = new URLSearchParams();
+        if (dayText !== null) {
+            const date = new Date(dayText);
+            const week = getWeekNumber(date);
+            const year = date.getFullYear();
+
+            params.append('year', year);
+            params.append('week', week);
+        }
+
+
+        const queryString = params.toString();
+        const url = queryString ? `/api/doctor/analytics/visits/distribution?${queryString}` : '/api/doctor/analytics/visits/distribution';
+
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Network response was not ok ' + response.statusText);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Errore nel recupero dei dati:', error);
+        return null;
+    }
+}
+
+
+let appDistrChartData = {
+    type: 'bar',
+    data: {
+        labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        datasets: [{
+            label: 'Appointments',
+            data: [12, 19, 3, 5, 2],
+            backgroundColor: ['rgba(54, 162, 235, 0.2)',],
+            borderColor: ['rgba(54, 162, 235, 1)',],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+};
+
+function renderAppointmentsAnalytics(appointmentDistribution) {
+    if (distributionChart) {
+        distributionChart.destroy();
+    }
+    const ctx = document.getElementById('app-distr-chart').getContext('2d');
+    if (appointmentDistribution) {
+        let days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        appointmentDistribution = {...appointmentDistribution};
+        let orderedData = [];
+        for (let i = 0; i < days.length; i++) {
+            let month = days[i].toLowerCase()
+            if (appointmentDistribution[month]) {
+                orderedData.push(appointmentDistribution[month]);
+            }
+            else {
+                orderedData.push(0);
+            }
+        }
+        console.log(orderedData);
+        appDistrChartData.data.datasets[0].data = orderedData
+        appDistrChartData.data.labels = days;
+        distributionChart = new Chart(ctx, appDistrChartData);
     }
 }

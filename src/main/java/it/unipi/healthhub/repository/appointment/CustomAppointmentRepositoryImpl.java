@@ -2,6 +2,7 @@ package it.unipi.healthhub.repository.appointment;
 
 import com.mongodb.DBObject;
 import it.unipi.healthhub.model.Appointment;
+import it.unipi.healthhub.util.DateUtil;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -11,6 +12,7 @@ import org.thymeleaf.util.DateUtils;
 
 import java.text.DateFormatSymbols;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -90,5 +92,38 @@ public class CustomAppointmentRepositoryImpl implements CustomAppointmentReposit
         }
 
         return earningsByYear;
+    }
+
+    @Override
+public Map<String, Integer> getVisitsCountByDayForDoctorWeek(String doctorId, Integer week, Integer year) {
+        LocalDateTime startOfWeek = DateUtil.getFirstDayOfWeek(week, year).atStartOfDay();
+        LocalDateTime endOfWeek = DateUtil.getFirstDayOfWeek(week+1, year).atStartOfDay();
+        System.out.println(startOfWeek);
+        System.out.println(endOfWeek);
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("doctorInfo.doctorId").is(doctorId)
+                .and("appointmentDateTime")
+                .gte(startOfWeek)
+                .lt(endOfWeek)
+        );
+        ProjectionOperation projectDay = Aggregation.project().andExpression("dayOfWeek(appointmentDateTime)").as("day");
+        GroupOperation groupOperation = Aggregation.group("day").count().as("total");
+
+        Aggregation aggregation = Aggregation.newAggregation(
+                matchOperation,
+                projectDay,
+                groupOperation
+        );
+
+        AggregationResults<DBObject> results = mongoTemplate.aggregate(aggregation, Appointment.class, DBObject.class);
+
+        Map<String, Integer> visitsCountByDay = new HashMap<>();
+        for (DBObject doc : results.getMappedResults()) {
+            Integer day = (Integer) doc.get("_id");
+            String dayString = new DateFormatSymbols(Locale.ENGLISH).getWeekdays()[day].toLowerCase();
+            Integer total = (Integer) doc.get("total");
+            visitsCountByDay.put(dayString, total);
+        }
+
+        return visitsCountByDay;
     }
 }
