@@ -81,8 +81,6 @@ public class CustomAppointmentRepositoryImpl implements CustomAppointmentReposit
 
         AggregationResults<DBObject> results = mongoTemplate.aggregate(aggregation, Appointment.class, DBObject.class);
 
-        // Problemi di casting
-        // Da verificare una volta che il database è popolato
         Map<String, Double> earningsByYear = new HashMap<>();
         for (DBObject doc : results.getMappedResults()) {
             Integer month = (Integer) doc.get("month");
@@ -98,8 +96,7 @@ public class CustomAppointmentRepositoryImpl implements CustomAppointmentReposit
 public Map<String, Integer> getVisitsCountByDayForDoctorWeek(String doctorId, Integer week, Integer year) {
         LocalDateTime startOfWeek = DateUtil.getFirstDayOfWeek(week, year).atStartOfDay();
         LocalDateTime endOfWeek = DateUtil.getFirstDayOfWeek(week+1, year).atStartOfDay();
-        System.out.println(startOfWeek);
-        System.out.println(endOfWeek);
+
         MatchOperation matchOperation = Aggregation.match(Criteria.where("doctorInfo.doctorId").is(doctorId)
                 .and("appointmentDateTime")
                 .gte(startOfWeek)

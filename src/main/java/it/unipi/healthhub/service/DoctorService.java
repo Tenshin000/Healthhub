@@ -141,7 +141,7 @@ public class DoctorService {
         return null;
     }
 
-    public boolean bookAnAppointment2(String doctorId, AppointmentDTO appointmentDto, String patientId) {
+    public boolean bookAnAppointment(String doctorId, AppointmentDTO appointmentDto, String patientId) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         Optional<User> patientOpt = userRepository.findById(patientId);
         if (doctorOpt.isPresent() && patientOpt.isPresent()) {
@@ -151,19 +151,21 @@ public class DoctorService {
             Integer year = appointmentDto.getDate().getYear();
             Integer week = appointmentDto.getDate().get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
             String keyDay = appointmentDto.getDate().getDayOfWeek().toString().toLowerCase();
+            String slotStart = appointmentDto.getSlot();
 
 
             // la funzione prova ad aggiornare il parametro taaken dello slot nella schedule
-            // se non riesce a trovare la schedule, ritorna false
-            // se non riesce a trovare il giorno nella schedule, ritorna false
-            // se non riesce a trovare lo slot nella schedule, ritorna false
             // se lo slot è già occupato, ritorna false
             // se riesce a prenotare l'appuntamento, ritorna true
-            boolean res = doctorRepository.updateScheduleSlot(doctorId, year, week, keyDay, true);
-
-            if(res){
+            boolean taken = doctorRepository.checkScheduleSlot(doctorId, year, week, keyDay, slotStart);
+            System.out.println("TEST CHECK: " + taken);
+            if(!taken){
                 Appointment appointment = createAppointment(appointmentDto, patient, doctor);
+                if (appointment == null) {
+                    return false;
+                }
                 appointmentRepository.save(appointment); // Save appointment
+                doctorRepository.bookScheduleSlot(doctorId, year, week, keyDay, slotStart);
                 return true;
             }
 
@@ -171,7 +173,7 @@ public class DoctorService {
         return false;
     }
 
-    public boolean bookAnAppointment(String doctorId, AppointmentDTO appointmentDto, String patientId) {
+    public boolean _bookAnAppointment(String doctorId, AppointmentDTO appointmentDto, String patientId) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         Optional<User> patientOpt = userRepository.findById(patientId);
         if (doctorOpt.isPresent() && patientOpt.isPresent()) {
