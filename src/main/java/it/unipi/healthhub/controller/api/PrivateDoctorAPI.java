@@ -50,7 +50,7 @@ public class PrivateDoctorAPI {
         String doctorId = (String) session.getAttribute("doctorId");
         boolean deleted = doctorService.cancelAnAppointment(doctorId, appointmentId);
         if (deleted) {
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();
         }

@@ -77,9 +77,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Converti activeWeek in LocalDate (solo data, senza ora)
         let activeLocalDate = new Date(activeWeek);
-        // Sottraggo un giorno perchè non riesco a gestire il timezone
-        // tra il client e il server
-        activeLocalDate.setDate(activeLocalDate.getDate() - 1);
 
         activeLocalDate.setHours(0, 0, 0, 0); // Imposta ore, minuti, secondi e millisecondi a 0
 

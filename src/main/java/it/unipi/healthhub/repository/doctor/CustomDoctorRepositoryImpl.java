@@ -36,6 +36,10 @@ public class CustomDoctorRepositoryImpl implements CustomDoctorRepository{
         );
 
         AggregationResults<DBObject> result = mongoTemplate.aggregate(aggregation, Doctor.class, DBObject.class);
+        if (result.getMappedResults().isEmpty()){
+            System.out.println("Error: No slot found");
+            return false;
+        }
         return result.getMappedResults().get(0).get("taken").equals(true);
     }
 
@@ -48,9 +52,8 @@ public class CustomDoctorRepositoryImpl implements CustomDoctorRepository{
                         .and("schedules.week").is(startOfWeek)
                         .and("schedules.slots." + keyDay + ".start").is(slotStart)
         );
-        //Update update = new Update().set("schedules.$[schedule].slots." + keyDay + ".$[slot].taken", true);
         Update update = new Update().set("schedules.$.slots." + keyDay + ".$[slot].taken", true)
-                .filterArray(Criteria.where("slot.start").is(slotStart));;
+                .filterArray(Criteria.where("slot.start").is(slotStart));
         mongoTemplate.updateMulti(query, update, Doctor.class);
     }
 
@@ -58,11 +61,13 @@ public class CustomDoctorRepositoryImpl implements CustomDoctorRepository{
     public void freeScheduleSlot(String doctorId, Integer year, Integer week, String keyDay, String slotStart) {
         LocalDateTime startOfWeek = DateUtil.getFirstDayOfWeek(week, year).atStartOfDay();
 
-        Query query = new Query(Criteria.where("_id").is(doctorId)
-                .and("schedules.week").is(startOfWeek)
-                .and("schedules.slots." + keyDay + ".start").is(slotStart));
+        Query query = new Query(
+                Criteria.where("_id").is(doctorId)
+                        .and("schedules.week").is(startOfWeek)
+                        .and("schedules.slots." + keyDay + ".start").is(slotStart)
+        );
         Update update = new Update().set("schedules.$.slots." + keyDay + ".$[slot].taken", false)
                 .filterArray(Criteria.where("slot.start").is(slotStart));
-        mongoTemplate.updateFirst(query, update, Doctor.class);
+        mongoTemplate.updateMulti(query, update, Doctor.class);
     }
 }

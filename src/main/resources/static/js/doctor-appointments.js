@@ -2,6 +2,7 @@ let distributionChart = null;
 $(document).ready(() => {
     // Inizializzazione del datepicker con jQuery UI
     $("#datepicker").datepicker({
+        firstDay: 1,
         onSelect: (dateText) => {
             fetchAppointments(dateText).then((appointments) => renderAppointments(appointments));
             fetchAppointmentsAnalytics(dateText).then((appointmentDistribution) => renderAppointmentsAnalytics(appointmentDistribution));
@@ -14,11 +15,16 @@ $(document).ready(() => {
 });
 
 function getWeekNumber(date) {
-    const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-    const millisecondsInDay = 86400000; // 1000 * 60 * 60 * 24
-    const startOfWeek = firstDayOfYear.getTime() - (firstDayOfYear.getDay() * millisecondsInDay);
-    const dayOfYear = (date.getTime() - startOfWeek) / millisecondsInDay;
-    return Math.ceil((dayOfYear + firstDayOfYear.getDay()) / 7);
+    // Copy date as UTC to avoid DST
+    let d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    // Shift to the following Saturday to get the year
+    d.setUTCDate(d.getUTCDate() + 6 - d.getUTCDay());
+    // Get the first day of the year
+    let yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    yearStart.setUTCDate(yearStart.getUTCDate() - yearStart.getUTCDay());
+    // Get difference between yearStart and d in milliseconds
+    // Reduce to whole weeks
+    return (Math.ceil((d - yearStart) / 6.048e8));
 }
 
 async function fetchAppointments(dateJQuery = null) {
@@ -111,12 +117,20 @@ async function deleteAppointment(appointmentId) {
         if (response.ok) {
             // Recupera di nuovo gli appuntamenti per aggiornare la lista
             const date = $('#datepicker').datepicker('getDate');
-            const formattedDate = formatDate(date);
-            fetchAppointments(formattedDate);
+            //const formattedDate = formatDate(date);
+            fetchAppointments(date).then((appointments) => renderAppointments(appointments));
+            fetchAppointmentsAnalytics(date).then((appointmentDistribution) => renderAppointmentsAnalytics(appointmentDistribution));
         }
     } catch (error) {
         console.error('Errore nella cancellazione dell\'appuntamento:', error);
     }
+}
+
+function startOfWeek(d) {
+    d = new Date(d);
+    let day = d.getDay(),
+        diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+    return new Date(d.setDate(diff));
 }
 
 async function fetchAppointmentsAnalytics(dayText = null) {
@@ -124,7 +138,7 @@ async function fetchAppointmentsAnalytics(dayText = null) {
         const params = new URLSearchParams();
         if (dayText !== null) {
             const date = new Date(dayText);
-            const week = getWeekNumber(date);
+            const week = getWeekNumber(startOfWeek(date));
             const year = date.getFullYear();
 
             params.append('year', year);

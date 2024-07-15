@@ -158,7 +158,6 @@ public class DoctorService {
             // se lo slot è già occupato, ritorna false
             // se riesce a prenotare l'appuntamento, ritorna true
             boolean taken = doctorRepository.checkScheduleSlot(doctorId, year, week, keyDay, slotStart);
-            System.out.println("TEST CHECK: " + taken);
             if(!taken){
                 Appointment appointment = createAppointment(appointmentDto, patient, doctor);
                 if (appointment == null) {
@@ -169,62 +168,6 @@ public class DoctorService {
                 return true;
             }
 
-        }
-        return false;
-    }
-
-    public boolean _bookAnAppointment(String doctorId, AppointmentDTO appointmentDto, String patientId) {
-        Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
-        Optional<User> patientOpt = userRepository.findById(patientId);
-        if (doctorOpt.isPresent() && patientOpt.isPresent()) {
-            Doctor doctor = doctorOpt.get();
-            User patient = patientOpt.get();
-
-            // check the slot in the schedule
-            Pair<Schedule, Integer> response = getSchedule(
-                    doctorId,
-                    appointmentDto.getDate().getYear(),
-                    appointmentDto.getDate().get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
-            );
-            if(response == null){
-                System.out.println("Schedule not found");
-                return false;
-            }
-            Schedule schedule = response.getFirst();
-
-            String keyDay = appointmentDto.getDate().getDayOfWeek().toString().toLowerCase();
-            if(!schedule.getSlots().containsKey(keyDay)){
-                System.out.println("Day not found");
-                return false;
-            }
-
-            List<PrenotableSlot> slots = schedule.getSlots().get(keyDay);
-            boolean slotFound = false;
-            for (PrenotableSlot slot : slots) {
-                if (slot.getStart().equals(appointmentDto.getSlot())) {
-                    slotFound = true;
-                    if(slot.isTaken()){
-                        System.out.println("Slot already taken");
-                        return false;
-                    }
-                    slot.setTaken(true);
-                    break;
-                }
-            }
-            if (!slotFound) {
-                System.out.println("Slot not found");
-                return false;
-            }
-
-
-            Appointment appointment = createAppointment(appointmentDto, patient, doctor);
-            if (appointment == null) {
-                return false;
-            }
-            updateSchedule(doctorId, response.getSecond(), schedule);
-            appointmentRepository.save(appointment); // Save appointment
-
-            return true;
         }
         return false;
     }
@@ -253,48 +196,30 @@ public class DoctorService {
         return appointment;
     }
 
-    public boolean cancelAnAppointment(String doctorId, String appointmentId) {
-        Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
+    public boolean cancelAnAppointment(String doctorId, String appointmentId){
         Optional<Appointment> appointmentOpt = appointmentRepository.findById(appointmentId);
-        if (doctorOpt.isPresent() && appointmentOpt.isPresent()) {
-            Doctor doctor = doctorOpt.get();
+
+        if (appointmentOpt.isPresent()) {
             Appointment appointment = appointmentOpt.get();
+
             LocalDateTime dateTimeSlot = appointment.getAppointmentDateTime();
-            Pair<Schedule, Integer> response = getSchedule(doctorId,
-                    dateTimeSlot.getYear(),
-                    dateTimeSlot.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear()));
-            if(response == null){
-                return false;
-            }
-            Schedule schedule = response.getFirst();
+
+            Integer year = dateTimeSlot.getYear();
+            Integer week = dateTimeSlot.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
             String keyDay = dateTimeSlot.getDayOfWeek().toString().toLowerCase();
-            if(!schedule.getSlots().containsKey(keyDay)){
-                return false;
-            }
-            List<PrenotableSlot> slots = schedule.getSlots().get(keyDay);
-            boolean slotFound = false;
-            for (PrenotableSlot slot : slots) {
-                if (slot.getStart().equals(dateTimeSlot.toLocalTime().toString())) {
-                    slotFound = true;
-                    slot.setTaken(false);
-                    break;
-                }
-            }
+            String slotStart = dateTimeSlot.toLocalTime().toString();
 
-            // Mi interessa che sia stato trovato?
-            // Non ne sono sicuro, problemi di inconsistenza
-            if (!slotFound) {
-                return false;
+            // la funzione prova ad aggiornare il parametro taken dello slot nella schedule
+            // se lo slot è già occupato, ritorna false
+            boolean taken = doctorRepository.checkScheduleSlot(doctorId, year, week, keyDay, slotStart);
+            if(taken){
+                appointmentRepository.deleteById(appointmentId);
+                doctorRepository.freeScheduleSlot(doctorId, year, week, keyDay, slotStart);
+                return true;
             }
-
-            updateSchedule(doctorId, response.getSecond(), schedule);
-            appointmentRepository.deleteById(appointmentId);
-
-            return true;
 
         }
         return false;
-
     }
 
     public List<CalendarTemplate> getTemplates(String doctorId) {

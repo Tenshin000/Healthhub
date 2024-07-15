@@ -104,7 +104,7 @@ public class DoctorAPI {
         if (booked) {
             return ResponseEntity.ok(appointmentDto);
         } else {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().build(); // HTTP 400
         }
     }
 
@@ -130,7 +130,6 @@ public class DoctorAPI {
     // Endpoints for schedules
     @GetMapping("/{doctorId}/schedules/week")
     public ResponseEntity<ScheduleDTO> getSchedule(@PathVariable String doctorId, @RequestParam Integer year, @RequestParam Integer week) {
-        System.out.println(week);
         Pair<Schedule, Integer> response = doctorService.getSchedule(doctorId, year, week);
         if (response != null) {
             Schedule schedule = (Schedule) response.getFirst();
