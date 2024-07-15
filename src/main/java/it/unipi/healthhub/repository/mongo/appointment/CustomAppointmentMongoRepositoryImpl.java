@@ -1,14 +1,12 @@
-package it.unipi.healthhub.repository.appointment;
+package it.unipi.healthhub.repository.mongo.appointment;
 
 import com.mongodb.DBObject;
-import it.unipi.healthhub.model.Appointment;
+import it.unipi.healthhub.dao.mongo.Appointment;
 import it.unipi.healthhub.util.DateUtil;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
-import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.thymeleaf.util.DateUtils;
 
 import java.text.DateFormatSymbols;
 import java.time.LocalDate;
@@ -18,10 +16,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class CustomAppointmentRepositoryImpl implements CustomAppointmentRepository{
+public class CustomAppointmentMongoRepositoryImpl implements CustomAppointmentMongoRepository {
     private final MongoTemplate mongoTemplate;
 
-    public CustomAppointmentRepositoryImpl(MongoTemplate mongoTemplate) {
+    public CustomAppointmentMongoRepositoryImpl(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
     }
 

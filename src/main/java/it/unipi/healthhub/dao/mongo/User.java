@@ -1,11 +1,9 @@
-package it.unipi.healthhub.model;
+package it.unipi.healthhub.dao.mongo;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @Document(collection = "users")

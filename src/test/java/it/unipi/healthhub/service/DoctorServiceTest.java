@@ -1,7 +1,7 @@
 package it.unipi.healthhub.service;
 
-import it.unipi.healthhub.model.Doctor;
-import it.unipi.healthhub.repository.DoctorRepository;
+import it.unipi.healthhub.dao.mongo.Doctor;
+import it.unipi.healthhub.repository.mongo.DoctorMongoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +17,7 @@ import static org.mockito.Mockito.*;
 
 public class DoctorServiceTest {
     @Mock
-    private DoctorRepository doctorRepository;
+    private DoctorMongoRepository doctorRepository;
 
     @InjectMocks
     private DoctorService doctorService;

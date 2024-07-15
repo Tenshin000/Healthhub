@@ -1,14 +1,14 @@
 package it.unipi.healthhub.service;
 
+import it.unipi.healthhub.dao.mongo.*;
 import it.unipi.healthhub.dto.AppointmentDTO;
 import it.unipi.healthhub.dto.ReviewDTO;
 import it.unipi.healthhub.dto.SpecializationDTO;
 import it.unipi.healthhub.dto.UserDetailsDTO;
-import it.unipi.healthhub.model.*;
-import it.unipi.healthhub.repository.AppointmentRepository;
-import it.unipi.healthhub.repository.DoctorRepository;
-import it.unipi.healthhub.repository.TemplateRepository;
-import it.unipi.healthhub.repository.UserRepository;
+import it.unipi.healthhub.repository.mongo.AppointmentMongoRepository;
+import it.unipi.healthhub.repository.mongo.DoctorMongoRepository;
+import it.unipi.healthhub.repository.mongo.TemplateMongoRepository;
+import it.unipi.healthhub.repository.mongo.UserMongoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
@@ -22,16 +22,16 @@ import java.util.*;
 @Service
 public class DoctorService {
     @Autowired
-    private DoctorRepository doctorRepository;
+    private DoctorMongoRepository doctorRepository;
 
     @Autowired
-    private TemplateRepository templateRepository;
+    private TemplateMongoRepository templateRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserMongoRepository userRepository;
 
     @Autowired
-    private AppointmentRepository appointmentRepository;
+    private AppointmentMongoRepository appointmentRepository;
 
     public List<Doctor> searchDoctors(String query) {
         if (query != null && !query.isEmpty()) {
@@ -66,7 +66,7 @@ public class DoctorService {
         doctorRepository.deleteById(id);
     }
 
-    public List<it.unipi.healthhub.model.Service> getServices(String doctorId) {
+    public List<it.unipi.healthhub.dao.mongo.Service> getServices(String doctorId) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if(doctorOpt.isPresent()){
             Doctor doctor = doctorOpt.get();
@@ -75,7 +75,7 @@ public class DoctorService {
         return null;
     }
 
-    public Integer addService(String doctorId, it.unipi.healthhub.model.Service service) {
+    public Integer addService(String doctorId, it.unipi.healthhub.dao.mongo.Service service) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
@@ -92,7 +92,7 @@ public class DoctorService {
         return null;
     }
 
-    public List<it.unipi.healthhub.model.Service> getMyServices(String doctorId) {
+    public List<it.unipi.healthhub.dao.mongo.Service> getMyServices(String doctorId) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if(doctorOpt.isPresent()){
             Doctor doctor = doctorOpt.get();
@@ -101,11 +101,11 @@ public class DoctorService {
         return null;
     }
 
-    public boolean updateService(String doctorId, Integer index, it.unipi.healthhub.model.Service service) {
+    public boolean updateService(String doctorId, Integer index, it.unipi.healthhub.dao.mongo.Service service) {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
-            List<it.unipi.healthhub.model.Service> services = doctor.getServices();
+            List<it.unipi.healthhub.dao.mongo.Service> services = doctor.getServices();
 
             if (index >= 0 && index < services.size()) {
                 services.set(index, service); // Aggiorna il servizio
@@ -121,7 +121,7 @@ public class DoctorService {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
-            List<it.unipi.healthhub.model.Service> services = doctor.getServices();
+            List<it.unipi.healthhub.dao.mongo.Service> services = doctor.getServices();
 
             if (index >= 0 && index < services.size()) {
                 services.remove(index.intValue()); // Remove service
@@ -182,11 +182,11 @@ public class DoctorService {
         appointment.setDoctorInfo(new Appointment.DoctorInfo(doctor.getId(), doctor.getName()));
         appointment.setPatientInfo(new Appointment.PatientInfo(patient.getId(), patient.getName()));
         appointment.setVisitType(appointmentDto.getService());
-        List<it.unipi.healthhub.model.Service> services = doctor.getServices();
+        List<it.unipi.healthhub.dao.mongo.Service> services = doctor.getServices();
         if (services == null) {
             return null;
         }
-        for (it.unipi.healthhub.model.Service service : services) {
+        for (it.unipi.healthhub.dao.mongo.Service service : services) {
             if (service.getService().equals(appointmentDto.getService())) {
                 appointment.setPrice(service.getPrice());
                 break;

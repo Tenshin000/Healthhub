@@ -1,9 +1,7 @@
 package it.unipi.healthhub.controller;
 
-import it.unipi.healthhub.controller.api.DoctorAPI;
-import it.unipi.healthhub.model.Doctor;
+import it.unipi.healthhub.dao.mongo.Doctor;
 import it.unipi.healthhub.service.DoctorService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

@@ -1,6 +1,5 @@
-package it.unipi.healthhub.model;
+package it.unipi.healthhub.dao.mongo;
 
-import it.unipi.healthhub.dto.TemplateDTO;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 

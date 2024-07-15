@@ -1,7 +1,7 @@
 package it.unipi.healthhub.service;
 
-import it.unipi.healthhub.model.User;
-import it.unipi.healthhub.repository.UserRepository;
+import it.unipi.healthhub.dao.mongo.User;
+import it.unipi.healthhub.repository.mongo.UserMongoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +11,7 @@ import java.util.Optional;
 @Service
 public class UserService {
     @Autowired
-    private UserRepository userRepository;
+    private UserMongoRepository userRepository;
 
     public List<User> getAllUser(){
         return userRepository.findAll();

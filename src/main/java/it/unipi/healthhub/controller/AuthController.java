@@ -1,7 +1,7 @@
 package it.unipi.healthhub.controller;
 
-import it.unipi.healthhub.model.Doctor;
-import it.unipi.healthhub.model.User;
+import it.unipi.healthhub.dao.mongo.Doctor;
+import it.unipi.healthhub.dao.mongo.User;
 import it.unipi.healthhub.service.DoctorService;
 import it.unipi.healthhub.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;

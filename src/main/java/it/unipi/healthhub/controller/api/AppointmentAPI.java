@@ -1,6 +1,6 @@
 package it.unipi.healthhub.controller.api;
 
-import it.unipi.healthhub.model.Appointment;
+import it.unipi.healthhub.dao.mongo.Appointment;
 import it.unipi.healthhub.service.AppointmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

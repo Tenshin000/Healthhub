@@ -1,7 +1,7 @@
 package it.unipi.healthhub.service;
 
-import it.unipi.healthhub.model.Appointment;
-import it.unipi.healthhub.repository.AppointmentRepository;
+import it.unipi.healthhub.dao.mongo.Appointment;
+import it.unipi.healthhub.repository.mongo.AppointmentMongoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +12,7 @@ import java.util.Optional;
 @Service
 public class AppointmentService {
     @Autowired
-    private AppointmentRepository appointmentRepository;
+    private AppointmentMongoRepository appointmentRepository;
 
     public List<Appointment> getAllAppointment(){
         return appointmentRepository.findAll();

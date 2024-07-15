@@ -1,7 +1,7 @@
 package it.unipi.healthhub.controller.api;
 
+import it.unipi.healthhub.dao.mongo.*;
 import it.unipi.healthhub.dto.*;
-import it.unipi.healthhub.model.*;
 import it.unipi.healthhub.service.AppointmentService;
 import it.unipi.healthhub.service.DoctorService;
 import it.unipi.healthhub.util.ScheduleConverter;
@@ -153,7 +153,7 @@ public class PrivateDoctorAPI {
     public ResponseEntity<ServiceDTO> addVisitType(@RequestBody ServiceDTO serviceDto, HttpSession session) {
         String doctorId = (String) session.getAttribute("doctorId");
 
-        it.unipi.healthhub.model.Service service = new it.unipi.healthhub.model.Service();
+        Service service = new Service();
         service.setService(serviceDto.getService());
         service.setPrice(serviceDto.getPrice());
 
@@ -174,7 +174,7 @@ public class PrivateDoctorAPI {
     @GetMapping("/services")
     public ResponseEntity<List<ServiceDTO>> getMyServices(HttpSession session) {
         String doctorId = (String) session.getAttribute("doctorId");
-        List<it.unipi.healthhub.model.Service> services = doctorService.getMyServices(doctorId);
+        List<Service> services = doctorService.getMyServices(doctorId);
 
         if (services != null) {
             List<ServiceDTO> response = new ArrayList<>();
@@ -197,7 +197,7 @@ public class PrivateDoctorAPI {
     public ResponseEntity<String> updateVisitType(@PathVariable Integer index, @RequestBody ServiceDTO serviceDto, HttpSession session) {
         String doctorId = (String) session.getAttribute("doctorId");
 
-        it.unipi.healthhub.model.Service service = new it.unipi.healthhub.model.Service();
+        Service service = new Service();
         service.setService(serviceDto.getService());
         service.setPrice(serviceDto.getPrice());
 

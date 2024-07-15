@@ -1,27 +1,22 @@
 package it.unipi.healthhub.controller.api;
 
+import it.unipi.healthhub.dao.mongo.*;
 import it.unipi.healthhub.dto.*;
-import it.unipi.healthhub.model.*;
 import it.unipi.healthhub.service.AppointmentService;
 import it.unipi.healthhub.service.DoctorService;
 
 import it.unipi.healthhub.service.UserService;
 import it.unipi.healthhub.util.ScheduleConverter;
-import it.unipi.healthhub.util.TemplateConverter;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/doctors")
