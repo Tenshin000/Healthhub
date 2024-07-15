@@ -104,7 +104,7 @@ public class DoctorAPI {
         if (booked) {
             return ResponseEntity.ok(appointmentDto);
         } else {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().build(); // HTTP 400
         }
     }
 

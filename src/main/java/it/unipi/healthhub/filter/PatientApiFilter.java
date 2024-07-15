@@ -8,10 +8,9 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 
-public class AuthFilter implements Filter {
+public class PatientApiFilter implements Filter {
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
@@ -23,8 +22,11 @@ public class AuthFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
 
-        if (req.getSession(false) == null) {
-            res.sendRedirect(req.getContextPath() + "/login");
+        String method = req.getMethod();
+
+        if (("POST".equals(method) || "PUT".equals(method) || "DELETE".equals(method)) &&
+                (req.getSession(false) == null || !"patient".equals(req.getSession().getAttribute("role")))) {
+            res.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
 
@@ -34,5 +36,4 @@ public class AuthFilter implements Filter {
     @Override
     public void destroy() {
     }
-
 }

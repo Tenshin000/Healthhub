@@ -13,8 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @RestController
@@ -46,9 +48,9 @@ public class PrivateDoctorAPI {
     @DeleteMapping("/appointments/{appointmentId}")
     public ResponseEntity<Void> deleteAppointment(@PathVariable String appointmentId, HttpSession session) {
         String doctorId = (String) session.getAttribute("doctorId");
-        boolean deleted = doctorService.deleteAppointment(doctorId, appointmentId);
+        boolean deleted = doctorService.cancelAnAppointment(doctorId, appointmentId);
         if (deleted) {
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -388,7 +390,39 @@ public class PrivateDoctorAPI {
     public ResponseEntity<Map<String,Integer>> getVisitsAnalytics(HttpSession session) {
         String doctorId = (String) session.getAttribute("doctorId");
         Map<String,Integer> visitData = doctorService.getVisitsAnalytics(doctorId);
-        System.out.println(visitData);
+        if (visitData != null) {
+            return ResponseEntity.ok(visitData);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/analytics/earnings")
+    public ResponseEntity<Map<String,Double>> getEarningsAnalytics(HttpSession session, @RequestParam(value = "year", required = false) Integer year) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        if (year == null) {
+            year = LocalDate.now().getYear();
+        }
+        Map<String,Double> earningsData = doctorService.getEarningsAnalytics(doctorId, year);
+        if (earningsData != null) {
+            return ResponseEntity.ok(earningsData);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/analytics/visits/distribution")
+    public ResponseEntity<Map<String,Integer>> getVisitsAnalyticsWeek(HttpSession session, @RequestParam(value = "year", required = false) Integer year, @RequestParam(value = "week", required = false) Integer week) {
+        String doctorId = (String) session.getAttribute("doctorId");
+
+        if (year == null) {
+            year = LocalDate.now().getYear();
+        }
+        if (week == null) {
+            week = LocalDate.now().get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
+        }
+
+        Map<String,Integer> visitData = doctorService.getVisitsAnalyticsWeek(doctorId, week, year);
         if (visitData != null) {
             return ResponseEntity.ok(visitData);
         } else {

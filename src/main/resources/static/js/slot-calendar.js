@@ -23,8 +23,7 @@ class DoctorScheduleCalendar {
     }
 
     getWeekRange(date) {
-        const startOfWeek = new Date(date);
-        startOfWeek.setDate(date.getDate() - date.getDay() + 1); // Inizia da lunedì
+        const startOfWeek = this.startOfWeek(date);
         const endOfWeek = new Date(startOfWeek);
         endOfWeek.setDate(startOfWeek.getDate() + 6); // Fine domenica
 
@@ -51,8 +50,9 @@ class DoctorScheduleCalendar {
     }
 
     updateWeekInfo() {
+        const startOfWeek = this.startOfWeek(this.currentDate);
         const year = this.currentDate.getFullYear();
-        const week = this.getWeekNumber(this.currentDate);
+        const week = this.getWeekNumber(startOfWeek);
 
         this.weekInfo.textContent = this.getWeekRange(this.currentDate);
 
@@ -61,9 +61,15 @@ class DoctorScheduleCalendar {
         });
     }
 
+    startOfWeek(d) {
+        d = new Date(d);
+        let day = d.getDay(),
+            diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+        return new Date(d.setDate(diff));
+    }
+
     updateDays(scheduleData = null) {
-        const startOfWeek = new Date(this.currentDate);
-        startOfWeek.setDate(this.currentDate.getDate() - this.currentDate.getDay() + 1);
+        const startOfWeek = this.startOfWeek(this.currentDate);
 
         this.daysContainer.innerHTML = '';
 
@@ -133,11 +139,16 @@ class DoctorScheduleCalendar {
     }
 
     getWeekNumber(date) {
-        const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-        const millisecondsInDay = 86400000; // 1000 * 60 * 60 * 24
-        const startOfWeek = firstDayOfYear.getTime() - (firstDayOfYear.getDay() * millisecondsInDay);
-        const dayOfYear = (date.getTime() - startOfWeek) / millisecondsInDay;
-        return Math.ceil((dayOfYear + firstDayOfYear.getDay()) / 7);
+        // Copy date as UTC to avoid DST
+        let d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        // Shift to the following Saturday to get the year
+        d.setUTCDate(d.getUTCDate() + 6 - d.getUTCDay());
+        // Get the first day of the year
+        let yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        yearStart.setUTCDate(yearStart.getUTCDate() - yearStart.getUTCDay());
+        // Get difference between yearStart and d in milliseconds
+        // Reduce to whole weeks
+        return (Math.ceil((d - yearStart) / 6.048e8));
     }
 
     getSelectedSlot() {

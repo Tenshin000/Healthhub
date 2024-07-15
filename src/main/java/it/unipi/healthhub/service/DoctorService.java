@@ -148,45 +148,26 @@ public class DoctorService {
             Doctor doctor = doctorOpt.get();
             User patient = patientOpt.get();
 
-            // check the slot in the schedule
-            Pair<Schedule, Integer> response = getSchedule(
-                    doctorId,
-                    appointmentDto.getDate().getYear(),
-                    appointmentDto.getDate().get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
-            );
-            if(response == null){
-                return false;
-            }
-            Schedule schedule = response.getFirst();
-
+            Integer year = appointmentDto.getDate().getYear();
+            Integer week = appointmentDto.getDate().get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
             String keyDay = appointmentDto.getDate().getDayOfWeek().toString().toLowerCase();
-            if(!schedule.getSlots().containsKey(keyDay)){
-                return false;
-            }
+            String slotStart = appointmentDto.getSlot();
 
-            List<PrenotableSlot> slots = schedule.getSlots().get(keyDay);
-            boolean slotFound = false;
-            for (PrenotableSlot slot : slots) {
-                if (slot.getStart().equals(appointmentDto.getSlot())) {
-                    slotFound = true;
-                    if(slot.isTaken()){
-                        return false;
-                    }
-                    slot.setTaken(true);
-                    break;
+
+            // la funzione prova ad aggiornare il parametro taaken dello slot nella schedule
+            // se lo slot è già occupato, ritorna false
+            // se riesce a prenotare l'appuntamento, ritorna true
+            boolean taken = doctorRepository.checkScheduleSlot(doctorId, year, week, keyDay, slotStart);
+            if(!taken){
+                Appointment appointment = createAppointment(appointmentDto, patient, doctor);
+                if (appointment == null) {
+                    return false;
                 }
+                appointmentRepository.save(appointment); // Save appointment
+                doctorRepository.bookScheduleSlot(doctorId, year, week, keyDay, slotStart);
+                return true;
             }
-            if (!slotFound) {
-                return false;
-            }
 
-            updateSchedule(doctorId, response.getSecond(), schedule);
-
-            Appointment appointment = createAppointment(appointmentDto, patient, doctor);
-
-            appointmentRepository.save(appointment); // Save appointment
-
-            return true;
         }
         return false;
     }
@@ -201,52 +182,44 @@ public class DoctorService {
         appointment.setDoctorInfo(new Appointment.DoctorInfo(doctor.getId(), doctor.getName()));
         appointment.setPatientInfo(new Appointment.PatientInfo(patient.getId(), patient.getName()));
         appointment.setVisitType(appointmentDto.getService());
+        List<it.unipi.healthhub.model.Service> services = doctor.getServices();
+        if (services == null) {
+            return null;
+        }
+        for (it.unipi.healthhub.model.Service service : services) {
+            if (service.getService().equals(appointmentDto.getService())) {
+                appointment.setPrice(service.getPrice());
+                break;
+            }
+        }
         appointment.setPatientNotes(appointmentDto.getPatientNotes());
         return appointment;
     }
 
-    public boolean deleteAppointment(String doctorId, String appointmentId) {
-        Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
+    public boolean cancelAnAppointment(String doctorId, String appointmentId){
         Optional<Appointment> appointmentOpt = appointmentRepository.findById(appointmentId);
-        if (doctorOpt.isPresent() && appointmentOpt.isPresent()) {
-            Doctor doctor = doctorOpt.get();
+
+        if (appointmentOpt.isPresent()) {
             Appointment appointment = appointmentOpt.get();
+
             LocalDateTime dateTimeSlot = appointment.getAppointmentDateTime();
-            Pair<Schedule, Integer> response = getSchedule(doctorId,
-                    dateTimeSlot.getYear(),
-                    dateTimeSlot.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear()));
-            if(response == null){
-                return false;
-            }
-            Schedule schedule = response.getFirst();
+
+            Integer year = dateTimeSlot.getYear();
+            Integer week = dateTimeSlot.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
             String keyDay = dateTimeSlot.getDayOfWeek().toString().toLowerCase();
-            if(!schedule.getSlots().containsKey(keyDay)){
-                return false;
-            }
-            List<PrenotableSlot> slots = schedule.getSlots().get(keyDay);
-            boolean slotFound = false;
-            for (PrenotableSlot slot : slots) {
-                if (slot.getStart().equals(dateTimeSlot.toLocalTime().toString())) {
-                    slotFound = true;
-                    slot.setTaken(false);
-                    break;
-                }
-            }
+            String slotStart = dateTimeSlot.toLocalTime().toString();
 
-            // Mi interessa che sia stato trovato?
-            // Non ne sono sicuro, problemi di inconsistenza
-            if (!slotFound) {
-                return false;
+            // la funzione prova ad aggiornare il parametro taken dello slot nella schedule
+            // se lo slot è già occupato, ritorna false
+            boolean taken = doctorRepository.checkScheduleSlot(doctorId, year, week, keyDay, slotStart);
+            if(taken){
+                appointmentRepository.deleteById(appointmentId);
+                doctorRepository.freeScheduleSlot(doctorId, year, week, keyDay, slotStart);
+                return true;
             }
-
-            updateSchedule(doctorId, response.getSecond(), schedule);
-            appointmentRepository.deleteById(appointmentId);
-
-            return true;
 
         }
         return false;
-
     }
 
     public List<CalendarTemplate> getTemplates(String doctorId) {
@@ -349,17 +322,24 @@ public class DoctorService {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if(doctorOpt.isPresent()){
             Doctor doctor = doctorOpt.get();
-            List<Schedule> schedules = doctor.getSchedule();
+            List<Schedule> schedules = doctor.getSchedules();
+            if (schedules == null) {
+                System.out.println("Schedules not found");
+                return null;
+            }
+            // Schedule typically is a 4 weeks schedule
+            // passed schedule are removed at the end of the week
             for (Schedule schedule : schedules) {
                 WeekFields weekFields = WeekFields.of(Locale.getDefault());
                 // Again we need to add 1 to the week number because of the issue with the time zones
-                Integer scheduleWeek = schedule.getWeek().get(weekFields.weekOfWeekBasedYear()) + 1;
+                Integer scheduleWeek = schedule.getWeek().get(weekFields.weekOfWeekBasedYear());
                 Integer scheduleYear = schedule.getWeek().getYear();
 
                 if (scheduleYear.equals(year) && scheduleWeek.equals(week)) {
                     return Pair.of(schedule, schedules.indexOf(schedule));
                 }
             }
+            System.out.println("Schedule not found in list");
         }
         return null;
     }
@@ -368,7 +348,7 @@ public class DoctorService {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if(doctorOpt.isPresent()){
             Doctor doctor = doctorOpt.get();
-            return doctor.getSchedule();
+            return doctor.getSchedules();
         }
         return null;
     }
@@ -378,11 +358,11 @@ public class DoctorService {
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
 
-            if (doctor.getSchedule() == null) {
-                doctor.setSchedule(new ArrayList<>());
+            if (doctor.getSchedules() == null) {
+                doctor.setSchedules(new ArrayList<>());
             }
 
-            doctor.getSchedule().add(calendar);
+            doctor.getSchedules().add(calendar);
             doctorRepository.save(doctor); // Save updated doctor with the new appointment
             return calendar;
         }
@@ -393,7 +373,7 @@ public class DoctorService {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
-            List<Schedule> calendars = doctor.getSchedule();
+            List<Schedule> calendars = doctor.getSchedules();
             calendars.set(scheduleIndex, calendar); // Update calendar
             doctorRepository.save(doctor); // Save updated doctor with the updated calendar
             return calendar;
@@ -405,10 +385,8 @@ public class DoctorService {
         Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
-            List<Schedule> calendars = doctor.getSchedule();
+            List<Schedule> calendars = doctor.getSchedules();
             for (int i = 0; i < calendars.size(); i++) {
-                System.out.println(calendars.get(i).getWeek());
-                System.out.println(calendarDate);
                 if (calendars.get(i).getWeek().equals(calendarDate)) {
                     calendars.remove(i); // Remove calendar
                     doctorRepository.save(doctor); // Save updated doctor without the removed calendar
@@ -463,8 +441,6 @@ public class DoctorService {
 
     public Doctor loginDoctor(String username, String password) {
         Doctor doctor = doctorRepository.findByUsername(username);
-        System.out.println(doctor);
-        System.out.println(username);
 
         if (doctor != null && doctor.getPassword().equals(password)) {
             return doctor;
@@ -624,5 +600,14 @@ public class DoctorService {
 
     public Map<String, Integer> getVisitsAnalytics(String doctorId) {
         return appointmentRepository.getVisitsCountByTypeForDoctor(doctorId);
+    }
+
+    public Map<String, Double> getEarningsAnalytics(String doctorId, Integer year) {
+        return appointmentRepository.getEarningsByYearForDoctor(doctorId, year);
+    }
+
+    public Map<String, Integer> getVisitsAnalyticsWeek(String doctorId, Integer week, Integer year) {
+        // return the distribution of the visits by day for the given week
+        return appointmentRepository.getVisitsCountByDayForDoctorWeek(doctorId, week, year);
     }
 }

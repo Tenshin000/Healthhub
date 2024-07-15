@@ -14,8 +14,8 @@
             doctors.forEach(doctor => {
                 const doctorElement = document.createElement('div');
                 doctorElement.innerHTML = `
-                    <h4>${doctor.name}</h4>
-                    <p>Specializzazioni: ${doctor.specializations}</p>
+                    <h4><a href="/doctors/${doctor.id}">${doctor.name}</a></h4>
+                    <p>Specializzazioni: ${doctor.specialization}</p>
                     <p>Località: ${doctor.location}</p>
                 `;
                 resultsDiv.appendChild(doctorElement);

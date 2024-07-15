@@ -1,38 +1,31 @@
+let distributionChart = null;
 $(document).ready(() => {
     // Inizializzazione del datepicker con jQuery UI
     $("#datepicker").datepicker({
+        firstDay: 1,
         onSelect: (dateText) => {
-            fetchAppointments(dateText);
+            fetchAppointments(dateText).then((appointments) => renderAppointments(appointments));
+            fetchAppointmentsAnalytics(dateText).then((appointmentDistribution) => renderAppointmentsAnalytics(appointmentDistribution));
         }
     });
-
     // Chiamata iniziale per recuperare gli appuntamenti della data corrente
-    fetchAppointments();
+    fetchAppointments().then((appointments) => renderAppointments(appointments));
+    fetchAppointmentsAnalytics().then((appointmentDistribution) => renderAppointmentsAnalytics(appointmentDistribution));
+
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    const ctx = document.getElementById('app-distr-chart').getContext('2d');
-    const myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-            datasets: [{
-                label: 'Appointments',
-                data: [12, 19, 3, 5, 2],
-                backgroundColor: ['rgba(54, 162, 235, 0.2)',],
-                borderColor: ['rgba(54, 162, 235, 1)',],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-});
+function getWeekNumber(date) {
+    // Copy date as UTC to avoid DST
+    let d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    // Shift to the following Saturday to get the year
+    d.setUTCDate(d.getUTCDate() + 6 - d.getUTCDay());
+    // Get the first day of the year
+    let yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    yearStart.setUTCDate(yearStart.getUTCDate() - yearStart.getUTCDay());
+    // Get difference between yearStart and d in milliseconds
+    // Reduce to whole weeks
+    return (Math.ceil((d - yearStart) / 6.048e8));
+}
 
 async function fetchAppointments(dateJQuery = null) {
     const date = dateJQuery ? new Date(dateJQuery) : new Date();
@@ -40,9 +33,7 @@ async function fetchAppointments(dateJQuery = null) {
 
     try {
         const response = await fetch(`/api/doctor/appointments?date=${dateStr}`);
-        const data = await response.json();
-        console.log(JSON.stringify(data));
-        renderAppointments(data);
+        return await response.json();
     } catch (error) {
         console.error('Errore nel recupero degli appuntamenti:', error);
     }
@@ -126,10 +117,93 @@ async function deleteAppointment(appointmentId) {
         if (response.ok) {
             // Recupera di nuovo gli appuntamenti per aggiornare la lista
             const date = $('#datepicker').datepicker('getDate');
-            const formattedDate = formatDate(date);
-            fetchAppointments(formattedDate);
+            //const formattedDate = formatDate(date);
+            fetchAppointments(date).then((appointments) => renderAppointments(appointments));
+            fetchAppointmentsAnalytics(date).then((appointmentDistribution) => renderAppointmentsAnalytics(appointmentDistribution));
         }
     } catch (error) {
         console.error('Errore nella cancellazione dell\'appuntamento:', error);
+    }
+}
+
+function startOfWeek(d) {
+    d = new Date(d);
+    let day = d.getDay(),
+        diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+    return new Date(d.setDate(diff));
+}
+
+async function fetchAppointmentsAnalytics(dayText = null) {
+    try {
+        const params = new URLSearchParams();
+        if (dayText !== null) {
+            const date = new Date(dayText);
+            const week = getWeekNumber(startOfWeek(date));
+            const year = date.getFullYear();
+
+            params.append('year', year);
+            params.append('week', week);
+        }
+
+
+        const queryString = params.toString();
+        const url = queryString ? `/api/doctor/analytics/visits/distribution?${queryString}` : '/api/doctor/analytics/visits/distribution';
+
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Network response was not ok ' + response.statusText);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Errore nel recupero dei dati:', error);
+        return null;
+    }
+}
+
+
+let appDistrChartData = {
+    type: 'bar',
+    data: {
+        labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        datasets: [{
+            label: 'Appointments',
+            data: [12, 19, 3, 5, 2],
+            backgroundColor: ['rgba(54, 162, 235, 0.2)',],
+            borderColor: ['rgba(54, 162, 235, 1)',],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+};
+
+function renderAppointmentsAnalytics(appointmentDistribution) {
+    if (distributionChart) {
+        distributionChart.destroy();
+    }
+    const ctx = document.getElementById('app-distr-chart').getContext('2d');
+    if (appointmentDistribution) {
+        let days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        appointmentDistribution = {...appointmentDistribution};
+        let orderedData = [];
+        for (let i = 0; i < days.length; i++) {
+            let month = days[i].toLowerCase()
+            if (appointmentDistribution[month]) {
+                orderedData.push(appointmentDistribution[month]);
+            }
+            else {
+                orderedData.push(0);
+            }
+        }
+        console.log(orderedData);
+        appDistrChartData.data.datasets[0].data = orderedData
+        appDistrChartData.data.labels = days;
+        distributionChart = new Chart(ctx, appDistrChartData);
     }
 }
