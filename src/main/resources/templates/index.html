@@ -7,22 +7,7 @@
     <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
-<header>
-    <div class="navbar">
-        <div class="logo">
-            <h1>HealthHub</h1>
-        </div>
-        <nav>
-            <ul>
-                <li><a href="/login">Accedi</a></li>
-                <li><a href="/register">Registrati</a></li>
-                <li><a href="/search">Cerca Medico</a></li>
-                <li><a href="/contact">Contatti</a></li>
-                <li><a href="/help">Aiuto</a></li>
-            </ul>
-        </nav>
-    </div>
-</header>
+<header th:replace="~{fragments/header :: header(${logged},${role})}"></header>
 <main>
     <section class="hero">
         <div class="hero-content">
@@ -47,8 +32,6 @@
     </section>
 </main>
 <!-- Include footer -->
-<footer>
-    <th:block th:include="fragments/footer :: footer"></th:block>
-</footer>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 </html>

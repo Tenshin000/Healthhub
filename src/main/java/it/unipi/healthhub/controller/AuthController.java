@@ -23,7 +23,7 @@ public class AuthController {
     private UserService userService;
 
     @GetMapping("/login")
-    public String loginForm() {
+    public String loginForm(Model model) {
         return "login";
     }
     @PostMapping("/login")
@@ -50,7 +50,7 @@ public class AuthController {
             session.setAttribute("username", doctor.getUsername());
             session.setAttribute("doctorId", doctor.getId());
             session.setAttribute("role", "doctor");
-            return "redirect:/doctors/dashboard"; // Redirect dopo il login
+            return "redirect:/doctor/dashboard"; // Redirect dopo il login
         }
 
         // Se nessun utente o medico trovato, mostra un messaggio di errore
@@ -65,7 +65,17 @@ public class AuthController {
     }
 
     @GetMapping("/register")
-    public String registerPage(Model model) {
+    public String registerPage(Model model, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            String role = (String) session.getAttribute("role");
+            boolean isLoggedIn = (role != null);
+            model.addAttribute("logged", isLoggedIn);
+            model.addAttribute("role", isLoggedIn ? (role.equals("patient") ? "patient" : "doctor") : "");
+        } else {
+            model.addAttribute("logged", false);
+            model.addAttribute("role", "");
+        }
         model.addAttribute("user", new User());
         return "register";
     }
@@ -77,7 +87,17 @@ public class AuthController {
     }
 
     @GetMapping("/register-doctor")
-    public String registerPageDoctor(Model model) {
+    public String registerPageDoctor(Model model, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            String role = (String) session.getAttribute("role");
+            boolean isLoggedIn = (role != null);
+            model.addAttribute("logged", isLoggedIn);
+            model.addAttribute("role", isLoggedIn ? (role.equals("patient") ? "patient" : "doctor") : "");
+        } else {
+            model.addAttribute("logged", false);
+            model.addAttribute("role", "");
+        }
         model.addAttribute("doctor", new Doctor());
         return "register-doctor";
     }
