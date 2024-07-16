@@ -180,8 +180,9 @@ public class DoctorAPI {
         review.setDate(currentDate);
         String name = (String) session.getAttribute("username");
         review.setName(name);
+        String patientId = (String) session.getAttribute("patientId");
 
-        Review newReview = doctorService.addReview(doctorId, review);
+        Review newReview = doctorService.addReview(doctorId, patientId, review);
         if (newReview != null) {
             return ResponseEntity.ok(newReview);
         } else {

@@ -18,4 +18,13 @@ public interface DoctorNeo4jRepository extends Neo4jRepository<DoctorDAO, String
             "RETURN d")
     DoctorDAO removeSpecialization(@Param("id") String id, @Param("specialization") String specialization);
 
+    @Query("MATCH (d:Doctor {id: $id}) " +
+            "DELETE d")
+    void deleteDoctor(@Param("id") String id);
+
+    @Query("MATCH (d:Doctor {id: $id}) " +
+            "SET d.name = $name " +
+            "RETURN d")
+    DoctorDAO updateName(@Param("id") String id, @Param("name") String name);
+
 }

@@ -59,6 +59,7 @@ public class DoctorService {
         return doctorMongoRepository.findById(id);
     }
 
+    @Transactional
     public Doctor createDoctor(Doctor doctor){
         Doctor newDoc = doctorMongoRepository.save(doctor);
         DoctorDAO doctorDAO = new DoctorDAO(newDoc.getId(), newDoc.getName(), newDoc.getSpecializations());
@@ -76,7 +77,9 @@ public class DoctorService {
         return null;
     }
 
+    @Transactional
     public void deleteDoctor(String id){
+        doctorNeo4jRepository.deleteDoctor(id);
         doctorMongoRepository.deleteById(id);
     }
 
@@ -155,6 +158,7 @@ public class DoctorService {
         return null;
     }
 
+    @Transactional
     public boolean bookAnAppointment(String doctorId, AppointmentDTO appointmentDto, String patientId) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         Optional<User> patientOpt = userMongoRepository.findById(patientId);
@@ -210,6 +214,7 @@ public class DoctorService {
         return appointment;
     }
 
+    @Transactional
     public boolean cancelAnAppointment(String doctorId, String appointmentId){
         Optional<Appointment> appointmentOpt = appointmentRepository.findById(appointmentId);
 
@@ -251,6 +256,7 @@ public class DoctorService {
         return null;
     }
 
+    @Transactional
     public CalendarTemplate addTemplate(String doctorId, CalendarTemplate template) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
@@ -268,6 +274,7 @@ public class DoctorService {
         return null;
     }
 
+    @Transactional
     public CalendarTemplate updateTemplate(String doctorId, CalendarTemplate updatedTemplate) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
@@ -299,6 +306,7 @@ public class DoctorService {
         return null;
     }
 
+    @Transactional
     public boolean deleteTemplate(String doctorId, String templateId) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
@@ -312,6 +320,7 @@ public class DoctorService {
         return false;
     }
 
+    @Transactional
     public boolean setDefaultTemplate(String doctorId, String templateId) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
@@ -420,7 +429,8 @@ public class DoctorService {
         return null;
     }
 
-    public Review addReview(String doctorId, ReviewDTO review) {
+    @Transactional
+    public Review addReview(String doctorId, String userId, ReviewDTO review) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
@@ -433,19 +443,28 @@ public class DoctorService {
             modelReview.setName(review.getName());
             modelReview.setText(review.getText());
             modelReview.setDate(review.getDate());
+            modelReview.setPatientId(userId);
 
             doctor.getReviews().add(modelReview); // Add review to doctor's list
             doctorMongoRepository.save(doctor); // Save updated doctor with the new review
+
+            userNeo4jRepository.review(userId, doctorId);
+
             return modelReview;
         }
         return null;
     }
 
+    @Transactional
     public boolean deleteReview(String doctorId, Integer reviewIndex) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
             List<Review> reviews = doctor.getReviews();
+
+            Review review = reviews.get(reviewIndex);
+            userNeo4jRepository.unreview(review.getPatientId(), doctorId);
+
             reviews.remove(reviewIndex.intValue()); // Remove review
             doctorMongoRepository.save(doctor); // Save updated doctor without the removed review
             return true;
@@ -474,7 +493,7 @@ public class DoctorService {
         return null;
     }
 
-
+    @Transactional
     public UserDetailsDTO updateUserDetails(String doctorId, UserDetailsDTO userDetails) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
@@ -482,6 +501,9 @@ public class DoctorService {
             doctor.setName(userDetails.getFullName());
             doctor.setDob(userDetails.getBirthDate());
             doctor.setGender(userDetails.getGender());
+
+            doctorNeo4jRepository.updateName(doctorId, userDetails.getFullName());
+
             doctorMongoRepository.save(doctor); // Save updated doctor with the updated user details
             return userDetails;
         }
@@ -497,9 +519,9 @@ public class DoctorService {
                 doctor.setPhoneNumbers(new ArrayList<>());
             }
 
-            int newIndex = doctor.getPhoneNumbers().size(); // Ottieni l'indice del nuovo numero di telefono
-            doctor.getPhoneNumbers().add(number); // Aggiunge il numero di telefono alla lista del dottore
-            doctorMongoRepository.save(doctor); // Salva il dottore aggiornato con il nuovo numero di telefono
+            int newIndex = doctor.getPhoneNumbers().size();
+            doctor.getPhoneNumbers().add(number);
+            doctorMongoRepository.save(doctor);
             return newIndex;
         }
         return null;
@@ -521,7 +543,7 @@ public class DoctorService {
             List<String> phoneNumbers = doctor.getPhoneNumbers();
             if (index >= 0 && index < phoneNumbers.size()) {
                 phoneNumbers.remove(index.intValue());
-                doctorMongoRepository.save(doctor); // Salva il dottore aggiornato senza il numero di telefono rimosso
+                doctorMongoRepository.save(doctor);
                 return true;
             }
         }
