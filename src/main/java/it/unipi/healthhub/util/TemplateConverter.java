@@ -1,6 +1,6 @@
 package it.unipi.healthhub.util;
 
-import it.unipi.healthhub.dao.mongo.Slot;
+import it.unipi.healthhub.model.mongo.Slot;
 import it.unipi.healthhub.dto.TemplateDTO;
 
 import java.util.List;

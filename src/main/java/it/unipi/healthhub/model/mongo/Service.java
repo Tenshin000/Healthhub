@@ -1,4 +1,4 @@
-package it.unipi.healthhub.dao.mongo;
+package it.unipi.healthhub.model.mongo;
 
 public class Service {
 

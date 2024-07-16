@@ -1,4 +1,4 @@
-package it.unipi.healthhub.dao.neo4j;
+package it.unipi.healthhub.model.neo4j;
 
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
@@ -7,31 +7,31 @@ import org.springframework.data.neo4j.core.schema.Relationship;
 import java.util.HashSet;
 import java.util.Set;
 
-@Node
-public class User {
+@Node("User")
+public class UserDAO {
     @Id
-    private Long id;
+    private String id;
     private String name;
 
     @Relationship(type = "ENDORSED")
-    private Set<Doctor> endorsedDoctors = new HashSet<>();
+    private Set<DoctorDAO> endorsedDoctors = new HashSet<>();
 
     @Relationship(type = "REVIEWED")
-    private Set<Doctor> reviewedDoctors = new HashSet<>();
+    private Set<DoctorDAO> reviewedDoctors = new HashSet<>();
 
-    public User() {
+    public UserDAO() {
     }
 
-    public User(Long id, String name) {
+    public UserDAO(String id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -41,5 +41,13 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Set<DoctorDAO> getEndorsedDoctors() {
+        return endorsedDoctors;
+    }
+
+    public Set<DoctorDAO> getReviewedDoctors() {
+        return reviewedDoctors;
     }
 }

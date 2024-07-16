@@ -1,6 +1,6 @@
 package it.unipi.healthhub.repository.mongo.appointment;
 
-import it.unipi.healthhub.dao.mongo.Appointment;
+import it.unipi.healthhub.model.mongo.Appointment;
 
 import java.time.LocalDate;
 import java.util.List;

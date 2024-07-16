@@ -1,7 +1,7 @@
 package it.unipi.healthhub.repository.mongo.doctor;
 
 import com.mongodb.DBObject;
-import it.unipi.healthhub.dao.mongo.Doctor;
+import it.unipi.healthhub.model.mongo.Doctor;
 import it.unipi.healthhub.util.DateUtil;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;

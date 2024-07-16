@@ -1,6 +1,6 @@
 package it.unipi.healthhub.controller.api;
 
-import it.unipi.healthhub.dao.mongo.User;
+import it.unipi.healthhub.model.mongo.User;
 import it.unipi.healthhub.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

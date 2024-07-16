@@ -1,4 +1,4 @@
-package it.unipi.healthhub.dao.mongo;
+package it.unipi.healthhub.model.mongo;
 
 public class PrenotableSlot extends Slot{
     private boolean taken;

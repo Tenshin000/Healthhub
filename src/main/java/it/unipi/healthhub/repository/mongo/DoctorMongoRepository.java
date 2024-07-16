@@ -1,6 +1,6 @@
 package it.unipi.healthhub.repository.mongo;
 
-import it.unipi.healthhub.dao.mongo.Doctor;
+import it.unipi.healthhub.model.mongo.Doctor;
 
 import it.unipi.healthhub.repository.mongo.doctor.CustomDoctorMongoRepository;
 import org.bson.types.ObjectId;

@@ -1,6 +1,6 @@
 package it.unipi.healthhub.controller.api;
 
-import it.unipi.healthhub.dao.mongo.*;
+import it.unipi.healthhub.model.mongo.*;
 import it.unipi.healthhub.dto.*;
 import it.unipi.healthhub.service.AppointmentService;
 import it.unipi.healthhub.service.DoctorService;
@@ -109,19 +109,6 @@ public class DoctorAPI {
         return ResponseEntity.ok(doctorService.getTemplates(doctorId));
     }
 
-    /*
-    @PostMapping("/{doctorId}/templates")
-    public ResponseEntity<CalendarTemplate> addTemplate(@PathVariable String doctorId, @RequestBody CalendarTemplate template) {
-        return ResponseEntity.ok(doctorService.addTemplate(doctorId, template));
-    }
-
-    @DeleteMapping("/{doctorId}/templates/{templateId}")
-    public ResponseEntity<Void> deleteTemplate(@PathVariable String doctorId, @PathVariable String templateId) {
-        doctorService.deleteTemplate(doctorId, templateId);
-        return ResponseEntity.noContent().build();
-    }
-    */
-
     // Endpoints for schedules
     @GetMapping("/{doctorId}/schedules/week")
     public ResponseEntity<ScheduleDTO> getSchedule(@PathVariable String doctorId, @RequestParam Integer year, @RequestParam Integer week) {
@@ -156,12 +143,21 @@ public class DoctorAPI {
         }
     }
 
-    @PostMapping("/{doctorId}/endorsements")
+    @PostMapping("/{doctorId}/endorse")
     public ResponseEntity<EndorsementDTO> endorseDoctor(@PathVariable String doctorId, HttpSession session) {
         String patientId = (String) session.getAttribute("patientId");
-        boolean hasEndorsed = doctorService.toggleEndorsement(doctorId, patientId); // Metodo che gestisce aggiunta/rimozione endorsement
-        Integer endorsementCount = doctorService.getEndorsements(doctorId); // Ottiene il conteggio aggiornato degli endorsement
-        EndorsementDTO endorsementDto = new EndorsementDTO(endorsementCount, hasEndorsed);
+        doctorService.endorse(doctorId, patientId);
+        Integer endorsementCount = doctorService.getEndorsements(doctorId);
+        EndorsementDTO endorsementDto = new EndorsementDTO(endorsementCount, true);
+        return ResponseEntity.ok(endorsementDto);
+    }
+
+    @PostMapping("/{doctorId}/unendorse")
+    public ResponseEntity<EndorsementDTO> unendorseDoctor(@PathVariable String doctorId, HttpSession session) {
+        String patientId = (String) session.getAttribute("patientId");
+        doctorService.unendorse(doctorId, patientId);
+        Integer endorsementCount = doctorService.getEndorsements(doctorId);
+        EndorsementDTO endorsementDto = new EndorsementDTO(endorsementCount, false);
         return ResponseEntity.ok(endorsementDto);
     }
 
@@ -192,13 +188,5 @@ public class DoctorAPI {
             return ResponseEntity.badRequest().build();
         }
     }
-
-    /*
-    @DeleteMapping("/{doctorId}/reviews/{reviewId}")
-    public ResponseEntity<Void> deleteReview(@PathVariable String doctorId, @PathVariable Integer reviewId) {
-        doctorService.deleteReview(doctorId, reviewId);
-        return ResponseEntity.noContent().build();
-    }
-    */
 
 }

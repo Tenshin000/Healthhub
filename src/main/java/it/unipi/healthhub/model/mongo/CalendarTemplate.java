@@ -1,4 +1,4 @@
-package it.unipi.healthhub.dao.mongo;
+package it.unipi.healthhub.model.mongo;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;

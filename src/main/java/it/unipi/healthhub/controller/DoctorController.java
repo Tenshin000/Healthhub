@@ -1,6 +1,6 @@
 package it.unipi.healthhub.controller;
 
-import it.unipi.healthhub.dao.mongo.Doctor;
+import it.unipi.healthhub.model.mongo.Doctor;
 import it.unipi.healthhub.service.DoctorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

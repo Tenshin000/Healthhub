@@ -1,6 +1,6 @@
 package it.unipi.healthhub.controller.api;
 
-import it.unipi.healthhub.dao.mongo.*;
+import it.unipi.healthhub.model.mongo.*;
 import it.unipi.healthhub.dto.*;
 import it.unipi.healthhub.service.AppointmentService;
 import it.unipi.healthhub.service.DoctorService;

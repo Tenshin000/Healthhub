@@ -1,4 +1,4 @@
-package it.unipi.healthhub.dao.mongo;
+package it.unipi.healthhub.model.mongo;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -21,8 +21,6 @@ public class User {
 //  private List<String> phoneNumbers;
     protected String email;
     protected Address address;
-    protected List<String> endorsedDoctors;
-
 
 //  public String getFiscalCode() { return fiscalCode; }
 //  public void setFiscalCode(String fiscalCode) { this.fiscalCode = fiscalCode; }
@@ -100,12 +98,5 @@ public class User {
                 ", age=" + age + "}";
     }
 
-    public List<String> getEndorsedDoctors() {
-        return endorsedDoctors;
-    }
-
-    public void setEndorsedDoctors(List<String> endorsedDoctors) {
-        this.endorsedDoctors = endorsedDoctors;
-    }
 }
 

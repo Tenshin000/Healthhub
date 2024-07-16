@@ -1,6 +1,6 @@
 package it.unipi.healthhub.service;
 
-import it.unipi.healthhub.dao.mongo.Appointment;
+import it.unipi.healthhub.model.mongo.Appointment;
 import it.unipi.healthhub.repository.mongo.AppointmentMongoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

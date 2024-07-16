@@ -1,6 +1,6 @@
 package it.unipi.healthhub.repository.mongo;
 
-import it.unipi.healthhub.dao.mongo.User;
+import it.unipi.healthhub.model.mongo.User;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 

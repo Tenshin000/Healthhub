@@ -1,32 +1,34 @@
-package it.unipi.healthhub.dao.neo4j;
+package it.unipi.healthhub.model.neo4j;
 
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@Node
-public class Doctor {
+@Node("Doctor")
+public class DoctorDAO {
     @Id
-    private Long id;
+    private String id;
 
     private String name;
     private List<String> specializations;
 
-    public Doctor() {
+    public DoctorDAO() {
+        specializations = new ArrayList<>();
     }
 
-    public Doctor(Long id, String name, List<String> specializations) {
+    public DoctorDAO(String id, String name, List<String> specializations) {
         this.id = id;
         this.name = name;
         this.specializations = specializations;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -45,5 +47,13 @@ public class Doctor {
 
     public void setSpecializations(List<String> specializations) {
         this.specializations = specializations;
+    }
+
+    public String toString() {
+        return "DoctorDAO{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", specializations=" + specializations +
+                '}';
     }
 }

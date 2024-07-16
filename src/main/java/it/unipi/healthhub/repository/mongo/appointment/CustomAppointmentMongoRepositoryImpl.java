@@ -1,7 +1,7 @@
 package it.unipi.healthhub.repository.mongo.appointment;
 
 import com.mongodb.DBObject;
-import it.unipi.healthhub.dao.mongo.Appointment;
+import it.unipi.healthhub.model.mongo.Appointment;
 import it.unipi.healthhub.util.DateUtil;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
