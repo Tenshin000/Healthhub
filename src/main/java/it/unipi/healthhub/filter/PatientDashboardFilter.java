@@ -1,17 +1,13 @@
 package it.unipi.healthhub.filter;
 
-import jakarta.servlet.Filter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.FilterConfig;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
+
+import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 
-public class DoctorDashboardAuthFilter implements Filter {
-
+public class PatientDashboardFilter implements Filter{
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
     }
@@ -22,7 +18,7 @@ public class DoctorDashboardAuthFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
 
-        if (req.getSession(false) == null || !"doctor".equals(req.getSession(false).getAttribute("role"))) {
+        if (req.getSession(false) == null || !"patient".equals(req.getSession(false).getAttribute("role"))) {
             res.sendRedirect(req.getContextPath() + "/login");
             return;
         }

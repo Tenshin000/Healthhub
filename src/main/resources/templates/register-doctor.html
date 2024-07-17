@@ -7,22 +7,7 @@
     <link rel="stylesheet" th:href="@{/css/register.css}">
 </head>
 <body>
-<header>
-    <div class="navbar">
-        <div class="logo">
-            <h1>HealthHub</h1>
-        </div>
-        <nav>
-            <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/login">Accedi</a></li>
-                <li><a href="/search">Cerca Medico</a></li>
-                <li><a href="/contact">Contatti</a></li>
-                <li><a href="/help">Aiuto</a></li>
-            </ul>
-        </nav>
-    </div>
-</header>
+<header th:replace="~{fragments/header :: header(${logged},${role})}"></header>
 <main>
     <div class="container">
         <div class="register-form">
@@ -85,16 +70,6 @@
         </div>
     </div>
 </main>
-<footer>
-    <div class="footer-content">
-        <p>&copy; 2024 HealthHub. Tutti i diritti riservati.</p>
-        <ul class="footer-links">
-            <li><a href="/terms">Termini di Servizio</a></li>
-            <li><a href="/privacy">Privacy</a></li>
-            <li><a href="/contact">Contatti</a></li>
-            <li><a href="/about">Chi Siamo</a></li>
-        </ul>
-    </div>
-</footer>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 </html>

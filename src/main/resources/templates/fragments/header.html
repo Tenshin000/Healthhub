@@ -1,12 +1,4 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title th:text="${title}">HealthHub</title>
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
-</head>
-<body>
-<header>
+<header th:fragment="header (logged, role)">
     <div class="navbar">
         <div class="logo">
             <h1>HealthHub</h1>
@@ -14,13 +6,29 @@
         <nav>
             <ul>
                 <li><a href="/">Home</a></li>
-                <li><a href="/register">Registrati</a></li>
-                <li><a href="/search">Cerca Medico</a></li>
-                <li><a href="/contact">Contatti</a></li>
-                <li><a href="/help">Aiuto</a></li>
+                <li th:if="${!logged}">
+                    <a href="/register">Sign In</a>
+                </li>
+                <li><a href="/search">Search for Doctors</a></li>
+                <li th:if="${logged and role == 'doctor'}">
+                    <a href="/doctor/dashboard">Dashboard</a>
+                </li>
+                <li th:if="${logged and role != 'doctor'}">
+                    <a href="/user/profile">Profile</a>
+                </li>
+                <li th:if="${logged and role != 'doctor'}">
+                    <a href="/user/appointments">Appointments</a>
+                </li>
+                <li th:if="${logged and role != 'doctor'}">
+                    <a href="/user/favorites">Favorites</a>
+                </li>
+                <li th:if="${logged}">
+                    <a href="/logout">Logout</a>
+                </li>
+                <li th:if="${!logged}">
+                    <a href="/login">Login</a>
+                </li>
             </ul>
         </nav>
     </div>
 </header>
-</body>
-</html>

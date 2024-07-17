@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthHub - I tuoi appuntamenti</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/user-appointments.css}">
+</head>
+<body>
+<header th:replace="~{fragments/header :: header(true,'patient')}"></header>
+<main>
+    <div class="content">
+        <section class="appointments">
+            <h2>Prossimi appuntamenti</h2>
+            <ul id="upcoming-appointments">
+                <!-- Placeholder data -->
+                <li class="appointment-card">
+                    <div class="appointment-info">
+                        <h3>Dr. Mario Rossi</h3>
+                        <p><strong>Data:</strong> 20 Lug 2024</p>
+                        <p><strong>Ora:</strong> 14:30</p>
+                        <p><strong>Servizio:</strong> Visita cardiologica</p>
+                    </div>
+                    <button class="cancel-button">Cancella</button>
+                </li>
+                <li class="appointment-card">
+                    <div class="appointment-info">
+                        <h3>Dr. Anna Bianchi</h3>
+                        <p><strong>Data:</strong> 22 Lug 2024</p>
+                        <p><strong>Ora:</strong> 09:00</p>
+                        <p><strong>Servizio:</strong> Controllo generale</p>
+                        <p><strong>Indirizzo:</strong> Via C. Battisti 19, Buggiano</p>
+                    </div>
+                    <button class="cancel-button">Cancella</button>
+                </li>
+            </ul>
+        </section>
+        <section class="appointments">
+            <h2>Vecchi appuntamenti</h2>
+            <ul id="past-appointments">
+                <!-- Placeholder data -->
+                <li class="appointment-card">
+                    <div class="appointment-info">
+                        <h3>Dr. Luigi Verdi</h3>
+                        <p><strong>Data:</strong> 15 Lug 2024</p>
+                        <p><strong>Ora:</strong> 11:00</p>
+                        <p><strong>Servizio:</strong> Visita dermatologica</p>
+                    </div>
+                </li>
+                <li class="appointment-card">
+                    <div class="appointment-info">
+                        <h3>Dr. Maria Neri</h3>
+                        <p><strong>Data:</strong> 10 Lug 2024</p>
+                        <p><strong>Ora:</strong> 10:00</p>
+                        <p><strong>Servizio:</strong> Esame del sangue</p>
+                    </div>
+                </li>
+            </ul>
+        </section>
+    </div>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<script th:src="@{/js/user-appointments.js}"></script>
+</body>
+</html>

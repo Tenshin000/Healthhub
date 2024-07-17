@@ -8,23 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-<header>
-    <div class="navbar">
-        <div class="logo">
-            <h1>HealthHub</h1>
-        </div>
-        <nav>
-            <ul>
-                <li><a href="/login">Accedi</a></li>
-                <li><a href="/register">Registrati</a></li>
-                <li><a href="/search">Cerca Medico</a></li>
-                <li><a href="/contact">Contatti</a></li>
-                <li><a href="/help">Aiuto</a></li>
-            </ul>
-        </nav>
-    </div>
-</header>
-
+<header th:replace="~{fragments/header :: header(${logged},${role})}"></header>
 <main>
     <div class="content">
         <section class="doctor-intro">
@@ -134,9 +118,7 @@
     </aside>
 </main>
 
-<footer>
-    <th:block th:insert="~{fragments/footer :: footer}"></th:block>
-</footer>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
 
 <script th:src="@{/js/slot-calendar.js}"></script>
 <script th:src="@{/js/doctor-public.js}"></script>
