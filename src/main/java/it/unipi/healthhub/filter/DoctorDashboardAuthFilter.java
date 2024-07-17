@@ -22,7 +22,7 @@ public class DoctorDashboardAuthFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
 
-        if (req.getSession(false) == null || !"doctor".equals(req.getSession().getAttribute("role"))) {
+        if (req.getSession(false) == null || !"doctor".equals(req.getSession(false).getAttribute("role"))) {
             res.sendRedirect(req.getContextPath() + "/login");
             return;
         }

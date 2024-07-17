@@ -10,8 +10,6 @@
                     <a href="/register">Sign In</a>
                 </li>
                 <li><a href="/search">Search for Doctors</a></li>
-                <li><a href="/contact">Contacts</a></li>
-                <li><a href="/help">Help</a></li>
                 <li th:if="${logged and role == 'doctor'}">
                     <a href="/doctor/dashboard">Dashboard</a>
                 </li>
@@ -20,6 +18,9 @@
                 </li>
                 <li th:if="${logged and role != 'doctor'}">
                     <a href="/user/appointments">Appointments</a>
+                </li>
+                <li th:if="${logged and role != 'doctor'}">
+                    <a href="/user/favorites">Favorites</a>
                 </li>
                 <li th:if="${logged}">
                     <a href="/logout">Logout</a>

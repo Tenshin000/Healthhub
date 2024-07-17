@@ -1,6 +1,7 @@
 package it.unipi.healthhub.controller;
 
 import it.unipi.healthhub.service.DoctorService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,7 +16,8 @@ public class DoctorDashboardController {
     @Autowired
     private DoctorService doctorService;
     @GetMapping
-    public String dashboard(Model model, HttpSession session) {
+    public String dashboard(Model model, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         model.addAttribute(
                 "doctor",
                 doctorService.getDoctorById(
@@ -25,7 +27,8 @@ public class DoctorDashboardController {
         return "doctor-dashboard";
     }
     @GetMapping("/appointments")
-    public String appointments(Model model, HttpSession session) {
+    public String appointments(Model model, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         model.addAttribute(
                 "doctor",
                 doctorService.getDoctorById(
@@ -36,7 +39,8 @@ public class DoctorDashboardController {
     }
 
     @GetMapping("/profile")
-    public String profile(Model model, HttpSession session) {
+    public String profile(Model model, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         model.addAttribute(
                 "doctor",
                 doctorService.getDoctorById(
@@ -46,7 +50,8 @@ public class DoctorDashboardController {
         return "doctor-profile";
     }
     @GetMapping("/reviews")
-    public String reviews(Model model, HttpSession session) {
+    public String reviews(Model model, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         model.addAttribute(
                 "doctor",
                 doctorService.getDoctorById(
@@ -57,7 +62,8 @@ public class DoctorDashboardController {
     }
 
     @GetMapping("/templates")
-    public String templates(Model model, HttpSession session) {
+    public String templates(Model model, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         model.addAttribute(
                 "doctor",
                 doctorService.getDoctorById(
@@ -68,7 +74,8 @@ public class DoctorDashboardController {
     }
 
     @GetMapping("/week")
-    public String week(Model model, HttpSession session) {
+    public String week(Model model, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         model.addAttribute(
                 "doctor",
                 doctorService.getDoctorById(

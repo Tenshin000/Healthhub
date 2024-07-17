@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthHub - Medici</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/user-favorites.css}">
+</head>
+<body>
+<header th:replace="~{fragments/header :: header(true,'patient')}"></header>
+
+<main>
+    <section class="recommended-doctors">
+        <h2>Medici consigliati</h2>
+        <div class="doctor-cards">
+            <div class="doctor-card">
+                <h3>Dr. Mario Rossi</h3>
+                <p>Cardiologo</p>
+            </div>
+            <div class="doctor-card">
+                <h3>Dr.ssa Anna Bianchi</h3>
+                <p>Dermatologo</p>
+            </div>
+            <div class="doctor-card">
+                <h3>Dr. Luigi Verdi</h3>
+                <p>Neurologo</p>
+            </div>
+        </div>
+    </section>
+    <section class="liked-reviewed-doctors">
+        <div class="liked-doctors">
+            <h2>Medici che ti piacciono</h2>
+            <ul>
+                <!-- Placeholder data -->
+                <li class="doctor-item">
+                    <div>
+                        <h3>Dr.ssa Maria Neri</h3>
+                        <p>Ginecologo</p>
+                    </div>
+                </li>
+                <li class="doctor-item">
+                    <div>
+                        <h3>Dr. Carlo Bianchi</h3>
+                        <p>Ortopedico</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="reviewed-doctors">
+            <h2>Medici che hai recensito</h2>
+            <ul>
+                <!-- Placeholder data -->
+                <li class="doctor-item">
+                    <div>
+                        <h3>Dr.ssa Elisa Rossi</h3>
+                        <p>Oculista</p>
+                    </div>
+                </li>
+                <li class="doctor-item">
+                    <div>
+                        <h3>Dr. Giorgio Verdi</h3>
+                        <p>Psichiatra</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </section>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+</body>
+</html>

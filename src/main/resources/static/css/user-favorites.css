@@ -5,6 +5,8 @@ body {
     background-color: #f4f4f4;
 }
 
+/* HEADER */
+
 header {
     background-color: #007bff;
     color: white;
@@ -45,76 +47,91 @@ header {
     text-decoration: underline;
 }
 
+/* MAIN CONTENT */
+
 main {
-    max-width: 1200px;
-    margin: 0 auto;
     padding: 20px;
+    margin: 0 10%;
 }
 
-.container {
-    width: 100%;
-    max-width: 400px;
-    padding: 20px;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    margin: 40px auto;
-}
-
-.login-form h2 {
+section {
     margin-bottom: 20px;
-    color: #333;
+}
+
+.recommended-doctors {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.recommended-doctors h2 {
+    margin-top: 0;
+}
+
+.doctor-cards {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.doctor-card {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     text-align: center;
+    width: 30%;
 }
 
-.form-group {
-    margin-bottom: 15px;
+.doctor-card img {
+    border-radius: 50%;
+    margin-bottom: 10px;
 }
 
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    color: #333;
+.doctor-card h3 {
+    margin: 10px 0 5px 0;
 }
 
-.form-group input {
-    width: -moz-available;
-    width: -webkit-fill-available;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+.liked-reviewed-doctors {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
 }
 
-.btn {
-    width: 100%;
-    padding: 10px;
-    background-color: #5cb85c;
-    border: none;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
+.liked-doctors, .reviewed-doctors {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 48%;
 }
 
-.btn:hover {
-    background-color: #4cae4c;
+.liked-doctors h2, .reviewed-doctors h2 {
+    margin-top: 0;
 }
 
-.links {
-    margin-top: 15px;
-    text-align: center;
+.liked-doctors ul, .reviewed-doctors ul {
+    list-style: none;
+    padding: 0;
 }
 
-.links a {
-    color: #007bff;
-    text-decoration: none;
-    margin: 0 5px;
+.doctor-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
 }
 
-.links a:hover {
-    text-decoration: underline;
+.doctor-item img {
+    border-radius: 50%;
+    margin-right: 10px;
 }
 
-/*FOOTER*/
+.doctor-item h3 {
+    margin: 0 0 5px 0;
+}
+
+/* FOOTER */
 
 .footer-content {
     text-align: center;

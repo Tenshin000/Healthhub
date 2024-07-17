@@ -90,8 +90,9 @@ public class DoctorAPI {
     }
 
     @PostMapping("/{doctorId}/appointments")
-    public ResponseEntity<AppointmentDTO> bookAnAppointment(@PathVariable String doctorId, @RequestBody AppointmentDTO appointmentDto, HttpSession session) {
+    public ResponseEntity<AppointmentDTO> bookAnAppointment(@PathVariable String doctorId, @RequestBody AppointmentDTO appointmentDto, HttpServletRequest request) {
         // usata da un paziente per prenotare un appuntamento
+        HttpSession session = request.getSession(false);
         String patientId = (String) session.getAttribute("patientId");
         boolean booked = doctorService.bookAnAppointment(doctorId, appointmentDto, patientId);
         if (booked) {
@@ -147,7 +148,8 @@ public class DoctorAPI {
 
 
     @PostMapping("/{doctorId}/endorsements")
-    public ResponseEntity<EndorsementDTO> endorseDoctor(@PathVariable String doctorId, HttpSession session) {
+    public ResponseEntity<EndorsementDTO> endorseDoctor(@PathVariable String doctorId, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String patientId = (String) session.getAttribute("patientId");
         boolean hasEndorsed = doctorService.toggleEndorsement(doctorId, patientId); // Metodo che gestisce aggiunta/rimozione endorsement
         Integer endorsementCount = doctorService.getEndorsements(doctorId); // Ottiene il conteggio aggiornato degli endorsement
@@ -168,8 +170,9 @@ public class DoctorAPI {
     }
 
     @PostMapping("/{doctorId}/reviews")
-    public ResponseEntity<Review> addReview(@PathVariable String doctorId, @RequestBody ReviewDTO review, HttpSession session) {
+    public ResponseEntity<Review> addReview(@PathVariable String doctorId, @RequestBody ReviewDTO review, HttpServletRequest request) {
         // Set the current date and the name of the user
+        HttpSession session = request.getSession(false);
         LocalDate currentDate = LocalDate.now();
         review.setDate(currentDate);
         String name = (String) session.getAttribute("username");
