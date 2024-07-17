@@ -1,28 +1,26 @@
 package it.unipi.healthhub.controller.api;
 
+import it.unipi.healthhub.model.mongo.*;
 import it.unipi.healthhub.dto.*;
-import it.unipi.healthhub.model.*;
 import it.unipi.healthhub.service.AppointmentService;
 import it.unipi.healthhub.service.DoctorService;
 
 import it.unipi.healthhub.service.UserService;
 import it.unipi.healthhub.util.ScheduleConverter;
 import it.unipi.healthhub.util.TemplateConverter;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/doctors")
@@ -147,13 +145,23 @@ public class DoctorAPI {
     }
 
 
-    @PostMapping("/{doctorId}/endorsements")
+    @PostMapping("/{doctorId}/endorse")
     public ResponseEntity<EndorsementDTO> endorseDoctor(@PathVariable String doctorId, HttpServletRequest request) {
         HttpSession session = request.getSession(false);
+
         String patientId = (String) session.getAttribute("patientId");
-        boolean hasEndorsed = doctorService.toggleEndorsement(doctorId, patientId); // Metodo che gestisce aggiunta/rimozione endorsement
-        Integer endorsementCount = doctorService.getEndorsements(doctorId); // Ottiene il conteggio aggiornato degli endorsement
-        EndorsementDTO endorsementDto = new EndorsementDTO(endorsementCount, hasEndorsed);
+        doctorService.endorse(doctorId, patientId);
+        Integer endorsementCount = doctorService.getEndorsements(doctorId);
+        EndorsementDTO endorsementDto = new EndorsementDTO(endorsementCount, true);
+        return ResponseEntity.ok(endorsementDto);
+    }
+
+    @PostMapping("/{doctorId}/unendorse")
+    public ResponseEntity<EndorsementDTO> unendorseDoctor(@PathVariable String doctorId, HttpSession session) {
+        String patientId = (String) session.getAttribute("patientId");
+        doctorService.unendorse(doctorId, patientId);
+        Integer endorsementCount = doctorService.getEndorsements(doctorId);
+        EndorsementDTO endorsementDto = new EndorsementDTO(endorsementCount, false);
         return ResponseEntity.ok(endorsementDto);
     }
 
@@ -177,8 +185,9 @@ public class DoctorAPI {
         review.setDate(currentDate);
         String name = (String) session.getAttribute("username");
         review.setName(name);
+        String patientId = (String) session.getAttribute("patientId");
 
-        Review newReview = doctorService.addReview(doctorId, review);
+        Review newReview = doctorService.addReview(doctorId, patientId, review);
         if (newReview != null) {
             return ResponseEntity.ok(newReview);
         } else {

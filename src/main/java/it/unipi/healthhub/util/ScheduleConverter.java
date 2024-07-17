@@ -1,7 +1,7 @@
 package it.unipi.healthhub.util;
 
 import it.unipi.healthhub.dto.ScheduleDTO;
-import it.unipi.healthhub.model.PrenotableSlot;
+import it.unipi.healthhub.model.mongo.PrenotableSlot;
 
 import java.util.List;
 import java.util.Map;

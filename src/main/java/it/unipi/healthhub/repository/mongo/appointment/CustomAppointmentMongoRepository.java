@@ -1,12 +1,12 @@
-package it.unipi.healthhub.repository.appointment;
+package it.unipi.healthhub.repository.mongo.appointment;
 
-import it.unipi.healthhub.model.Appointment;
+import it.unipi.healthhub.model.mongo.Appointment;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-public interface CustomAppointmentRepository {
+public interface CustomAppointmentMongoRepository {
     List<Appointment> findByDoctorIdAndDay(String doctorId, LocalDate day);
     Map<String, Integer> getVisitsCountByTypeForDoctor(String doctorId);
     Map<String, Double> getEarningsByYearForDoctor(String doctorId, Integer year);

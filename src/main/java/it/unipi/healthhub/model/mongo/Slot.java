@@ -1,4 +1,4 @@
-package it.unipi.healthhub.model;
+package it.unipi.healthhub.model.mongo;
 
 public class Slot {
     protected String start;

@@ -1,14 +1,14 @@
-package it.unipi.healthhub.repository;
+package it.unipi.healthhub.repository.mongo;
 
-import it.unipi.healthhub.model.Doctor;
+import it.unipi.healthhub.model.mongo.Doctor;
 
-import it.unipi.healthhub.repository.doctor.CustomDoctorRepository;
+import it.unipi.healthhub.repository.mongo.doctor.CustomDoctorMongoRepository;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
 
-public interface DoctorRepository extends MongoRepository<Doctor, String>, CustomDoctorRepository {
+public interface DoctorMongoRepository extends MongoRepository<Doctor, String>, CustomDoctorMongoRepository {
     Doctor findByUsername(String username);
     Doctor findById(ObjectId id);
     List<Doctor> findBySpecializations(String specialization);

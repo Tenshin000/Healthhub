@@ -1,8 +1,7 @@
-package it.unipi.healthhub.repository.doctor;
+package it.unipi.healthhub.repository.mongo.doctor;
 
 import com.mongodb.DBObject;
-import it.unipi.healthhub.model.Appointment;
-import it.unipi.healthhub.model.Doctor;
+import it.unipi.healthhub.model.mongo.Doctor;
 import it.unipi.healthhub.util.DateUtil;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -12,12 +11,11 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
-public class CustomDoctorRepositoryImpl implements CustomDoctorRepository{
+public class CustomDoctorMongoRepositoryImpl implements CustomDoctorMongoRepository {
     private final MongoTemplate mongoTemplate;
 
-    public CustomDoctorRepositoryImpl(MongoTemplate mongoTemplate) {
+    public CustomDoctorMongoRepositoryImpl(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
     }
 

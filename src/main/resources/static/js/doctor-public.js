@@ -40,7 +40,10 @@ document.addEventListener('DOMContentLoaded', function(){
     async function toggleEndorsement() {
         hasEndorsed = !hasEndorsed;
         try {
-            const response = await fetch(`/api/doctors/${doctorId}/endorsements`, {
+            let url = `/api/doctors/${doctorId}/endorse`;
+            if(!hasEndorsed)
+                url = `/api/doctors/${doctorId}/unendorse`;
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

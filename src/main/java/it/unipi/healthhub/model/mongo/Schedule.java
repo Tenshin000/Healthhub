@@ -1,4 +1,4 @@
-package it.unipi.healthhub.model;
+package it.unipi.healthhub.model.mongo;
 
 import java.time.LocalDate;
 import java.util.List;

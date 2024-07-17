@@ -1,6 +1,4 @@
-package it.unipi.healthhub.model;
-
-import java.time.LocalTime;
+package it.unipi.healthhub.model.mongo;
 
 public class PrenotableSlot extends Slot{
     private boolean taken;

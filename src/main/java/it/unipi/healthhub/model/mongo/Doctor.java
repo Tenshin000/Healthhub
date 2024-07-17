@@ -1,7 +1,8 @@
-package it.unipi.healthhub.model;
+package it.unipi.healthhub.model.mongo;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "doctors")
@@ -14,6 +15,16 @@ public class Doctor extends User {
     private List<String> specializations;
     @Field("phone_numbers")
     private List<String> phoneNumbers;
+
+    public Doctor() {
+        super();
+        services = new ArrayList<>();
+        reviews = new ArrayList<>();
+        schedules = new ArrayList<>();
+        calendarTemplates = new ArrayList<>();
+        specializations = new ArrayList<>();
+        phoneNumbers = new ArrayList<>();
+    }
 
 
     public List<Service> getServices() {

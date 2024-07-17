@@ -1,7 +1,7 @@
 package it.unipi.healthhub.controller;
 
-import it.unipi.healthhub.model.Doctor;
-import it.unipi.healthhub.model.User;
+import it.unipi.healthhub.model.mongo.Doctor;
+import it.unipi.healthhub.model.mongo.User;
 import it.unipi.healthhub.service.DoctorService;
 import it.unipi.healthhub.service.UserService;
 import it.unipi.healthhub.util.ControllerUtil;
