@@ -24,6 +24,10 @@ public class PatientApiFilter implements Filter {
 
         String method = req.getMethod();
 
+        // Prevents unauthorized access to doctor APIs
+        // by patients
+        // they can retrive datas only with GET
+
         if (("POST".equals(method) || "PUT".equals(method) || "DELETE".equals(method)) &&
                 (req.getSession(false) == null || !"patient".equals(req.getSession().getAttribute("role")))) {
             res.sendError(HttpServletResponse.SC_FORBIDDEN);

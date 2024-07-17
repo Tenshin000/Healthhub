@@ -4,6 +4,7 @@ import it.unipi.healthhub.model.Doctor;
 import it.unipi.healthhub.model.User;
 import it.unipi.healthhub.service.DoctorService;
 import it.unipi.healthhub.service.UserService;
+import it.unipi.healthhub.util.ControllerUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,8 @@ public class AuthController {
     private UserService userService;
 
     @GetMapping("/login")
-    public String loginForm(Model model) {
+    public String loginForm(Model model, HttpServletRequest request) {
+        ControllerUtil.setSessionModel(model, request);
         return "login";
     }
     @PostMapping("/login")
@@ -66,16 +68,7 @@ public class AuthController {
 
     @GetMapping("/register")
     public String registerPage(Model model, HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            String role = (String) session.getAttribute("role");
-            boolean isLoggedIn = (role != null);
-            model.addAttribute("logged", isLoggedIn);
-            model.addAttribute("role", isLoggedIn ? (role.equals("patient") ? "patient" : "doctor") : "");
-        } else {
-            model.addAttribute("logged", false);
-            model.addAttribute("role", "");
-        }
+        ControllerUtil.setSessionModel(model, request);
         model.addAttribute("user", new User());
         return "register";
     }
@@ -88,16 +81,7 @@ public class AuthController {
 
     @GetMapping("/register-doctor")
     public String registerPageDoctor(Model model, HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            String role = (String) session.getAttribute("role");
-            boolean isLoggedIn = (role != null);
-            model.addAttribute("logged", isLoggedIn);
-            model.addAttribute("role", isLoggedIn ? (role.equals("patient") ? "patient" : "doctor") : "");
-        } else {
-            model.addAttribute("logged", false);
-            model.addAttribute("role", "");
-        }
+        ControllerUtil.setSessionModel(model, request);
         model.addAttribute("doctor", new Doctor());
         return "register-doctor";
     }

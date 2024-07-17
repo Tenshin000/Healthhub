@@ -1,5 +1,6 @@
 package it.unipi.healthhub.controller;
 
+import it.unipi.healthhub.util.ControllerUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,30 +11,12 @@ import jakarta.servlet.http.HttpSession;
 public class HomeController {
     @GetMapping({"/", "/index"})
     public String index(Model model, HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            String role = (String) session.getAttribute("role");
-            boolean isLoggedIn = (role != null);
-            model.addAttribute("logged", isLoggedIn);
-            model.addAttribute("role", isLoggedIn ? (role.equals("patient") ? "patient" : "doctor") : "");
-        } else {
-            model.addAttribute("logged", false);
-            model.addAttribute("role", "");
-        }
+        ControllerUtil.setSessionModel(model, request);
         return "index";
     }
     @GetMapping("/search")
     public String search(Model model, HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            String role = (String) session.getAttribute("role");
-            boolean isLoggedIn = (role != null);
-            model.addAttribute("logged", isLoggedIn);
-            model.addAttribute("role", isLoggedIn ? (role.equals("patient") ? "patient" : "doctor") : "");
-        } else {
-            model.addAttribute("logged", false);
-            model.addAttribute("role", "");
-        }
+        ControllerUtil.setSessionModel(model, request);
         return "search";
     }
 

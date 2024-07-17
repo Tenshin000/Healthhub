@@ -3,6 +3,7 @@ package it.unipi.healthhub.controller;
 import it.unipi.healthhub.controller.api.DoctorAPI;
 import it.unipi.healthhub.model.Doctor;
 import it.unipi.healthhub.service.DoctorService;
+import it.unipi.healthhub.util.ControllerUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,16 +25,7 @@ public class DoctorController {
 
     @GetMapping("/{id}")
     public String doctorPublicProfile(@PathVariable String id, Model model, HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            String role = (String) session.getAttribute("role");
-            boolean isLoggedIn = (role != null);
-            model.addAttribute("logged", isLoggedIn);
-            model.addAttribute("role", isLoggedIn ? (role.equals("patient") ? "patient" : "doctor") : "");
-        } else {
-            model.addAttribute("logged", false);
-            model.addAttribute("role", "");
-        }
+        ControllerUtil.setSessionModel(model, request);
         // Get doctor by id
         Optional<Doctor> doctorOpt = doctorService.getDoctorById(id);
         if (doctorOpt.isPresent()) {

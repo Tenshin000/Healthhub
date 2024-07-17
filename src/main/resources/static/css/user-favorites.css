@@ -84,6 +84,16 @@ section {
     width: 30%;
 }
 
+.doctor-cards a {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.doctor-cards a:hover {
+    text-decoration: underline;
+}
+
 .doctor-card img {
     border-radius: 50%;
     margin-bottom: 10px;
@@ -122,9 +132,14 @@ section {
     margin-bottom: 10px;
 }
 
-.doctor-item img {
-    border-radius: 50%;
-    margin-right: 10px;
+.doctor-item a {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.doctor-item a:hover {
+    text-decoration: underline;
 }
 
 .doctor-item h3 {
