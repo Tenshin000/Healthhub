@@ -6,6 +6,7 @@ import it.unipi.healthhub.service.AppointmentService;
 import it.unipi.healthhub.service.DoctorService;
 import it.unipi.healthhub.util.ScheduleConverter;
 import it.unipi.healthhub.util.TemplateConverter;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -46,7 +47,8 @@ public class PrivateDoctorAPI {
     }
 
     @DeleteMapping("/appointments/{appointmentId}")
-    public ResponseEntity<Void> deleteAppointment(@PathVariable String appointmentId, HttpSession session) {
+    public ResponseEntity<Void> deleteAppointment(@PathVariable String appointmentId, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
         boolean deleted = doctorService.cancelAnAppointment(doctorId, appointmentId);
         if (deleted) {
@@ -58,21 +60,24 @@ public class PrivateDoctorAPI {
 
 
     @PutMapping("/address")
-    public ResponseEntity<Address> updateMyAddress(@RequestBody Address address, HttpSession session) {
+    public ResponseEntity<Address> updateMyAddress(@RequestBody Address address, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
         return ResponseEntity.ok(doctorService.updateAddress(doctorId, address));
     }
 
     @PutMapping("/details")
-    public ResponseEntity<UserDetailsDTO> updateMyDetails(@RequestBody UserDetailsDTO userDetails, HttpSession session) {
+    public ResponseEntity<UserDetailsDTO> updateMyDetails(@RequestBody UserDetailsDTO userDetails, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
         return ResponseEntity.ok(doctorService.updateUserDetails(doctorId, userDetails));
     }
 
     @PostMapping("/phones")
-    public ResponseEntity<PhoneNumberDTO> addMyNumber(@RequestBody PhoneNumberDTO request, HttpSession session) {
+    public ResponseEntity<PhoneNumberDTO> addMyNumber(@RequestBody PhoneNumberDTO phoneRequest, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
-        String phoneNumber = request.getPhoneNumber();
+        String phoneNumber = phoneRequest.getPhoneNumber();
 
         Integer newIndex = doctorService.addPhoneNumber(doctorId, phoneNumber);
 
@@ -85,7 +90,8 @@ public class PrivateDoctorAPI {
     }
 
     @GetMapping("/phones")
-    public ResponseEntity<List<PhoneNumberDTO>> getMyNumbers(HttpSession session) {
+    public ResponseEntity<List<PhoneNumberDTO>> getMyNumbers(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
         List<String> phoneNumbers = doctorService.getMyPhoneNumbers(doctorId);
 
@@ -101,7 +107,8 @@ public class PrivateDoctorAPI {
     }
 
     @DeleteMapping("/phones/{index}")
-    public ResponseEntity<String> removePhoneNumber(@PathVariable Integer index, HttpSession session) {
+    public ResponseEntity<String> removePhoneNumber(@PathVariable Integer index, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
         boolean removed = doctorService.removePhoneNumber(doctorId,index);
         if (removed) {
@@ -112,9 +119,10 @@ public class PrivateDoctorAPI {
     }
 
     @PostMapping("/specializations")
-    public ResponseEntity<SpecializationDTO> addMySpecialization(@RequestBody SpecializationDTO request, HttpSession session) {
+    public ResponseEntity<SpecializationDTO> addMySpecialization(@RequestBody SpecializationDTO specRequest, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
-        String specialization = request.getSpecialization();
+        String specialization = specRequest.getSpecialization();
 
         Integer newIndex = doctorService.addSpecialization(doctorId, specialization);
 
@@ -127,7 +135,8 @@ public class PrivateDoctorAPI {
     }
 
     @GetMapping("/specializations")
-    public ResponseEntity<List<SpecializationDTO>> getSpecializations(HttpSession session) {
+    public ResponseEntity<List<SpecializationDTO>> getSpecializations(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
         List<SpecializationDTO> specializations = doctorService.getSpecializations(doctorId);
 
@@ -139,7 +148,8 @@ public class PrivateDoctorAPI {
     }
 
     @DeleteMapping("/specializations/{index}")
-    public ResponseEntity<String> removeSpecializations(@PathVariable Integer index, HttpSession session) {
+    public ResponseEntity<String> removeSpecializations(@PathVariable Integer index, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
         boolean removed = doctorService.removeSpecialization(doctorId, index);
         if (removed) {
@@ -150,7 +160,8 @@ public class PrivateDoctorAPI {
     }
 
     @PostMapping("/services")
-    public ResponseEntity<ServiceDTO> addVisitType(@RequestBody ServiceDTO serviceDto, HttpSession session) {
+    public ResponseEntity<ServiceDTO> addVisitType(@RequestBody ServiceDTO serviceDto, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
 
         it.unipi.healthhub.model.Service service = new it.unipi.healthhub.model.Service();
@@ -172,7 +183,8 @@ public class PrivateDoctorAPI {
     }
 
     @GetMapping("/services")
-    public ResponseEntity<List<ServiceDTO>> getMyServices(HttpSession session) {
+    public ResponseEntity<List<ServiceDTO>> getMyServices(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
         List<it.unipi.healthhub.model.Service> services = doctorService.getMyServices(doctorId);
 
@@ -194,7 +206,8 @@ public class PrivateDoctorAPI {
 
 
     @PutMapping("/services/{index}")
-    public ResponseEntity<String> updateVisitType(@PathVariable Integer index, @RequestBody ServiceDTO serviceDto, HttpSession session) {
+    public ResponseEntity<String> updateVisitType(@PathVariable Integer index, @RequestBody ServiceDTO serviceDto, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
 
         it.unipi.healthhub.model.Service service = new it.unipi.healthhub.model.Service();
@@ -210,7 +223,8 @@ public class PrivateDoctorAPI {
     }
 
     @DeleteMapping("/services/{index}")
-    public ResponseEntity<String> removeService(@PathVariable Integer index, HttpSession session) {
+    public ResponseEntity<String> removeService(@PathVariable Integer index, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
         boolean removed = doctorService.deleteService(doctorId, index);
         if (removed) {
@@ -221,7 +235,8 @@ public class PrivateDoctorAPI {
     }
 
     @PostMapping("/templates")
-    public ResponseEntity<TemplateDTO> addTemplate(@RequestBody TemplateDTO templateDto, HttpSession session) {
+    public ResponseEntity<TemplateDTO> addTemplate(@RequestBody TemplateDTO templateDto, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
 
         CalendarTemplate template = new CalendarTemplate();
@@ -245,7 +260,8 @@ public class PrivateDoctorAPI {
     }
 
     @PutMapping("/templates/{templateId}")
-    public ResponseEntity<String> updateTemplate(@PathVariable String templateId, @RequestBody TemplateDTO templateDto, HttpSession session) {
+    public ResponseEntity<String> updateTemplate(@PathVariable String templateId, @RequestBody TemplateDTO templateDto, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
 
         CalendarTemplate template = new CalendarTemplate();
@@ -266,7 +282,8 @@ public class PrivateDoctorAPI {
     }
 
     @PutMapping("/templates/default")
-    public ResponseEntity<String> setDefaultTemplate(@RequestBody TemplateDTO templateDto, HttpSession session) {
+    public ResponseEntity<String> setDefaultTemplate(@RequestBody TemplateDTO templateDto, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
         String templateId = templateDto.getId();
         boolean updated = doctorService.setDefaultTemplate(doctorId, templateId);
@@ -278,7 +295,8 @@ public class PrivateDoctorAPI {
     }
 
     @GetMapping("/templates")
-    public ResponseEntity<List<TemplateDTO>> getMyTemplates(HttpSession session) {
+    public ResponseEntity<List<TemplateDTO>> getMyTemplates(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
         List<CalendarTemplate> templates = doctorService.getMyTemplates(doctorId);
 
@@ -298,7 +316,8 @@ public class PrivateDoctorAPI {
     }
 
     @DeleteMapping("/templates/{templateId}")
-    public ResponseEntity<String> removeTemplate(@PathVariable String templateId, HttpSession session) {
+    public ResponseEntity<String> removeTemplate(@PathVariable String templateId, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
         boolean removed = doctorService.deleteTemplate(doctorId, templateId);
         if (removed) {
@@ -309,7 +328,8 @@ public class PrivateDoctorAPI {
     }
 
     @PostMapping("/schedules")
-    public ResponseEntity<ScheduleDTO> addSchedule(@RequestBody ScheduleDTO scheduleDto, HttpSession session) {
+    public ResponseEntity<ScheduleDTO> addSchedule(@RequestBody ScheduleDTO scheduleDto, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
 
         Schedule schedule = new Schedule();
@@ -334,7 +354,8 @@ public class PrivateDoctorAPI {
     }
 
     @GetMapping("/schedules")
-    public ResponseEntity<List<ScheduleDTO>> getMySchedules(HttpSession session) {
+    public ResponseEntity<List<ScheduleDTO>> getMySchedules(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
         List<Schedule> schedules = doctorService.getSchedules(doctorId);
 
@@ -354,7 +375,8 @@ public class PrivateDoctorAPI {
     }
 
     @DeleteMapping("/schedules")
-    public ResponseEntity<String> removeSchedule(@RequestBody ScheduleDTO scheduleDto, HttpSession session) {
+    public ResponseEntity<String> removeSchedule(@RequestBody ScheduleDTO scheduleDto, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
         boolean removed = doctorService.deleteCalendar(doctorId, scheduleDto.getWeek());
         if (removed) {
@@ -365,7 +387,8 @@ public class PrivateDoctorAPI {
     }
 
     @GetMapping("/reviews")
-    public ResponseEntity<List<Review>> getMyReviews(HttpSession session) {
+    public ResponseEntity<List<Review>> getMyReviews(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
         List<Review> reviews = doctorService.getReviews(doctorId);
         if (reviews != null) {
@@ -376,7 +399,8 @@ public class PrivateDoctorAPI {
     }
 
     @DeleteMapping("/reviews/{index}")
-    public ResponseEntity<String> removeReview(@PathVariable Integer index, HttpSession session) {
+    public ResponseEntity<String> removeReview(@PathVariable Integer index, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
         boolean removed = doctorService.deleteReview(doctorId, index);
         if (removed) {
@@ -387,7 +411,8 @@ public class PrivateDoctorAPI {
     }
 
     @GetMapping("/analytics/visits")
-    public ResponseEntity<Map<String,Integer>> getVisitsAnalytics(HttpSession session) {
+    public ResponseEntity<Map<String,Integer>> getVisitsAnalytics(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
         Map<String,Integer> visitData = doctorService.getVisitsAnalytics(doctorId);
         if (visitData != null) {
@@ -398,7 +423,8 @@ public class PrivateDoctorAPI {
     }
 
     @GetMapping("/analytics/earnings")
-    public ResponseEntity<Map<String,Double>> getEarningsAnalytics(HttpSession session, @RequestParam(value = "year", required = false) Integer year) {
+    public ResponseEntity<Map<String,Double>> getEarningsAnalytics(HttpServletRequest request, @RequestParam(value = "year", required = false) Integer year) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
         if (year == null) {
             year = LocalDate.now().getYear();
@@ -412,7 +438,8 @@ public class PrivateDoctorAPI {
     }
 
     @GetMapping("/analytics/visits/distribution")
-    public ResponseEntity<Map<String,Integer>> getVisitsAnalyticsWeek(HttpSession session, @RequestParam(value = "year", required = false) Integer year, @RequestParam(value = "week", required = false) Integer week) {
+    public ResponseEntity<Map<String,Integer>> getVisitsAnalyticsWeek(HttpServletRequest request, @RequestParam(value = "year", required = false) Integer year, @RequestParam(value = "week", required = false) Integer week) {
+        HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
 
         if (year == null) {

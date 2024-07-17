@@ -8,6 +8,7 @@ import it.unipi.healthhub.service.DoctorService;
 import it.unipi.healthhub.service.UserService;
 import it.unipi.healthhub.util.ScheduleConverter;
 import it.unipi.healthhub.util.TemplateConverter;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -82,14 +83,6 @@ public class DoctorAPI {
         return ResponseEntity.ok(doctorService.getServices(doctorId));
     }
 
-    /*
-    @DeleteMapping("/{doctorId}/services/{serviceId}")
-    public ResponseEntity<Void> deleteService(@PathVariable String doctorId, @PathVariable Integer serviceId) {
-        doctorService.deleteService(doctorId, serviceId);
-        return ResponseEntity.noContent().build();
-    }
-     */
-
     // Endpoints for appointments
     @GetMapping("/{doctorId}/appointments")
     public ResponseEntity<List<Appointment>> getAppointments(@PathVariable String doctorId) {
@@ -97,8 +90,9 @@ public class DoctorAPI {
     }
 
     @PostMapping("/{doctorId}/appointments")
-    public ResponseEntity<AppointmentDTO> bookAnAppointment(@PathVariable String doctorId, @RequestBody AppointmentDTO appointmentDto, HttpSession session) {
+    public ResponseEntity<AppointmentDTO> bookAnAppointment(@PathVariable String doctorId, @RequestBody AppointmentDTO appointmentDto, HttpServletRequest request) {
         // usata da un paziente per prenotare un appuntamento
+        HttpSession session = request.getSession(false);
         String patientId = (String) session.getAttribute("patientId");
         boolean booked = doctorService.bookAnAppointment(doctorId, appointmentDto, patientId);
         if (booked) {
@@ -113,19 +107,6 @@ public class DoctorAPI {
     public ResponseEntity<List<CalendarTemplate>> getTemplates(@PathVariable String doctorId) {
         return ResponseEntity.ok(doctorService.getTemplates(doctorId));
     }
-
-    /*
-    @PostMapping("/{doctorId}/templates")
-    public ResponseEntity<CalendarTemplate> addTemplate(@PathVariable String doctorId, @RequestBody CalendarTemplate template) {
-        return ResponseEntity.ok(doctorService.addTemplate(doctorId, template));
-    }
-
-    @DeleteMapping("/{doctorId}/templates/{templateId}")
-    public ResponseEntity<Void> deleteTemplate(@PathVariable String doctorId, @PathVariable String templateId) {
-        doctorService.deleteTemplate(doctorId, templateId);
-        return ResponseEntity.noContent().build();
-    }
-    */
 
     // Endpoints for schedules
     @GetMapping("/{doctorId}/schedules/week")
@@ -146,13 +127,17 @@ public class DoctorAPI {
     // Endpoints for endorse
 
     @GetMapping("/{doctorId}/endorsements")
-    public ResponseEntity<EndorsementDTO> getEndorsements(@PathVariable String doctorId, HttpSession session) {
+    public ResponseEntity<EndorsementDTO> getEndorsements(@PathVariable String doctorId, HttpServletRequest request) {
         Integer endorsements = doctorService.getEndorsements(doctorId);
-        String patientId = (String) session.getAttribute("patientId");
+        HttpSession session = request.getSession(false);
         boolean hasEndorsed = false;
-        if(patientId != null) {
-            hasEndorsed = userService.hasEndorsed(patientId, doctorId);
+        if (session != null) {
+            String patientId = (String) session.getAttribute("patientId");
+            if (patientId != null) {
+                hasEndorsed = userService.hasEndorsed(patientId, doctorId);
+            }
         }
+
         if (endorsements != null) {
             EndorsementDTO endorsementDto = new EndorsementDTO(endorsements, hasEndorsed);
             return ResponseEntity.ok(endorsementDto);
@@ -161,8 +146,10 @@ public class DoctorAPI {
         }
     }
 
+
     @PostMapping("/{doctorId}/endorsements")
-    public ResponseEntity<EndorsementDTO> endorseDoctor(@PathVariable String doctorId, HttpSession session) {
+    public ResponseEntity<EndorsementDTO> endorseDoctor(@PathVariable String doctorId, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
         String patientId = (String) session.getAttribute("patientId");
         boolean hasEndorsed = doctorService.toggleEndorsement(doctorId, patientId); // Metodo che gestisce aggiunta/rimozione endorsement
         Integer endorsementCount = doctorService.getEndorsements(doctorId); // Ottiene il conteggio aggiornato degli endorsement
@@ -183,8 +170,9 @@ public class DoctorAPI {
     }
 
     @PostMapping("/{doctorId}/reviews")
-    public ResponseEntity<Review> addReview(@PathVariable String doctorId, @RequestBody ReviewDTO review, HttpSession session) {
+    public ResponseEntity<Review> addReview(@PathVariable String doctorId, @RequestBody ReviewDTO review, HttpServletRequest request) {
         // Set the current date and the name of the user
+        HttpSession session = request.getSession(false);
         LocalDate currentDate = LocalDate.now();
         review.setDate(currentDate);
         String name = (String) session.getAttribute("username");
@@ -197,13 +185,5 @@ public class DoctorAPI {
             return ResponseEntity.badRequest().build();
         }
     }
-
-    /*
-    @DeleteMapping("/{doctorId}/reviews/{reviewId}")
-    public ResponseEntity<Void> deleteReview(@PathVariable String doctorId, @PathVariable Integer reviewId) {
-        doctorService.deleteReview(doctorId, reviewId);
-        return ResponseEntity.noContent().build();
-    }
-    */
 
 }

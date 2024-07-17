@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthHub - Dati Personali</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/user-profile.css}">
+</head>
+<body>
+<header th:replace="~{fragments/header :: header(true,'patient')}"></header>
+
+<main>
+    <section class="personal-info">
+        <h2>Informazioni Personali</h2>
+        <form>
+            <div class="form-group">
+                <label for="firstName">Nome:</label>
+                <input type="text" id="firstName" name="firstName" required>
+            </div>
+            <div class="form-group">
+                <label for="lastName">Cognome:</label>
+                <input type="text" id="lastName" name="lastName" required>
+            </div>
+            <div class="form-group">
+                <label for="birthDate">Data di Nascita:</label>
+                <input type="date" id="birthDate" name="birthDate" required>
+            </div>
+            <div class="form-group">
+                <label for="gender">Genere:</label>
+                <select id="gender" name="gender" required>
+                    <option value="male">Maschio</option>
+                    <option value="female">Femmina</option>
+                    <option value="other">Altro</option>
+                </select>
+            </div>
+            <button type="submit">Salva Informazioni Personali</button>
+        </form>
+    </section>
+    <section class="contact-info">
+        <h2>Informazioni di Contatto</h2>
+        <form>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Telefono:</label>
+                <input type="tel" id="phone" name="phone" required>
+            </div>
+            <div class="form-group">
+                <label for="address">Indirizzo:</label>
+                <input type="text" id="address" name="address" required>
+            </div>
+            <button type="submit">Salva Informazioni di Contatto</button>
+        </form>
+    </section>
+    <section class="security-info">
+        <h2>Sicurezza dell'Account</h2>
+        <form>
+            <div class="form-group">
+                <label for="currentPassword">Password Attuale:</label>
+                <input type="password" id="currentPassword" name="currentPassword" required>
+            </div>
+            <div class="form-group">
+                <label for="newPassword">Nuova Password:</label>
+                <input type="password" id="newPassword" name="newPassword" required>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Conferma Nuova Password:</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
+            </div>
+            <button type="submit">Aggiorna Password</button>
+        </form>
+    </section>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

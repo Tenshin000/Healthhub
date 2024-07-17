@@ -1,8 +1,6 @@
 package it.unipi.healthhub.config;
 
-import it.unipi.healthhub.filter.DoctorDashboardAuthFilter;
-import it.unipi.healthhub.filter.DoctorApiFilter;
-import it.unipi.healthhub.filter.PatientApiFilter;
+import it.unipi.healthhub.filter.*;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,10 +17,18 @@ public class FilterConfig {
     }
 
     @Bean
+    public FilterRegistrationBean<PatientDashboardFilter> userDashboardAuthFilter() {
+        FilterRegistrationBean<PatientDashboardFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(new PatientDashboardFilter());
+        registrationBean.addUrlPatterns("/user/*");
+        return registrationBean;
+    }
+
+    @Bean
     public FilterRegistrationBean<PatientApiFilter> patientApiFilter() {
         FilterRegistrationBean<PatientApiFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new PatientApiFilter());
-        registrationBean.addUrlPatterns("/api/doctors/*");
+        registrationBean.addUrlPatterns("/api/doctor/*");
         return registrationBean;
     }
 
@@ -31,6 +37,14 @@ public class FilterConfig {
         FilterRegistrationBean<DoctorApiFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new DoctorApiFilter());
         registrationBean.addUrlPatterns("/api/doctor/*");
+        return registrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<LoginFilter> alreadyLoggedFilter() {
+        FilterRegistrationBean<LoginFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(new LoginFilter());
+        registrationBean.addUrlPatterns("/login");
         return registrationBean;
     }
 

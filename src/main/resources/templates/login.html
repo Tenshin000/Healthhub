@@ -8,9 +8,7 @@
 </head>
 <body>
 <!-- Include header -->
-<header>
-    <th:block th:insert="~{fragments/header :: header}"></th:block>
-</header>
+<header th:replace="~{fragments/header :: header(false, null)}"></header>
 <main>
     <div class="container">
         <div class="login-form">
@@ -34,8 +32,6 @@
     </div>
 </main>
 <!-- Include footer -->
-<footer>
-    <th:block th:insert="~{fragments/footer :: footer}"></th:block>
-</footer>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 </html>
