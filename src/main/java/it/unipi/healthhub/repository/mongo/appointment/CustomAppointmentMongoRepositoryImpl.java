@@ -3,6 +3,7 @@ package it.unipi.healthhub.repository.mongo.appointment;
 import com.mongodb.DBObject;
 import it.unipi.healthhub.model.mongo.Appointment;
 import it.unipi.healthhub.util.DateUtil;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -26,8 +27,8 @@ public class CustomAppointmentMongoRepositoryImpl implements CustomAppointmentMo
     @Override
     public List<Appointment> findByDoctorIdAndDay(String doctorId, LocalDate day) {
         Query query = new Query();
-        query.addCriteria(Criteria.where("doctorInfo.doctorId").is(doctorId)
-                .and("appointmentDateTime")
+        query.addCriteria(Criteria.where("doctor.id").is(doctorId)
+                .and("date")
                 .gte(day.atStartOfDay())
                 .lt(day.plusDays(1).atStartOfDay())
         );
@@ -36,7 +37,7 @@ public class CustomAppointmentMongoRepositoryImpl implements CustomAppointmentMo
 
     @Override
     public Map<String, Integer> getVisitsCountByTypeForDoctor(String doctorId){
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("doctorInfo.doctorId").is(doctorId));
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("doctor.id").is(doctorId));
         GroupOperation groupOperation = Aggregation.group("visitType").count().as("total");
         ProjectionOperation projectionOperation = Aggregation.project("total").and("visitType").previousOperation();
 
@@ -61,12 +62,12 @@ public class CustomAppointmentMongoRepositoryImpl implements CustomAppointmentMo
     @Override
     public Map<String, Double> getEarningsByYearForDoctor(String doctorId, Integer year) {
 
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("doctorInfo.doctorId").is(doctorId)
-                .and("appointmentDateTime")
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("doctor.id").is(doctorId)
+                .and("date")
                 .gte(LocalDate.of(year, 1, 1).atStartOfDay())
                 .lt(LocalDate.of(year + 1, 1, 1).atStartOfDay())
         );
-        ProjectionOperation projectMonth = Aggregation.project().andExpression("month(appointmentDateTime)").as("month").and("price").as("price");
+        ProjectionOperation projectMonth = Aggregation.project().andExpression("month(date)").as("month").and("price").as("price");
         GroupOperation groupOperation = Aggregation.group("month").sum("price").as("total");
         ProjectionOperation projectionOperation = Aggregation.project("total").and("month").previousOperation();
 
@@ -91,16 +92,16 @@ public class CustomAppointmentMongoRepositoryImpl implements CustomAppointmentMo
     }
 
     @Override
-public Map<String, Integer> getVisitsCountByDayForDoctorWeek(String doctorId, Integer week, Integer year) {
+    public Map<String, Integer> getVisitsCountByDayForDoctorWeek(String doctorId, Integer week, Integer year) {
         LocalDateTime startOfWeek = DateUtil.getFirstDayOfWeek(week, year).atStartOfDay();
         LocalDateTime endOfWeek = DateUtil.getFirstDayOfWeek(week+1, year).atStartOfDay();
 
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("doctorInfo.doctorId").is(doctorId)
-                .and("appointmentDateTime")
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("doctor.id").is(doctorId)
+                .and("date")
                 .gte(startOfWeek)
                 .lt(endOfWeek)
         );
-        ProjectionOperation projectDay = Aggregation.project().andExpression("dayOfWeek(appointmentDateTime)").as("day");
+        ProjectionOperation projectDay = Aggregation.project().andExpression("dayOfWeek(date)").as("day");
         GroupOperation groupOperation = Aggregation.group("day").count().as("total");
 
         Aggregation aggregation = Aggregation.newAggregation(
@@ -120,5 +121,26 @@ public Map<String, Integer> getVisitsCountByDayForDoctorWeek(String doctorId, In
         }
 
         return visitsCountByDay;
+    }
+
+    @Override
+    public List<Appointment> findByPatientIdFromDate(String patientId, LocalDate date) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("patient.id").is(patientId)
+                .and("date")
+                .gte(date.atStartOfDay())
+        );
+        query.with(Sort.by(Sort.Direction.ASC, "date"));
+        return mongoTemplate.find(query, Appointment.class);
+    }
+
+    @Override
+    public List<Appointment> findByPatientIdBeforeDate(String patientId, LocalDate date) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("patient.id").is(patientId)
+                .and("date").lt(date.atStartOfDay()));
+        query.with(Sort.by(Sort.Direction.ASC, "date"));  // Ordina in ordine ascendente di data
+
+        return mongoTemplate.find(query, Appointment.class);
     }
 }

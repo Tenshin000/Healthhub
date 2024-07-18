@@ -7,9 +7,9 @@ import java.time.LocalDateTime;
 public class Appointment {
     @Id
     private String id;
-    private LocalDateTime appointmentDateTime;
-    private DoctorInfo doctorInfo;
-    private PatientInfo patientInfo;
+    private LocalDateTime date;
+    private DoctorInfo doctor;
+    private PatientInfo patient;
     private String visitType;
     private String patientNotes;
     private double price;
@@ -19,9 +19,9 @@ public class Appointment {
 
     public Appointment(String id, LocalDateTime appointmentDateTime, DoctorInfo doctorInfo, PatientInfo patientInfo, String visitType, String patientNotes) {
         this.id = id;
-        this.appointmentDateTime = appointmentDateTime;
-        this.doctorInfo = doctorInfo;
-        this.patientInfo = patientInfo;
+        this.date = appointmentDateTime;
+        this.doctor = doctorInfo;
+        this.patient = patientInfo;
         this.visitType = visitType;
         this.patientNotes = patientNotes;
     }
@@ -35,28 +35,28 @@ public class Appointment {
         this.id = id;
     }
 
-    public LocalDateTime getAppointmentDateTime() {
-        return appointmentDateTime;
+    public LocalDateTime getDate() {
+        return date;
     }
 
-    public void setAppointmentDateTime(LocalDateTime appointmentDateTime) {
-        this.appointmentDateTime = appointmentDateTime;
+    public void setDate(LocalDateTime date) {
+        this.date = date;
     }
 
-    public DoctorInfo getDoctorInfo() {
-        return doctorInfo;
+    public DoctorInfo getDoctor() {
+        return doctor;
     }
 
-    public void setDoctorInfo(DoctorInfo doctorInfo) {
-        this.doctorInfo = doctorInfo;
+    public void setDoctor(DoctorInfo doctor) {
+        this.doctor = doctor;
     }
 
-    public PatientInfo getPatientInfo() {
-        return patientInfo;
+    public PatientInfo getPatient() {
+        return patient;
     }
 
-    public void setPatientInfo(PatientInfo patientInfo) {
-        this.patientInfo = patientInfo;
+    public void setPatient(PatientInfo patient) {
+        this.patient = patient;
     }
 
     public String getVisitType() {
@@ -85,59 +85,59 @@ public class Appointment {
 
     // Inner class DoctorInfo
     public static class DoctorInfo {
-        private String doctorId;
-        private String doctorName;
+        private String id;
+        private String name;
 
         public DoctorInfo() {}
 
         public DoctorInfo(String doctorId, String doctorName) {
-            this.doctorId = doctorId;
-            this.doctorName = doctorName;
+            this.id = doctorId;
+            this.name = doctorName;
         }
 
-        public String getDoctorId() {
-            return doctorId;
+        public String getId() {
+            return id;
         }
 
-        public void setDoctorId(String doctorId) {
-            this.doctorId = doctorId;
+        public void setId(String id) {
+            this.id = id;
         }
 
-        public String getDoctorName() {
-            return doctorName;
+        public String getName() {
+            return name;
         }
 
-        public void setDoctorName(String doctorName) {
-            this.doctorName = doctorName;
+        public void setName(String name) {
+            this.name = name;
         }
     }
 
     // Inner class PatientInfo
     public static class PatientInfo {
-        private String patientId;
-        private String patientName;
+        private String id;
+        private String name;
 
         public PatientInfo() {}
 
         public PatientInfo(String patientId, String patientName) {
-            this.patientId = patientId;
-            this.patientName = patientName;
+            this.id = patientId;
+            this.name = patientName;
         }
 
-        public String getPatientId() {
-            return patientId;
+        public String getId() {
+            return id;
         }
 
-        public void setPatientId(String patientId) {
-            this.patientId = patientId;
+        public void setId(String id) {
+            this.id = id;
         }
 
-        public String getPatientName() {
-            return patientName;
+        public String getName() {
+            return name;
         }
 
-        public void setPatientName(String patientName) {
-            this.patientName = patientName;
+        public void setName(String name) {
+            this.name = name;
         }
     }
 }

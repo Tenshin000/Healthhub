@@ -84,7 +84,7 @@ public class Doctor extends User {
         return "User{" +
                 ", username='" + getUsername() + '\'' +
                 ", password='" + getPassword() + '\'' +
-                ", age=" + getAge() + "}";
+                ", dob=" + dob + "}";
     }
 
 }

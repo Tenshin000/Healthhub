@@ -73,7 +73,10 @@ main {
 }
 
 .search-input {
-    width: 100%;
+    width: -moz-available;
+    width: -webkit-fill-available;
+    width: fill-available;
+    margin: 10px 0;
     padding: 15px;
     font-size: 1.2em;
     border: none;

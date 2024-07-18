@@ -131,7 +131,9 @@ h3 {
 }
 
 input, textarea, select, button {
-    width: 100%;
+    width: -moz-available;
+    width: -webkit-fill-available;
+    width: fill-available;
     padding: 10px;
     margin: 10px 0;
     border: 1px solid #ccc;
