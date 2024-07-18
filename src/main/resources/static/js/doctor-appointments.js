@@ -70,13 +70,13 @@ function createAppointmentElement(appointment) {
     const detailsDiv = document.createElement('div');
 
     const h3 = document.createElement('h3');
-    h3.textContent = appointment.patientInfo.patientName;
+    h3.textContent = appointment.patient.name;
 
     const pType = document.createElement('p');
     pType.textContent = appointment.visitType;
 
     const pTime = document.createElement('p');
-    pTime.textContent = appointment.appointmentDateTime.split('T')[1].slice(0, 5);
+    pTime.textContent = appointment.date.split('T')[1].slice(0, 5);
 
     detailsDiv.appendChild(h3);
     detailsDiv.appendChild(pType);

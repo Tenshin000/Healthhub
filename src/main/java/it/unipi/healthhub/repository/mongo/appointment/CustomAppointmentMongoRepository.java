@@ -11,4 +11,6 @@ public interface CustomAppointmentMongoRepository {
     Map<String, Integer> getVisitsCountByTypeForDoctor(String doctorId);
     Map<String, Double> getEarningsByYearForDoctor(String doctorId, Integer year);
     Map<String, Integer> getVisitsCountByDayForDoctorWeek(String doctorId, Integer week, Integer year);
+    List<Appointment> findByPatientIdFromDate(String patientId, LocalDate date);
+    List<Appointment> findByPatientIdBeforeDate(String patientId, LocalDate date);
 }

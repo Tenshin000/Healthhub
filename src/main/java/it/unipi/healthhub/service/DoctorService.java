@@ -6,7 +6,6 @@ import it.unipi.healthhub.dto.ReviewDTO;
 import it.unipi.healthhub.dto.SpecializationDTO;
 import it.unipi.healthhub.dto.UserDetailsDTO;
 import it.unipi.healthhub.model.neo4j.DoctorDAO;
-import it.unipi.healthhub.model.neo4j.UserDAO;
 import it.unipi.healthhub.repository.mongo.AppointmentMongoRepository;
 import it.unipi.healthhub.repository.mongo.DoctorMongoRepository;
 import it.unipi.healthhub.repository.mongo.TemplateMongoRepository;
@@ -196,9 +195,9 @@ public class DoctorService {
         LocalTime timeSlot = LocalTime.parse(appointmentDto.getSlot());
         LocalDateTime appointmentDateTime = appointmentDto.getDate().atTime(timeSlot);
 
-        appointment.setAppointmentDateTime(appointmentDateTime);
-        appointment.setDoctorInfo(new Appointment.DoctorInfo(doctor.getId(), doctor.getName()));
-        appointment.setPatientInfo(new Appointment.PatientInfo(patient.getId(), patient.getName()));
+        appointment.setDate(appointmentDateTime);
+        appointment.setDoctor(new Appointment.DoctorInfo(doctor.getId(), doctor.getName()));
+        appointment.setPatient(new Appointment.PatientInfo(patient.getId(), patient.getName()));
         appointment.setVisitType(appointmentDto.getService());
         List<it.unipi.healthhub.model.mongo.Service> services = doctor.getServices();
         if (services == null) {
@@ -221,7 +220,7 @@ public class DoctorService {
         if (appointmentOpt.isPresent()) {
             Appointment appointment = appointmentOpt.get();
 
-            LocalDateTime dateTimeSlot = appointment.getAppointmentDateTime();
+            LocalDateTime dateTimeSlot = appointment.getDate();
 
             Integer year = dateTimeSlot.getYear();
             Integer week = dateTimeSlot.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());

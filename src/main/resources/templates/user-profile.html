@@ -15,12 +15,8 @@
         <h2>Informazioni Personali</h2>
         <form>
             <div class="form-group">
-                <label for="firstName">Nome:</label>
-                <input type="text" id="firstName" name="firstName" required>
-            </div>
-            <div class="form-group">
-                <label for="lastName">Cognome:</label>
-                <input type="text" id="lastName" name="lastName" required>
+                <label for="fullName">Nome:</label>
+                <input type="text" id="fullName" name="fullName" required>
             </div>
             <div class="form-group">
                 <label for="birthDate">Data di Nascita:</label>
@@ -34,7 +30,7 @@
                     <option value="other">Altro</option>
                 </select>
             </div>
-            <button type="submit">Salva Informazioni Personali</button>
+            <button type="button" id="save-personal-info">Salva Informazioni Personali</button>
         </form>
     </section>
     <section class="contact-info">
@@ -52,7 +48,7 @@
                 <label for="address">Indirizzo:</label>
                 <input type="text" id="address" name="address" required>
             </div>
-            <button type="submit">Salva Informazioni di Contatto</button>
+            <button type="button" id="save-contact-info">Salva Informazioni di Contatto</button>
         </form>
     </section>
     <section class="security-info">
@@ -75,5 +71,6 @@
     </section>
 </main>
 <footer th:replace="~{fragments/footer :: footer}"></footer>
+<script th:src="@{/js/user-profile.js}"></script>
 </body>
 </html>

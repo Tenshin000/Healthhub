@@ -12,7 +12,7 @@ public class FilterConfig {
     public FilterRegistrationBean<DoctorDashboardAuthFilter> doctorDashboardAuthFilter() {
         FilterRegistrationBean<DoctorDashboardAuthFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new DoctorDashboardAuthFilter());
-        registrationBean.addUrlPatterns("/doctors/dashboard/*");
+        registrationBean.addUrlPatterns("/doctor/dashboard/*");
         return registrationBean;
     }
 
@@ -28,7 +28,7 @@ public class FilterConfig {
     public FilterRegistrationBean<PatientApiFilter> patientApiFilter() {
         FilterRegistrationBean<PatientApiFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new PatientApiFilter());
-        registrationBean.addUrlPatterns("/api/doctor/*");
+        registrationBean.addUrlPatterns("/api/user/*");
         return registrationBean;
     }
 

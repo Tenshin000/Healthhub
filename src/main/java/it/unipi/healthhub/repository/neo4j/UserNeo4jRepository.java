@@ -25,4 +25,9 @@ public interface UserNeo4jRepository extends Neo4jRepository<UserDAO, String> {
     @Query("MATCH (u:User {id: $userId})-[r:REVIEWED]->(d:Doctor {id: $doctorId}) " +
             "DELETE r")
     void unreview(@Param("userId") String userId, @Param("doctorId") String doctorId);
+
+    @Query("MATCH (u:User {id: $userId}) " +
+            "SET u.name = $name " +
+            "RETURN u")
+    UserDAO updateName(@Param("userId") String patientId, @Param("name") String fullName);
 }

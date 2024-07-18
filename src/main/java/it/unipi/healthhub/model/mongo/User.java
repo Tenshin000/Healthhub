@@ -12,45 +12,29 @@ public class User {
     protected String id;
 
     protected String username;
-    //private String fiscalCode;
+
     protected String name;
     protected String password;
-    protected int age;
     protected LocalDate dob;
     protected String gender;
-//  private List<String> phoneNumbers;
+    private String personalNumber;
     protected String email;
     protected Address address;
-
-//  public String getFiscalCode() { return fiscalCode; }
-//  public void setFiscalCode(String fiscalCode) { this.fiscalCode = fiscalCode; }
 
     public String getId() {
         return id;
     }
-
     public String getName() {
         return name;
     }
     public void setName(String name) {
         this.name = name;
     }
-
     public String getUsername() {
         return username;
     }
     public void setUsername(String username) {
         this.username = username;
-    }
-
-//  public String getPasswordHash() {return passwordHash;}
-//  public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
-
-    public int getAge() {
-        return age;
-    }
-    public void setAge(int age) {
-        this.age = age;
     }
 
     public String getGender() {
@@ -77,12 +61,9 @@ public class User {
     public String getPassword() {
         return password;
     }
-
     public void setPassword(String password) {
         this.password = password;
     }
-
-    //public static User parseDocument(){}
 
     public void setDob(LocalDate dob) {
         this.dob = dob;
@@ -91,11 +72,19 @@ public class User {
         return dob;
     }
 
+    public String getPersonalNumber() {
+        return personalNumber;
+    }
+
+    public void setPersonalNumber(String personalNumber) {
+        this.personalNumber = personalNumber;
+    }
+
     public String toString() {
         return "User{" +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
-                ", age=" + age + "}";
+                ", dob=" + dob + "}";
     }
 
 }
