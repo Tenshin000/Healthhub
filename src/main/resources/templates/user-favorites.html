@@ -37,21 +37,13 @@
     <section class="liked-reviewed-doctors">
         <div class="liked-doctors">
             <h2>Endorsed Doctors</h2>
-            <ul>
+            <ul id="endorsed-doctors-list">
                 <!-- Placeholder data -->
-                <li class="doctor-item">
-                    <a href="/doctor/maria-neri">
+                <li th:each="doctor : ${endorsedDoctors}" class="doctor-item">
+                    <a th:href="@{|/doctors/${doctor.id}|}">
                         <div>
-                            <h3>Dr.ssa Maria Neri</h3>
-                            <p>Ginecologo</p>
-                        </div>
-                    </a>
-                </li>
-                <li class="doctor-item">
-                    <a href="/doctor/carlo-bianchi">
-                        <div>
-                            <h3>Dr. Carlo Bianchi</h3>
-                            <p>Ortopedico</p>
+                            <h3 th:text="${'Dr. ' + doctor.name}">Doctor Name</h3>
+                            <p th:text="${doctor.specializations[0]}">Specialty</p>
                         </div>
                     </a>
                 </li>
@@ -59,21 +51,13 @@
         </div>
         <div class="reviewed-doctors">
             <h2>Reviewed Doctors</h2>
-            <ul>
+            <ul id="reviewed-doctors-list">
                 <!-- Placeholder data -->
-                <li class="doctor-item">
-                    <a href="/doctor/maria-neri">
+                <li th:each="doctor : ${reviewedDoctors}" class="doctor-item">
+                    <a th:href="@{|/doctors/${doctor.id}|}">
                         <div>
-                            <h3>Dr.ssa Maria Neri</h3>
-                            <p>Ginecologo</p>
-                        </div>
-                    </a>
-                </li>
-                <li class="doctor-item">
-                    <a href="/doctor/maria-neri">
-                        <div>
-                            <h3>Dr.ssa Maria Neri</h3>
-                            <p>Ginecologo</p>
+                            <h3 th:text="${'Dr. ' + doctor.name}">Doctor Name</h3>
+                            <p th:text="${doctor.specializations[0]}">Specialty</p>
                         </div>
                     </a>
                 </li>

@@ -50,6 +50,7 @@ public class UserService {
         return savedUser;
     }
 
+    @Transactional
     public User updateUser(String id, User user){
         Optional<User> userOptional = userMongoRepository.findById(id);
         if(userOptional.isPresent()){
@@ -119,6 +120,7 @@ public class UserService {
 
     }
 
+    @Transactional
     public PatientContactsDTO updateUserContacts(String patientId, PatientContactsDTO userContacts) {
         Optional<User> userOpt = userMongoRepository.findById(patientId);
         if (userOpt.isPresent()) {
@@ -131,11 +133,13 @@ public class UserService {
         return null;
     }
 
+    @Transactional
     public List<Appointment> getUpcomingAppointments(String patientId) {
         LocalDate currentDate = LocalDate.now();
         return appointmentMongoRepository.findByPatientIdFromDate(patientId, currentDate);
     }
 
+    @Transactional
     public List<Appointment> getPastAppointments(String patientId) {
         LocalDate currentDate = LocalDate.now();
         return appointmentMongoRepository.findByPatientIdBeforeDate(patientId, currentDate);
@@ -163,5 +167,27 @@ public class UserService {
             }
         }
         return false;
+    }
+
+    @Transactional
+    public List<Doctor> getEndorsedDoctors(String patientId) {
+        UserDAO userDAO = userNeo4jRepository.findById(patientId).orElseThrow(() -> new RuntimeException("User not found"));
+        List<Doctor> endorsedDoctors = new ArrayList<>();
+        userDAO.getEndorsedDoctors().forEach(doctorDAO -> {
+            Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorDAO.getId());
+            doctorOpt.ifPresent(endorsedDoctors::add);
+        });
+        return endorsedDoctors;
+    }
+
+    @Transactional
+    public List<Doctor> getReviewedDoctors(String userId) {
+        UserDAO userDAO = userNeo4jRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        List<Doctor> reviewedDoctors = new ArrayList<>();
+        userDAO.getReviewedDoctors().forEach(doctorDAO -> {
+            Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorDAO.getId());
+            doctorOpt.ifPresent(reviewedDoctors::add);
+        });
+        return reviewedDoctors;
     }
 }
