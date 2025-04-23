@@ -403,8 +403,6 @@ function renderServicesList(services) {
     });
 }
 
-
-
 // Function to add visit type card
 function createServiceCard(initialData = null) {
     const serviceTemplate = `

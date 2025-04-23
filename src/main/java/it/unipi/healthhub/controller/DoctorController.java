@@ -24,6 +24,7 @@ public class DoctorController {
     @Autowired
     private DoctorService doctorService;
 
+    // Handles requests to view a public profile of a doctor
     @GetMapping("/{id}")
     public String doctorPublicProfile(@PathVariable String id, Model model, HttpServletRequest request) {
         ControllerUtil.setSessionModel(model, request);

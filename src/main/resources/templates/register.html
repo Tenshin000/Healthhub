@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HealthHub - Registrati come Paziente</title>
+    <title>HealthHub - Register as a Patient</title>
     <link rel="stylesheet" th:href="@{/css/register.css}">
 </head>
 <body>
@@ -11,14 +11,14 @@
 <main>
     <div class="container">
         <div class="register-form">
-            <h2>Registrati come Paziente</h2>
+            <h2>Register as a Patient</h2>
             <form action="/register" method="post">
                 <div class="form-group">
                     <label for="username">Username</label>
                     <input type="text" id="username" name="username" required>
                 </div>
                 <div class="form-group">
-                    <label for="name">Nome</label>
+                    <label for="name">Name</label>
                     <input type="text" id="name" name="name" required>
                 </div>
                 <div class="form-group">
@@ -30,42 +30,50 @@
                     <input type="password" id="password" name="password" required>
                 </div>
                 <div class="form-group">
-                    <label for="confirm-password">Conferma Password</label>
+                    <label for="confirm-password">Confirm Password</label>
                     <input type="password" id="confirm-password" name="confirmPassword" required>
                 </div>
                 <div class="form-group">
-                    <label for="age">Età</label>
-                    <input type="number" id="age" name="age" required>
+                    <label for="dob">Date of Birth</label>
+                    <input type="date" id="dob" name="dob" required>
                 </div>
                 <div class="form-group">
-                    <label for="gender">Genere</label>
+                    <label for="gender">Gender</label>
                     <select id="gender" name="gender" required>
-                        <option value="">Seleziona</option>
-                        <option value="male">Maschio</option>
-                        <option value="female">Femmina</option>
-                        <option value="other">Altro</option>
+                        <option value="">Select</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="street">Via</label>
+                    <label for="phone">Personal Phone Number</label>
+                    <input type="text" id="phone" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="street">Street</label>
                     <input type="text" id="street" name="street" required>
                 </div>
                 <div class="form-group">
-                    <label for="city">Città</label>
+                    <label for="city">City</label>
                     <input type="text" id="city" name="city" required>
                 </div>
                 <div class="form-group">
-                    <label for="postal-code">CAP</label>
-                    <input type="text" id="postal-code" name="postalCode" required>
+                    <label for="CAP">Postal Code (CAP)</label>
+                    <input type="text" id="CAP" name="CAP" required>
                 </div>
                 <div class="form-group">
-                    <label for="country">Paese</label>
+                    <label for="province">Province</label>
+                    <input type="text" id="province" name="province" required>
+                </div>
+                <div class="form-group">
+                    <label for="country">Country</label>
                     <input type="text" id="country" name="country" required>
                 </div>
-                <button type="submit" class="btn">Registrati</button>
+                <button type="submit" class="btn">Register</button>
                 <div class="links">
-                    <a href="/login">Hai già un account? Accedi</a>
-                    <a href="/register-doctor">Sei un medico? Iscriviti per usare i nostri servizi</a>
+                    <a href="/login">Already have an account? Log in</a>
+                    <a href="/register-doctor">Are you a doctor? Sign up to use our services</a>
                 </div>
             </form>
         </div>

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HealthHub - Dati Personali</title>
+    <title>HealthHub - Personal Data</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/user-profile.css}">
 </head>
@@ -12,61 +12,77 @@
 
 <main>
     <section class="personal-info">
-        <h2>Informazioni Personali</h2>
+        <h2>Personal Data</h2>
         <form>
             <div class="form-group">
-                <label for="fullName">Nome:</label>
+                <label for="fullName">Name:</label>
                 <input type="text" id="fullName" name="fullName" required>
             </div>
-            <div class="form-group">
-                <label for="birthDate">Data di Nascita:</label>
+            <div class="form-group">Date of Birth:</label>
                 <input type="date" id="birthDate" name="birthDate" required>
             </div>
             <div class="form-group">
-                <label for="gender">Genere:</label>
+                <label for="gender">Gender:</label>
                 <select id="gender" name="gender" required>
-                    <option value="male">Maschio</option>
-                    <option value="female">Femmina</option>
-                    <option value="other">Altro</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
                 </select>
             </div>
-            <button type="button" id="save-personal-info">Salva Informazioni Personali</button>
+            <button type="button" id="save-personal-info">Save Personal Information</button>
         </form>
     </section>
     <section class="contact-info">
-        <h2>Informazioni di Contatto</h2>
+        <h2>Contact Information</h2>
         <form>
             <div class="form-group">
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" required>
             </div>
             <div class="form-group">
-                <label for="phone">Telefono:</label>
-                <input type="tel" id="phone" name="phone" required>
+                <label for="phone">Phone Number:</label>
+                <input type="tel" id="phone" name="phone">
             </div>
             <div class="form-group">
-                <label for="address">Indirizzo:</label>
-                <input type="text" id="address" name="address" required>
+                <label for="street">Street:</label>
+                <input type="text" id="street" name="street" placeholder="Street name">
             </div>
-            <button type="button" id="save-contact-info">Salva Informazioni di Contatto</button>
+            <div class="form-group">
+                <label for="city">City:</label>
+                <input type="text" id="city" name="city" placeholder="City">
+            </div>
+            <div class="form-group">
+                <label for="province">Province:</label>
+                <input type="text" id="province" name="province" placeholder="Province">
+            </div>
+            <div class="form-group">
+                <label for="CAP">Postal Code:</label>
+                <input type="text" id="CAP" name="CAP" placeholder="ZIP Code">
+            </div>
+            <div class="form-group">
+                <label for="country">Country:</label>
+                <input type="text" id="country" name="country" placeholder="Country">
+            </div>
+
+            <button type="button" id="save-contact-info">Save Contact Information</button>
         </form>
     </section>
     <section class="security-info">
-        <h2>Sicurezza dell'Account</h2>
+        <h2>Account Security</h2>
         <form>
             <div class="form-group">
-                <label for="currentPassword">Password Attuale:</label>
+                <label for="currentPassword">Current Password:</label>
                 <input type="password" id="currentPassword" name="currentPassword" required>
             </div>
             <div class="form-group">
-                <label for="newPassword">Nuova Password:</label>
+                <label for="newPassword">New Password:</label>
                 <input type="password" id="newPassword" name="newPassword" required>
             </div>
             <div class="form-group">
-                <label for="confirmPassword">Conferma Nuova Password:</label>
+                <label for="confirmPassword">Confirm New Password:</label>
                 <input type="password" id="confirmPassword" name="confirmPassword" required>
             </div>
-            <button type="submit">Aggiorna Password</button>
+            <button type="submit">Update Password</button>
         </form>
     </section>
 </main>

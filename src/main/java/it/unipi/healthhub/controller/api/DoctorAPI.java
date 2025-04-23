@@ -123,7 +123,6 @@ public class DoctorAPI {
     }
 
     // Endpoints for endorse
-
     @GetMapping("/{doctorId}/endorsements")
     public ResponseEntity<EndorsementDTO> getEndorsements(@PathVariable String doctorId, HttpServletRequest request) {
         Integer endorsements = doctorService.getEndorsements(doctorId);
