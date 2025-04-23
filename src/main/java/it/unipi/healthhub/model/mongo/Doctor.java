@@ -26,7 +26,6 @@ public class Doctor extends User {
         phoneNumbers = new ArrayList<>();
     }
 
-
     public List<Service> getServices() {
         return services;
     }

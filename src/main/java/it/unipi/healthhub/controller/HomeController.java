@@ -10,11 +10,14 @@ import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class HomeController {
+    // Display index page
     @GetMapping({"/", "/index"})
     public String index(Model model, HttpServletRequest request) {
         ControllerUtil.setSessionModel(model, request);
         return "index";
     }
+
+    // Display search page
     @GetMapping("/search")
     public String search(Model model, HttpServletRequest request) {
         ControllerUtil.setSessionModel(model, request);

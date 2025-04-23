@@ -19,12 +19,14 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    // Display the profile of the user
     @GetMapping("/profile")
     public String profile(Model model, HttpServletRequest request) {
         ControllerUtil.setSessionModel(model, request);
         return "user-profile";
     }
 
+    // Display the appointments of the user
     @GetMapping("/appointments")
     public String appointments(Model model, HttpServletRequest request) {
         ControllerUtil.setSessionModel(model, request);

@@ -80,21 +80,37 @@ function fetchContactInfo() {
 function renderContactInfo(contactInfo) {
     document.getElementById('email').value = contactInfo.email || '';
     document.getElementById('phone').value = contactInfo.phoneNumber || '';
-    document.getElementById('address').value = contactInfo.address || '';
+    document.getElementById('street').value = contactInfo.street || '';
+    document.getElementById('city').value = contactInfo.city || '';
+    document.getElementById('province').value = contactInfo.province || '';
+    document.getElementById('CAP').value = contactInfo.postalCode || '';
+    document.getElementById('country').value = contactInfo.country || '';
 }
 
-// Funzione per salvare i dati del form
+
+// Function to save contact information from the form
 function saveContactInfo() {
     const email = document.getElementById('email').value;
     const phone = document.getElementById('phone').value;
-    const address = document.getElementById('address').value;
+    const street = document.getElementById('street').value;
+    const city = document.getElementById('city').value;
+    const province = document.getElementById('province').value;
+    const postalCode = document.getElementById('CAP').value;
+    const country = document.getElementById('country').value;
 
+
+    // Create the data object to send
     const data = {
         email: email,
         phoneNumber: phone,
-        address: address
+        street: street,
+        city: city,
+        province: province,
+        postalCode: postalCode,
+        country: country
     };
 
+    // Send the data to the backend via PUT request
     fetch('/api/user/contacts', {
         method: 'PUT',
         headers: {
@@ -110,14 +126,15 @@ function saveContactInfo() {
         })
         .then(data => {
             console.log('Success:', data);
-            // Dopo aver salvato i dati, fai una fetch per ottenere i dati aggiornati
+            // After saving, fetch updated contact info again
             fetchContactInfo();
         })
         .catch(error => {
             console.error('Error saving contact info:', error);
-            // Puoi gestire l'errore qui, ad esempio mostrando un messaggio all'utente
+            // Handle error, e.g., show a message to the user
         });
 }
+
 
 // Aggiungi un event listener al pulsante di salvataggio
 document.getElementById('save-contact-info').addEventListener('click', saveContactInfo);

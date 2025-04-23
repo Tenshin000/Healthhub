@@ -3,6 +3,7 @@ package it.unipi.healthhub.service;
 import it.unipi.healthhub.dto.AppointmentDTO;
 import it.unipi.healthhub.dto.PatientContactsDTO;
 import it.unipi.healthhub.dto.UserDetailsDTO;
+import it.unipi.healthhub.model.mongo.Address;
 import it.unipi.healthhub.model.mongo.Appointment;
 import it.unipi.healthhub.model.mongo.Doctor;
 import it.unipi.healthhub.model.mongo.User;
@@ -111,13 +112,12 @@ public class UserService {
         Optional<User> userOpt = userMongoRepository.findById(patientId);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            PatientContactsDTO patientContactsDTO = new PatientContactsDTO();
-            patientContactsDTO.setEmail(user.getEmail());
-            patientContactsDTO.setPhoneNumber(user.getPersonalNumber());
-            return patientContactsDTO;
+            if(user.getAddress() != null)
+                return new PatientContactsDTO(user.getEmail(), user.getPersonalNumber(), user.getAddress().getStreet(), user.getAddress().getCity(), user.getAddress().getProvince(), user.getAddress().getPostalCode(), user.getAddress().getCountry());
+            else
+                return new PatientContactsDTO(user.getEmail(), user.getPersonalNumber());
         }
         return null;
-
     }
 
     @Transactional
@@ -127,8 +127,13 @@ public class UserService {
             User user = userOpt.get();
             user.setEmail(userContacts.getEmail());
             user.setPersonalNumber(userContacts.getPhoneNumber());
+
+            Address address = new Address(userContacts.getStreet(), userContacts.getCity(), userContacts.getProvince(), userContacts.getPostalCode(), userContacts.getCountry());
+
+            user.setAddress(address);
+
             userMongoRepository.save(user); // Save updated doctor with the updated user details
-            return new PatientContactsDTO(user.getEmail(), user.getPersonalNumber());
+            return new PatientContactsDTO(user.getEmail(), user.getPersonalNumber(), user.getAddress().getStreet(), user.getAddress().getCity(), user.getAddress().getProvince(), user.getAddress().getPostalCode(), user.getAddress().getCountry());
         }
         return null;
     }
