@@ -15,6 +15,24 @@ function addSlot(dayId, startTime = '', endTime = '') {
     dayContainer.appendChild(slotDiv);
 }
 
+// Validation of the slot
+function isValidSlot(startTime, endTime) {
+    const minTime = "07:00";
+    const maxTime = "19:00";
+
+    // Check bounds
+    if (startTime < minTime || endTime > maxTime) {
+        return false;
+    }
+
+    // Check logical order
+    if (endTime <= startTime) {
+        return false;
+    }
+
+    return true;
+}
+
 // Function to remove a specific time slot
 function removeSlot(button) {
     const slotDiv = button.parentElement;
@@ -37,6 +55,13 @@ function saveTemplate() {
         const startTime = slot.querySelector('input[name$="-start"]').value;
         const endTime = slot.querySelector('input[name$="-end"]').value;
         const day = slot.parentElement.id;
+
+        if (!isValidSlot(startTime, endTime)) {
+            alert(`Invalid time slot on ${day}: ${startTime} - ${endTime}. Make sure times are between 07:00 and 19:00 and end is after start.`);
+            enableForm();
+            throw new Error(`Invalid slot: ${startTime} - ${endTime}`);
+        }
+
         if (!templateData.slots[day]) {
             templateData.slots[day] = [];
         }
@@ -170,7 +195,6 @@ function newTemplate() {
         .catch(error => {
             console.error('Error saving template:', error);
         });
-
 }
 
 // Function to disable all elements in a form

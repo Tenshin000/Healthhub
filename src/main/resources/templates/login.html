@@ -12,7 +12,10 @@
 <main>
     <div class="container">
         <div class="login-form">
-            <h2>Accedi</h2>
+            <h2>Login</h2>
+            <div id="error-message" style="color: red;">
+                <span th:if="${error}" th:text="${error}"></span>
+            </div>
             <form action="/login" method="post">
                 <div class="form-group">
                     <label for="username">Email or Username</label>
@@ -33,5 +36,6 @@
 </main>
 <!-- Include footer -->
 <footer th:replace="~{fragments/footer :: footer}"></footer>
+<script src="/js/login.js"></script>
 </body>
 </html>

@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function(){
     const doctorId = document.getElementById('doctor-info').getAttribute('data-doctor-id');
     const calendar = new DoctorScheduleCalendar('calendar', doctorId);
 
-// Funzione per ottenere lo stato iniziale degli endorsement
+    // Function to get the initial state of endorsements
     async function fetchInitialEndorsementState() {
         try {
             const response = await fetch(`/api/doctors/${doctorId}/endorsements`);
@@ -22,11 +22,11 @@ document.addEventListener('DOMContentLoaded', function(){
             updateUIWithEndorsementState();
         } catch (error) {
             console.error('Error fetching initial endorsement state:', error);
-            // Gestisci gli errori in modo appropriato, ad esempio mostrando un messaggio all'utente
+            // Handle errors appropriately, e.g., by showing a message to the user
         }
     }
 
-// Funzione per aggiornare l'interfaccia utente con lo stato degli endorsement corrente
+    // Function to update the UI with the current endorsement state
     function updateUIWithEndorsementState() {
         endorsementElement.textContent = endorsementCount;
         if (hasEndorsed) {
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function(){
         }
     }
 
-// Funzione per gestire l'endorsement
+    // Function to handle endorsement
     async function toggleEndorsement() {
         hasEndorsed = !hasEndorsed;
         try {
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function(){
             updateUIWithEndorsementState();
         } catch (error) {
             console.error('Error endorsing doctor:', error);
-            // Gestisci gli errori in modo appropriato, ad esempio mostrando un messaggio all'utente
+            // Handle errors appropriately, e.g., by showing a message to the user
         }
     }
     endorsementButton.addEventListener('click', toggleEndorsement);
@@ -110,12 +110,12 @@ document.addEventListener('DOMContentLoaded', function(){
 
                 if (response.ok) {
                     document.getElementById('newReview').value = '';
-                    fetchReviews(doctorId);  // Ricarica le recensioni dopo averne aggiunta una nuova
+                    fetchReviews(doctorId);  // Reload the reviews after adding a new one
                 } else {
-                    console.error('Errore durante l\'invio della recensione');
+                    console.error('Error sending review');
                 }
             } catch (error) {
-                console.error('Errore durante l\'invio della recensione:', error);
+                console.error('Error sending review:', error);
             }
         }
     }
@@ -133,10 +133,10 @@ document.addEventListener('DOMContentLoaded', function(){
                 const reviews = await response.json();
                 renderReviews(reviews);
             } else {
-                console.error('Errore durante il recupero delle recensioni');
+                console.error('Error retrieving reviews');
             }
         } catch (error) {
-            console.error('Errore durante il recupero delle recensioni:', error);
+            console.error('Error retrieving reviews:', error);
         }
     }
 
@@ -149,9 +149,9 @@ document.addEventListener('DOMContentLoaded', function(){
 
         const reviewHeaderInfo = document.createElement('div');
         const reviewNameElement = document.createElement('h3');
-        reviewNameElement.textContent = review.name;  // Nome utente passato nell'oggetto review
+        reviewNameElement.textContent = review.name;  // Username passed in the review object
         const reviewDateElement = document.createElement('p');
-        reviewDateElement.textContent = review.date;  // Data passata nell'oggetto review
+        reviewDateElement.textContent = review.date;  // Date passed in the review object
 
         reviewHeaderInfo.appendChild(reviewNameElement);
         reviewHeaderInfo.appendChild(reviewDateElement);
@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
         const reviewContent = document.createElement('p');
         reviewContent.classList.add('review-content');
-        reviewContent.textContent = review.text;  // Testo della recensione passato nell'oggetto review
+        reviewContent.textContent = review.text;  // Review text passed in the review object
 
         newReview.appendChild(reviewHeader);
         newReview.appendChild(reviewContent);
@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
     function renderReviews(reviews) {
         const reviewList = document.getElementById('reviewList');
-        reviewList.innerHTML = '';  // Pulisce la lista prima di renderizzare le recensioni
+        reviewList.innerHTML = '';  // Clear the list before rendering reviews
 
         reviews.forEach(review => {
             const reviewCard = createReviewCard(review);
@@ -180,11 +180,20 @@ document.addEventListener('DOMContentLoaded', function(){
 
     reviewButton.addEventListener('click', sendReview);
 
-    // Appuntamento
-
+    // Appointment
     function bookAppointment() {
-
         const selectedSlot = calendar.getSelectedSlot();
+        const now = new Date();
+
+        const slotDate = new Date(selectedSlot.date);
+        const slotTimeParts = selectedSlot.slot.split(':');
+        slotDate.setHours(parseInt(slotTimeParts[0]), parseInt(slotTimeParts[1]), 0, 0); // Set the time on the slot
+
+        if (slotDate < now) {
+            alert("You cannot book an appointment in the past.");
+            return;
+        }
+
         const service = document.getElementById('service').value;
         const patientNotes = document.getElementById('notes').value;
 
@@ -205,10 +214,18 @@ document.addEventListener('DOMContentLoaded', function(){
             body: JSON.stringify(appointment)
         })
             .then(response => {
+                if (response.status === 401) {
+                    alert("You must be logged in to book an appointment.");
+                    // throw to skip the next `.then()` and go to `.catch()`, if needed
+                    throw new Error('Unauthorized');
+                }
                 if (!response.ok) {
                     throw new Error('Failed to book appointment: ' + response.status);
                 }
-                console.log('Appointment booked!');
+                return response.json(); // assuming you want to process the response
+            })
+            .then(data => {
+                console.log('Appointment booked!', data);
                 calendar.updateWeekInfo();
             })
             .catch(error => {
@@ -216,11 +233,11 @@ document.addEventListener('DOMContentLoaded', function(){
             });
     }
 
+
     document.getElementById('bookButton').addEventListener('click', bookAppointment);
 
-
-    // Recupera dati iniziali
-    fetchReviews(doctorId);  // Recupera le recensioni al caricamento della pagina
+    // Fetch initial data
+    fetchReviews(doctorId);  // Fetch reviews on page load
     fetchInitialEndorsementState();
 
 });

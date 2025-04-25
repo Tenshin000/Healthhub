@@ -75,6 +75,7 @@ public class AuthController {
         }
 
         // If neither patient nor doctor is found, show an error message
+        session.invalidate();
         model.addAttribute("error", "Credenziali non valide");
         return "login";
     }
