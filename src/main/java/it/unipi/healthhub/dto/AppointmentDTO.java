@@ -9,10 +9,10 @@ public class AppointmentDTO {
     private String service;
     private String patientNotes;
 
-    // Costruttore senza argomenti
+    // Constructor with no arguments
     public AppointmentDTO() {}
 
-    // Costruttore con argomenti
+    // Constructor with arguments
     public AppointmentDTO(LocalDate date, String slot, String service, String patientNotes) {
         this.date = date;
         this.slot = slot;
@@ -20,7 +20,7 @@ public class AppointmentDTO {
         this.patientNotes = patientNotes;
     }
 
-    // Getter e Setter
+    // Getters and Setters
     public LocalDate getDate() {
         return date;
     }

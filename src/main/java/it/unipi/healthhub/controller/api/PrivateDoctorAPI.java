@@ -58,7 +58,6 @@ public class PrivateDoctorAPI {
         }
     }
 
-
     @PutMapping("/address")
     public ResponseEntity<Address> updateMyAddress(@RequestBody Address address, HttpServletRequest request) {
         HttpSession session = request.getSession(false);
@@ -455,5 +454,19 @@ public class PrivateDoctorAPI {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/analytics/newPatients")
+    public ResponseEntity<Integer> getNewPatientsAnalytics(HttpServletRequest request){
+        HttpSession session = request.getSession(false);
+        String doctorId = (String) session.getAttribute("doctorId");
+
+        LocalDate currentDate = LocalDate.now();
+        int year = currentDate.getYear();
+        int month = currentDate.getMonthValue();
+
+        Integer count = doctorService.getAnalyticsNewPatientsByMonth(doctorId, year, month);
+
+        return ResponseEntity.ok(count);
     }
 }

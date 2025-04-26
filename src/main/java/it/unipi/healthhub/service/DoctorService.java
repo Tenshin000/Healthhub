@@ -13,6 +13,7 @@ import it.unipi.healthhub.repository.mongo.UserMongoRepository;
 import it.unipi.healthhub.repository.neo4j.DoctorNeo4jRepository;
 import it.unipi.healthhub.repository.neo4j.UserNeo4jRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -124,14 +125,13 @@ public class DoctorService {
             List<it.unipi.healthhub.model.mongo.Service> services = doctor.getServices();
 
             if (index >= 0 && index < services.size()) {
-                services.set(index, service); // Aggiorna il servizio
-                doctorMongoRepository.save(doctor); // Salva il dottore aggiornato con il servizio aggiornato
+                services.set(index, service); // Update the service
+                doctorMongoRepository.save(doctor); // Save the updated doctor with the updated service
                 return true;
             }
         }
         return false;
     }
-
 
     public boolean deleteService(String doctorId, Integer index) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
@@ -142,12 +142,11 @@ public class DoctorService {
             if (index >= 0 && index < services.size()) {
                 services.remove(index.intValue()); // Remove service
                 doctorMongoRepository.save(doctor); // Save updated doctor without the removed service
-                return true; // Indica che la rimozione è avvenuta con successo
+                return true; // Indicates that the removal was successful
             }
         }
-        return false; // Indica che la rimozione non è avvenuta (es. indice non valido o dottore non trovato)
+        return false; // Indicates that the removal did not occur (e.g. invalid index or doctor not found)
     }
-
 
     public List<Appointment> getAppointments(String doctorId) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
@@ -171,9 +170,9 @@ public class DoctorService {
             String slotStart = appointmentDto.getSlot();
 
 
-            // la funzione prova ad aggiornare il parametro taken dello slot nella schedule
-            // se lo slot è già occupato, ritorna false
-            // se riesce a prenotare l'appuntamento, ritorna true
+            // The function tries to update the slot's taken parameter in the schedule
+            // If the slot is already occupied, it returns false
+            // If it manages to book the appointment, it returns true
             boolean taken = doctorMongoRepository.checkScheduleSlot(doctorId, year, week, keyDay, slotStart);
             if(!taken){
                 Appointment appointment = createAppointment(appointmentDto, patient, doctor);
@@ -227,8 +226,8 @@ public class DoctorService {
             String keyDay = dateTimeSlot.getDayOfWeek().toString().toLowerCase();
             String slotStart = dateTimeSlot.toLocalTime().toString();
 
-            // la funzione prova ad aggiornare il parametro taken dello slot nella schedule
-            // se lo slot è già occupato, ritorna false
+            // The function tries to update the slot's taken parameter in the schedule
+            // If the slot is occupied return false
             boolean taken = doctorMongoRepository.checkScheduleSlot(doctorId, year, week, keyDay, slotStart);
             if(taken){
                 appointmentRepository.deleteById(appointmentId);
@@ -244,7 +243,7 @@ public class DoctorService {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         if(doctorOpt.isPresent()){
             Doctor doctor = doctorOpt.get();
-            List<String> ids = doctor.getCalendarTemplates(); // lista di riferimenti (chiavi esterne) a CalendarTemplate
+            List<String> ids = doctor.getCalendarTemplates(); // List of references (foreign keys) to Calendar Template
             List<CalendarTemplate> templates = new ArrayList<>();
             for (String id : ids) {
                 Optional<CalendarTemplate> templateOpt = templateRepository.findById(id);
@@ -294,7 +293,7 @@ public class DoctorService {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         if(doctorOpt.isPresent()){
             Doctor doctor = doctorOpt.get();
-            List<String> ids = doctor.getCalendarTemplates(); // lista di riferimenti (chiavi esterne) a CalendarTemplate
+            List<String> ids = doctor.getCalendarTemplates(); // List of references (foreign keys) to Calendar Template
             List<CalendarTemplate> templates = new ArrayList<>();
             for (String id : ids) {
                 Optional<CalendarTemplate> templateOpt = templateRepository.findById(id);
@@ -350,7 +349,7 @@ public class DoctorService {
                 return null;
             }
             // Schedule typically is a 4 weeks schedule
-            // passed schedule are removed at the end of the week
+            // Passed schedule are removed at the end of the week
             for (Schedule schedule : schedules) {
                 WeekFields weekFields = WeekFields.of(Locale.getDefault());
                 // Again we need to add 1 to the week number because of the issue with the time zones
@@ -568,7 +567,6 @@ public class DoctorService {
         return null;
     }
 
-
     @Transactional
     public boolean removeSpecialization(String doctorId, Integer index) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
@@ -635,7 +633,12 @@ public class DoctorService {
     }
 
     public Map<String, Integer> getVisitsAnalyticsWeek(String doctorId, Integer week, Integer year) {
-        // return the distribution of the visits by day for the given week
+        // Returns the distribution of the visits by day for the given week
         return appointmentRepository.getVisitsCountByDayForDoctorWeek(doctorId, week, year);
+    }
+
+    public Integer getAnalyticsNewPatientsByMonth(String doctorId, int year, int month){
+        // Returns the count of patients who were visited for the first time in the month and year indicated
+        return appointmentRepository.findNewPatientsVisitedByDoctorInCurrentMonth(doctorId, year, month);
     }
 }

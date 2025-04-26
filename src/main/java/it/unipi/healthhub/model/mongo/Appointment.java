@@ -14,7 +14,7 @@ public class Appointment {
     private String patientNotes;
     private double price;
 
-    // Costruttori
+    // Constructors
     public Appointment() {}
 
     public Appointment(String id, LocalDateTime appointmentDateTime, DoctorInfo doctorInfo, PatientInfo patientInfo, String visitType, String patientNotes) {
@@ -26,7 +26,7 @@ public class Appointment {
         this.patientNotes = patientNotes;
     }
 
-    // Getter e Setter
+    // Getters and Setters
     public String getId() {
         return id;
     }
