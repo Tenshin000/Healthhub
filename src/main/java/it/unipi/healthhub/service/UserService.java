@@ -69,7 +69,10 @@ public class UserService {
     public User loginUser(String username, String password) {
         User user = userMongoRepository.findByUsername(username);
 
-        if (user != null && user.getPassword().equals(password)) {
+        if(user == null)
+            user = userMongoRepository.findByEmail(username);
+
+        if(user != null && user.getPassword().equals(password)) {
             System.out.println("User found");
             return user;
         }

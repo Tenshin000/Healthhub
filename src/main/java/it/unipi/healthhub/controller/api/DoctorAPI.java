@@ -88,15 +88,23 @@ public class DoctorAPI {
     }
 
     @PostMapping("/{doctorId}/appointments")
-    public ResponseEntity<AppointmentDTO> bookAnAppointment(@PathVariable String doctorId, @RequestBody AppointmentDTO appointmentDto, HttpServletRequest request) {
-        // usata da un paziente per prenotare un appuntamento
+    public ResponseEntity<AppointmentDTO> bookAnAppointment(
+            @PathVariable String doctorId,
+            @RequestBody AppointmentDTO appointmentDto,
+            HttpServletRequest request) {
+
         HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("patientId") == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // HTTP 401 Unauthorized
+        }
+
         String patientId = (String) session.getAttribute("patientId");
+
         boolean booked = doctorService.bookAnAppointment(doctorId, appointmentDto, patientId);
         if (booked) {
             return ResponseEntity.ok(appointmentDto);
         } else {
-            return ResponseEntity.badRequest().build(); // HTTP 400
+            return ResponseEntity.badRequest().build(); // HTTP 400 Bad Request
         }
     }
 
