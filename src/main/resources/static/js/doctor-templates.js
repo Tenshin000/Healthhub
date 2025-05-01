@@ -137,11 +137,14 @@ function editTemplate(index) {
     // Clear existing slots
     document.querySelectorAll('.day-slots .slot').forEach(slot => slot.remove());
 
-    // Populate slots
+    // Populate slots in chronological order
     Object.keys(template.slots).forEach(day => {
-        template.slots[day].forEach(slot => {
-            addSlot(day, slot.start, slot.end);
-        });
+        // Sort by start time
+        template.slots[day]
+            .sort((a, b) => a.start.localeCompare(b.start))
+            .forEach(slot => {
+                addSlot(day, slot.start, slot.end);
+            });
     });
 
     enableForm();
@@ -189,7 +192,7 @@ function newTemplate() {
         .then(savedTemplate => {
             console.log('Template saved successfully:', savedTemplate);
 
-            // Seconda richiesta GET per ottenere i template aggiornati
+            // Second GET request to get the updated templates
             fetchUpdatedTemplates();
         })
         .catch(error => {

@@ -67,7 +67,6 @@ document.addEventListener('DOMContentLoaded', function(){
     }
     endorsementButton.addEventListener('click', toggleEndorsement);
 
-
     function sendEndorsement() {
         fetch(`/api/doctors/${doctorId}/endorsements`, {
             method: 'POST',
@@ -89,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function(){
     }
 
 
-    // REVIEW CODE
+    // Reviews
     let reviewButton = document.getElementById('reviewButton');
 
     async function sendReview() {
@@ -233,11 +232,9 @@ document.addEventListener('DOMContentLoaded', function(){
             });
     }
 
-
     document.getElementById('bookButton').addEventListener('click', bookAppointment);
 
     // Fetch initial data
     fetchReviews(doctorId);  // Fetch reviews on page load
     fetchInitialEndorsementState();
-
 });

@@ -14,7 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const patientCountElement = document.getElementById('patientCount');
     const patientTodayElement = document.getElementById('patientToday');
     const appointmentList = document.getElementById('appointments-list');
-    const patientInfo = document.getElementById('patient-info');
+    const nowPatientInfo = document.getElementById('patient-info-now');
+    const nextPatientInfo = document.getElementById('patient-info-next');
     const weeklyReviewsElement = document.getElementById('weeklyReviews');
 
     // Chart templates configuration
@@ -126,13 +127,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${year}-${month}-${day}`;
     };
 
-    // Fetch and display user details for the next appointment
-    const fetchUserDetails = async (userId, visitType, patientNotes) => {
+    // Fetch and display user details for a given patient element
+    const fetchUserDetails = async (userId, visitType, patientNotes, targetElement) => {
         const user = await fetchJSON(`/api/users/${userId}`);
-        if(!user)
-            return;
+        if (!user) return;
 
-        patientInfo.innerHTML = '';
+        targetElement.innerHTML = '';
         const fields = [
             { label: 'Name', value: user.name },
             { label: 'Type of Visit', value: visitType },
@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
             valueEl.textContent = value || '-';
 
             row.append(labelEl, valueEl);
-            patientInfo.appendChild(row);
+            targetElement.appendChild(row);
         });
     };
 
@@ -169,6 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
         appointmentList.innerHTML = '';
         let appointmentCount = 0;
         let nextAppointment = null;
+        let currentAppointment = null;
 
         if(appointments && appointments.length){
             appointments.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -189,9 +190,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 appointmentList.appendChild(li);
                 appointmentCount++;
 
-                // Set next upcoming appointment
-                if (!nextAppointment && appointmentDate >= now) {
+                // Set next and current appointments
+                if(!nextAppointment && appointmentDate >= now) {
                     nextAppointment = { userId: patient.id, visitType, patientNotes };
+                }
+                else if(appointmentDate < now) {
+                    currentAppointment = { userId: patient.id, visitType, patientNotes };
                 }
             });
         }
@@ -203,14 +207,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update today's patient count
         patientTodayElement.textContent = appointmentCount;
-        patientInfo.innerHTML = '';
 
-        // Display next appointment details if available
-        if(nextAppointment){
-            fetchUserDetails(nextAppointment.userId, nextAppointment.visitType, nextAppointment.patientNotes);
+        // Check if it's after 19:00
+        if(now.getHours() >= 19){
+            nowPatientInfo.innerHTML = '';
+            nextPatientInfo.innerHTML = '';
         }
         else{
-            patientInfo.innerHTML = `<p>There are no more appointments today.</p>`;
+            // Display current appointment details if available
+            if(currentAppointment){
+                fetchUserDetails(currentAppointment.userId, currentAppointment.visitType, currentAppointment.patientNotes, nowPatientInfo);
+            }
+            else{
+                nowPatientInfo.innerHTML = `<p>There are no appointments at the moment.</p>`;
+            }
+
+            // Display next appointment details if available
+            if(nextAppointment){
+                fetchUserDetails(nextAppointment.userId, nextAppointment.visitType, nextAppointment.patientNotes, nextPatientInfo);
+            }
+            else{
+                nextPatientInfo.innerHTML = `<p>There are no more appointments for today.</p>`;
+            }
         }
     };
 
