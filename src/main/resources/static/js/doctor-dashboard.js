@@ -210,8 +210,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Check if it's after 19:00
         if(now.getHours() >= 19){
-            nowPatientInfo.innerHTML = '';
-            nextPatientInfo.innerHTML = '';
+            nowPatientInfo.innerHTML = `<p>There are no appointments at the moment.</p>`;
+            nextPatientInfo.innerHTML = `<p>There are no more appointments for today.</p>`;
         }
         else{
             // Display current appointment details if available
