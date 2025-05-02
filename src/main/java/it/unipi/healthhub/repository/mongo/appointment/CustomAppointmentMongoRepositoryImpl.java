@@ -143,4 +143,65 @@ public class CustomAppointmentMongoRepositoryImpl implements CustomAppointmentMo
 
         return mongoTemplate.find(query, Appointment.class);
     }
+    
+    @Override
+    public Integer findNewPatientsVisitedByDoctorInCurrentMonth(String doctorId, Integer year, Integer month){
+        LocalDateTime startOfMonth = LocalDate.of(year, month, 1).atStartOfDay();
+        LocalDateTime endOfMonth = startOfMonth.plusMonths(1);
+
+        // 1. Find all doctor's appointments in this month
+        MatchOperation matchAppointmentsThisMonth = Aggregation.match(
+                Criteria.where("doctor.id").is(doctorId)
+                        .and("date").gte(startOfMonth).lt(endOfMonth)
+        );
+
+        // 2. Group by patient ID (we want a list of unique patients)
+        GroupOperation groupByPatient = Aggregation.group("patient.id");
+
+        // 3. Perform aggregation
+        Aggregation aggregation = Aggregation.newAggregation(
+                matchAppointmentsThisMonth,
+                groupByPatient
+        );
+
+        // 4. Execute aggregation
+        AggregationResults<PatientIdResult> results = mongoTemplate.aggregate(aggregation, Appointment.class, PatientIdResult.class);
+        List<PatientIdResult> patientIds = results.getMappedResults();
+
+        int newPatientsCount = 0;
+
+        // 5. For each patient, check if they had previous visits before this month
+        for(PatientIdResult patientIdResult : patientIds){
+            String patientId = patientIdResult.getId();
+
+            boolean hasPreviousAppointments = mongoTemplate.exists(
+                    Query.query(
+                            Criteria.where("doctor.id").is(doctorId)
+                                    .and("patient.id").is(patientId)
+                                    .and("date").lt(startOfMonth)
+                    ),
+                    Appointment.class
+            );
+
+            // If there are NO previous visits => it's a new patient
+            if(!hasPreviousAppointments){
+                newPatientsCount++;
+            }
+        }
+
+        return newPatientsCount;
+    }
+
+    // Internal helper class for group results
+    private static class PatientIdResult{
+        private String id;
+
+        public String getId(){
+            return id;
+        }
+
+        public void setId(String id){
+            this.id = id;
+        }
+    }
 }

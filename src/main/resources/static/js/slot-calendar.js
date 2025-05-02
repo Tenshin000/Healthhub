@@ -57,9 +57,16 @@ class DoctorScheduleCalendar {
         this.weekInfo.textContent = this.getWeekRange(this.currentDate);
 
         this.fetchScheduleData(year, week).then(data => {
+            // Sort each day's slots chronologically
+            if(data && data.slots){
+                Object.keys(data.slots).forEach(dayKey => {
+                    data.slots[dayKey].sort((a, b) => a.start.localeCompare(b.start));
+                });
+            }
             this.updateDays(data);
         });
     }
+
 
     startOfWeek(d) {
         d = new Date(d);

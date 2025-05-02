@@ -21,4 +21,10 @@ public class DateUtil {
         //DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return firstDayOfWeek;
     }
+
+    public static boolean isSameWeek(LocalDate date1, LocalDate date2) {
+        java.time.temporal.WeekFields weekFields = java.time.temporal.WeekFields.ISO;
+        return date1.get(weekFields.weekOfWeekBasedYear()) == date2.get(weekFields.weekOfWeekBasedYear())
+                && date1.getYear() == date2.getYear();
+    }
 }

@@ -5,6 +5,7 @@ import it.unipi.healthhub.dto.*;
 import it.unipi.healthhub.service.AppointmentService;
 import it.unipi.healthhub.service.DoctorService;
 
+import it.unipi.healthhub.util.DateUtil;
 import it.unipi.healthhub.service.UserService;
 import it.unipi.healthhub.util.ScheduleConverter;
 import it.unipi.healthhub.util.TemplateConverter;
@@ -151,7 +152,6 @@ public class DoctorAPI {
         }
     }
 
-
     @PostMapping("/{doctorId}/endorse")
     public ResponseEntity<EndorsementDTO> endorseDoctor(@PathVariable String doctorId, HttpServletRequest request) {
         HttpSession session = request.getSession(false);
@@ -171,7 +171,6 @@ public class DoctorAPI {
         EndorsementDTO endorsementDto = new EndorsementDTO(endorsementCount, false);
         return ResponseEntity.ok(endorsementDto);
     }
-
 
     // Endpoints for reviews
     @GetMapping("/{doctorId}/reviews")
@@ -202,4 +201,23 @@ public class DoctorAPI {
         }
     }
 
+    @GetMapping("/{doctorId}/reviews/week/count")
+    public ResponseEntity<Integer> getReviewsCount(@PathVariable String doctorId){
+        List<Review> reviews = doctorService.getReviews(doctorId);
+
+        if(reviews != null){
+            LocalDate currentDate = LocalDate.now();
+
+            // Filter reviews that are in the same week as the currentDate
+            // Counting the reviews that are made in the same week of now
+            long count = reviews.stream()
+                    .filter(review -> DateUtil.isSameWeek(review.getDate(), currentDate))
+                    .count();
+
+            return ResponseEntity.ok((int) count);
+        }
+        else{
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
