@@ -19,13 +19,6 @@ def import_data_to_mongo(host):
     client = MongoClient(config["MONGO_URI"])
     db = client[config["DB_NAME"]]
 
-    # Doctors
-    if "doctors" not in db.list_collection_names():
-        with open(os.path.join(JSON_DIR, "doctors.json"), "r", encoding="utf-8") as file:
-            data = json.load(file)
-        db["doctors"].insert_many(data if isinstance(data, list) else [data])
-        print("✅ Doctors importati")
-
     # Users
     if "users" not in db.list_collection_names():
         db["users"].drop()
@@ -33,6 +26,20 @@ def import_data_to_mongo(host):
             data = json.load(file)
         db["users"].insert_many(data if isinstance(data, list) else [data])
         print("✅ Users importati")
+
+    # Doctors
+    if "doctors" not in db.list_collection_names():
+        with open(os.path.join(JSON_DIR, "doctors.json"), "r", encoding="utf-8") as file:
+            data = json.load(file)
+
+        users = {u["ousername"]: u for u in db["users"].find()}
+
+        for doc in data:
+            for rev in doc["reviews"]:
+                rev["patientId"] = users[rev["patientId"]]["_id"]
+
+        db["doctors"].insert_many(data if isinstance(data, list) else [data])
+        print("✅ Doctors importati")
 
     # Appointments
     if "appointments" not in db.list_collection_names():

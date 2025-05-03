@@ -25,16 +25,16 @@ def generate_user(username):
         ''.join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", k=4))
     )[:16]
 
-    phone_numbers = [fake.phone_number() for _ in range(2)]
+    phone_numbers = fake.phone_number()
     email = profile['mail']
 
     return {
         "fiscalCode": fiscal_code,
         "name": name,
-        "passwordHash": PASSWORD_HASH,
-        "dateOfBirth": dob.strftime('%Y-%m-%d'),
+        "password": PASSWORD_HASH,
+        "dob": dob.strftime('%Y-%m-%d'),
         "gender": gender,
-        "phoneNumbers": phone_numbers,
+        "personalNumber": phone_numbers,
         "email": email,
         "ousername": username
     }
@@ -58,19 +58,23 @@ def refactor_doctor(doctor, usermap):
     reviews = []
     if "reviews" in doctor:
         for review in doctor["reviews"]:
-            review["ousername"] = review["name"]
-            review["name"] = usermap[review["name"]]["name"]
-            reviews.append(review)
+            ousername = review["name"]
+            new_rev = {}
+            new_rev["patientId"] = ousername
+            new_rev["name"] = usermap[ousername]["name"]
+            new_rev["text"] = review["review"]
+            new_rev["date"] = review["time"]
+            reviews.append(new_rev)
 
     return {
         "name": doctor["name"],
         "email": email,
-        "passwordHash": PASSWORD_HASH,
+        "password": PASSWORD_HASH,
         "address": doctor["address"],
-        "phoneNumbers": doctor["phone_numbers"],
+        "phone_numbers": doctor["phone_numbers"],
         "specializations": doctor["specializations"],
         "services": doctor["servicies"],
-        "endorseCount": 0,
+        "endorsementCount": 0,
         "reviews": reviews,
         "reviewsCount": len(reviews)
     }
@@ -85,29 +89,33 @@ def generate_appointment_date(review_date_str):
     appointment_date = review_date - timedelta(days=random.randint(1, 10))
     return appointment_date.strftime('%Y-%m-%dT%H:%M:%SZ')
 
-def generate_appointment(doctor, patient, review_date, visit_type, notes):
+def generate_appointment(doctor, patient, review_date, visit_type, price, notes):
     return {
-        "appointmentDateTime": generate_appointment_date(review_date),
-        "doctor": {"name": doctor["name"]},
+        "date": generate_appointment_date(review_date),
+        "doctor": {
+            "id": doctor["name"],
+            "name": doctor["name"]
+        },
         "patient": {
-            "ousername": patient["ousername"],
-            "fullName": patient["name"],
+            "id": patient["ousername"],
+            "name": patient["name"],
             "fiscalCode": patient["fiscalCode"]
         },
         "visitType": visit_type,
-        "patientNotes": notes
+        "patientNotes": notes,
+        "price": price
     }
 
 def generate_appointments(doctors, users):
     usermap = {user["ousername"]: user for user in users}
     appointments = []
     for doctor in tqdm(doctors, desc="Generating appointments"):
-        services = [service["service"] for service in doctor.get("services", [])]
+        services = [(service["service"], service["price"]) for service in doctor.get("services", [])]
         for review in doctor.get("reviews", []):
             user = usermap.get(review["ousername"])
             if user:
                 service = random.choice(services) if services else ""
-                appointments.append(generate_appointment(doctor, user, review["time"], service, ""))
+                appointments.append(generate_appointment(doctor, user, review["time"], service[0], service[1], ""))
     return appointments
 
 def generate_user_likes(doctors, appointments):
