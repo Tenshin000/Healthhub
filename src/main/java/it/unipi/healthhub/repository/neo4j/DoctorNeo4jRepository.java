@@ -5,6 +5,9 @@ import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 @Repository
 public interface DoctorNeo4jRepository extends Neo4jRepository<DoctorDAO, String>{
@@ -26,5 +29,4 @@ public interface DoctorNeo4jRepository extends Neo4jRepository<DoctorDAO, String
             "SET d.name = $name " +
             "RETURN d")
     DoctorDAO updateName(@Param("id") String id, @Param("name") String name);
-
 }

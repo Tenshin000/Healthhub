@@ -1,13 +1,17 @@
 package it.unipi.healthhub.repository.neo4j;
 
+import it.unipi.healthhub.model.neo4j.DoctorDAO;
 import it.unipi.healthhub.model.neo4j.UserDAO;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 @Repository
-public interface UserNeo4jRepository extends Neo4jRepository<UserDAO, String> {
+public interface UserNeo4jRepository extends Neo4jRepository<UserDAO, String>, CustomUserNeo4jRepository{
     @Query("MATCH (u:User) WHERE u.id = $userId "+
             "MATCH (d:Doctor) WHERE d.id = $doctorId " +
             "MERGE (u)-[:ENDORSED]->(d) ")
