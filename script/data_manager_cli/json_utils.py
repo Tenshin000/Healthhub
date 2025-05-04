@@ -36,6 +36,7 @@ def generate_user(username):
         "gender": gender,
         "personalNumber": phone_numbers,
         "email": email,
+        "username": username,
         "ousername": username
     }
 
@@ -65,13 +66,20 @@ def refactor_doctor(doctor, usermap):
             new_rev["text"] = review["review"]
             new_rev["date"] = review["time"]
             reviews.append(new_rev)
+        
+    if "address" in doctor:
+        address = doctor["address"]
+        if "cap" in address:
+            address["postalCode"] = address["cap"]
+            address.pop("cap",None)
 
     return {
         "name": doctor["name"],
         "email": email,
+        "username": doctor["name"],
         "password": PASSWORD_HASH,
         "address": doctor["address"],
-        "phone_numbers": doctor["phone_numbers"],
+        "phoneNumbers": doctor["phone_numbers"],
         "specializations": doctor["specializations"],
         "services": doctor["servicies"],
         "endorsementCount": 0,
@@ -112,10 +120,10 @@ def generate_appointments(doctors, users):
     for doctor in tqdm(doctors, desc="Generating appointments"):
         services = [(service["service"], service["price"]) for service in doctor.get("services", [])]
         for review in doctor.get("reviews", []):
-            user = usermap.get(review["ousername"])
+            user = usermap.get(review["patientId"])
             if user:
-                service = random.choice(services) if services else ""
-                appointments.append(generate_appointment(doctor, user, review["time"], service[0], service[1], ""))
+                service = random.choice(services) if services else ("",0)
+                appointments.append(generate_appointment(doctor, user, review["date"], service[0], service[1], ""))
     return appointments
 
 def generate_user_likes(doctors, appointments):
@@ -124,13 +132,13 @@ def generate_user_likes(doctors, appointments):
     for doc in tqdm(doctors, desc="Processing doctors and reviews"):
         doctor_province[doc["name"]] = doc["address"]["province"]
         for rev in doc["reviews"]:
-            user_review_counts[rev["ousername"]] += 1
+            user_review_counts[rev["patientId"]] += 1
 
     user_province = defaultdict(set)
     province_doctor = defaultdict(set)
 
     for app in tqdm(appointments, desc="Processing appointments"):
-        user = app["patient"]["ousername"]
+        user = app["patient"]["id"]
         doctor = app["doctor"]["name"]
         province = doctor_province[doctor]
 

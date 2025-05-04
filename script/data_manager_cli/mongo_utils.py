@@ -25,6 +25,23 @@ def import_data_to_mongo(host):
         with open(os.path.join(JSON_DIR, "users.json"), "r", encoding="utf-8") as file:
             data = json.load(file)
         db["users"].insert_many(data if isinstance(data, list) else [data])
+
+        db["users"].update_many(
+            {"dob": {"$type": "string"}},  # Filtro per documenti che hanno "dob" come stringa
+            [
+                {
+                    "$set": {
+                        "dob": {
+                            "$dateFromString": {
+                                "dateString": "$dob",  # Campo da convertire
+                                "format": "%Y-%m-%d"  # Formato della data
+                            }
+                        }
+                    }
+                }
+            ]
+        )
+
         print("✅ Users importati")
 
     # Doctors
@@ -32,14 +49,46 @@ def import_data_to_mongo(host):
         with open(os.path.join(JSON_DIR, "doctors.json"), "r", encoding="utf-8") as file:
             data = json.load(file)
 
-        users = {u["ousername"]: u for u in db["users"].find()}
+        users = {u["username"]: u for u in db["users"].find()}
 
         for doc in data:
             for rev in doc["reviews"]:
                 rev["patientId"] = users[rev["patientId"]]["_id"]
 
         db["doctors"].insert_many(data if isinstance(data, list) else [data])
+
+        db["doctors"].update_many(
+            {
+                "reviews.date": {"$type": "string"}
+            },
+            [
+                {
+                    "$set": {
+                        "reviews": {
+                            "$map": {
+                                "input": "$reviews",
+                                "as": "rev",
+                                "in": {
+                                    "$mergeObjects": [
+                                        "$$rev",
+                                        {
+                                            "date": {
+                                                "$dateFromString": {
+                                                    "dateString": "$$rev.date"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        )
+
         print("✅ Doctors importati")
+
 
     # Appointments
     if "appointments" not in db.list_collection_names():
@@ -47,7 +96,7 @@ def import_data_to_mongo(host):
             data = json.load(file)
 
         doctors = {d["name"]: d for d in db["doctors"].find()}
-        users = {u["ousername"]: u for u in db["users"].find()}
+        users = {u["username"]: u for u in db["users"].find()}
 
         for a in data:
             d = a.get("doctor", {}).get("name")
@@ -58,6 +107,18 @@ def import_data_to_mongo(host):
                 a["patient"].pop("ousername", None)
 
         db["appointments"].insert_many(data)
+
+        db["appointments"].update_many(
+            { "date": { "$type": "string" } },
+            [
+                {
+                    "$set": {
+                        "date": { "$dateFromString": { "dateString": "$date" } }
+                    }
+                }
+            ]
+        )
+        
         print("✅ Appointments importati")
 
     client.close()
