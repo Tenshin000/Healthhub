@@ -99,12 +99,13 @@ def import_data_to_mongo(host):
         users = {u["username"]: u for u in db["users"].find()}
 
         for a in data:
-            d = a.get("doctor", {}).get("name")
-            u = a.get("patient", {}).get("ousername")
+            d = a.get("doctor", {}).get("_id")
+            u = a.get("patient", {}).get("_id")
             if d in doctors and u in users:
-                a["doctor"]["id"] = doctors[d]["_id"]
-                a["patient"]["id"] = users[u]["_id"]
-                a["patient"].pop("ousername", None)
+                a["doctor"]["_id"] = doctors[d]["_id"]
+                a["patient"]["_id"] = users[u]["_id"]
+                a["doctor"].pop("id",None)
+                a["patient"].pop("id",None)
 
         db["appointments"].insert_many(data)
 

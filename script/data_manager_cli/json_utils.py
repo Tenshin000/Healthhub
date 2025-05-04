@@ -9,7 +9,8 @@ from tqdm import tqdm
 from config import JSON_DIR
 
 fake = Faker('it_IT')
-PASSWORD_HASH = hashlib.sha256("password".encode()).hexdigest()
+PASSWORD = "password"
+PASSWORD_HASH = hashlib.sha256(PASSWORD.encode()).hexdigest()
 
 def generate_user(username):
     profile = fake.simple_profile()
@@ -31,13 +32,12 @@ def generate_user(username):
     return {
         "fiscalCode": fiscal_code,
         "name": name,
-        "password": PASSWORD_HASH,
+        "password": PASSWORD,
         "dob": dob.strftime('%Y-%m-%d'),
         "gender": gender,
         "personalNumber": phone_numbers,
         "email": email,
-        "username": username,
-        "ousername": username
+        "username": username
     }
 
 def generate_users(data):
@@ -59,10 +59,10 @@ def refactor_doctor(doctor, usermap):
     reviews = []
     if "reviews" in doctor:
         for review in doctor["reviews"]:
-            ousername = review["name"]
+            username = review["name"]
             new_rev = {}
-            new_rev["patientId"] = ousername
-            new_rev["name"] = usermap[ousername]["name"]
+            new_rev["patientId"] = username
+            new_rev["name"] = usermap[username]["name"]
             new_rev["text"] = review["review"]
             new_rev["date"] = review["time"]
             reviews.append(new_rev)
@@ -76,8 +76,8 @@ def refactor_doctor(doctor, usermap):
     return {
         "name": doctor["name"],
         "email": email,
-        "username": doctor["name"],
-        "password": PASSWORD_HASH,
+        "username": doctor["name"].lower().replace(" ", "_"),
+        "password": PASSWORD,
         "address": doctor["address"],
         "phoneNumbers": doctor["phone_numbers"],
         "specializations": doctor["specializations"],
@@ -87,9 +87,44 @@ def refactor_doctor(doctor, usermap):
         "reviewsCount": len(reviews)
     }
 
+def find_most_recent_review_date(doctors):
+    latest_date = None
+    for doc in tqdm(doctors, desc="Finding most recent review"):
+        for rev in doc.get("reviews", []):
+            date_str = rev.get("date", None)
+            if date_str:
+                try:
+                    date = datetime.fromisoformat(date_str)
+                    if latest_date is None or date > latest_date:
+                        latest_date = date
+                except ValueError:
+                    continue
+    return latest_date
+
+def postpone_reviews(doctors, manual_delta: timedelta = timedelta(weeks=4)):
+    most_recent_date = find_most_recent_review_date(doctors)
+    if not most_recent_date:
+        print("Nessuna data valida trovata.")
+        return
+
+    now = datetime.now(most_recent_date.tzinfo)  # Fuso orario coerente
+    delta = (now - most_recent_date) + manual_delta
+
+    for doc in tqdm(doctors, desc="Postponing reviews"):
+        for rev in doc.get("reviews", []):
+            date_str = rev.get("date", None)
+            if date_str:
+                try:
+                    original_date = datetime.fromisoformat(date_str)
+                    new_date = original_date + delta
+                    rev["date"] = new_date.isoformat()
+                except ValueError:
+                    continue
+
 def generate_doctors(data, users):
-    usermap = {user["ousername"]: user for user in users}
+    usermap = {user["username"]: user for user in users}
     doctors = [refactor_doctor(doctor, usermap) for doctor in tqdm(data, desc="Generating doctors")]
+    postpone_reviews(doctors)
     return doctors
 
 def generate_appointment_date(review_date_str):
@@ -101,11 +136,11 @@ def generate_appointment(doctor, patient, review_date, visit_type, price, notes)
     return {
         "date": generate_appointment_date(review_date),
         "doctor": {
-            "id": doctor["name"],
+            "_id": doctor["name"],
             "name": doctor["name"]
         },
         "patient": {
-            "id": patient["ousername"],
+            "_id": patient["username"],
             "name": patient["name"],
             "fiscalCode": patient["fiscalCode"]
         },
@@ -115,7 +150,7 @@ def generate_appointment(doctor, patient, review_date, visit_type, price, notes)
     }
 
 def generate_appointments(doctors, users):
-    usermap = {user["ousername"]: user for user in users}
+    usermap = {user["username"]: user for user in users}
     appointments = []
     for doctor in tqdm(doctors, desc="Generating appointments"):
         services = [(service["service"], service["price"]) for service in doctor.get("services", [])]
@@ -138,8 +173,8 @@ def generate_user_likes(doctors, appointments):
     province_doctor = defaultdict(set)
 
     for app in tqdm(appointments, desc="Processing appointments"):
-        user = app["patient"]["id"]
-        doctor = app["doctor"]["name"]
+        user = app["patient"]["_id"]
+        doctor = app["doctor"]["_id"]
         province = doctor_province[doctor]
 
         user_province[user].add(province)
