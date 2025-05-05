@@ -13,7 +13,6 @@ public class Doctor extends User {
     private List<Schedule> schedules;
     private List<String> calendarTemplates;
     private List<String> specializations;
-    @Field("phone_numbers")
     private List<String> phoneNumbers;
 
     public Doctor() {

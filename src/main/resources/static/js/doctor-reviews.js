@@ -105,6 +105,4 @@ document.addEventListener('DOMContentLoaded', function(){
     }
 
     fetchReviews();
-
-
 });

@@ -7,6 +7,7 @@ import it.unipi.healthhub.model.mongo.Address;
 import it.unipi.healthhub.model.mongo.Appointment;
 import it.unipi.healthhub.model.mongo.Doctor;
 import it.unipi.healthhub.model.mongo.User;
+import it.unipi.healthhub.model.neo4j.DoctorDAO;
 import it.unipi.healthhub.model.neo4j.UserDAO;
 import it.unipi.healthhub.repository.mongo.AppointmentMongoRepository;
 import it.unipi.healthhub.repository.mongo.DoctorMongoRepository;
@@ -19,10 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.WeekFields;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
+
 
 @Service
 public class UserService {
@@ -197,5 +197,43 @@ public class UserService {
             doctorOpt.ifPresent(reviewedDoctors::add);
         });
         return reviewedDoctors;
+    }
+
+    @Transactional
+    public List<DoctorDAO> getRecommendedDoctors(String userId, int limit1, int limit2){
+        List<DoctorDAO> recommendedDoctors = new ArrayList<>();
+
+        // Doctors with specializations already attended
+        List<DoctorDAO> seenSpecDoctors = userNeo4jRepository.recommendDoctorsBySeenSpecializations(userId, limit1);
+        // Doctors with specializations new to the user
+        List<DoctorDAO> unseenSpecDoctors = userNeo4jRepository.recommendDoctorsByNotSeenSpecializations(userId, limit2);
+
+        recommendedDoctors.addAll(seenSpecDoctors);
+        recommendedDoctors.addAll(unseenSpecDoctors);
+
+        // If the list is incomplete or empty, add popular doctors
+        if(recommendedDoctors.size() < (limit1 + limit2)){
+            int remaining = limit1 + limit2 - recommendedDoctors.size();
+
+            // Only retrieve doctors that have not already been added
+            Set<String> alreadyAddedIds = recommendedDoctors.stream()
+                    .map(DoctorDAO::getId)
+                    .collect(Collectors.toSet());
+
+            List<DoctorDAO> popularDoctors = userNeo4jRepository.recommendPopularDoctors(remaining * 2); // We take more and then filter
+
+            // Add only those not already present
+            if(!popularDoctors.isEmpty()){
+                for(DoctorDAO doctor : popularDoctors){
+                    if(!alreadyAddedIds.contains(doctor.getId())){
+                        recommendedDoctors.add(doctor);
+                        if(recommendedDoctors.size() == (limit1 + limit2))
+                            break;
+                    }
+                }
+            }
+        }
+
+        return recommendedDoctors;
     }
 }

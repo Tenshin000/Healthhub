@@ -12,8 +12,8 @@
 
 <main>
     <section class="recommended-doctors">
-        <h2>Recommended Doctors</h2>
-        <div class="doctor-cards">
+        <h2>No Doctor Recommended</h2>
+            <!--
             <a href="/doctor/mario-rossi" class="doctor-card">
                 <div>
                     <h3>Dr. Mario Rossi</h3>
@@ -32,6 +32,7 @@
                     <p>Neurologo</p>
                 </div>
             </a>
+            -->
         </div>
     </section>
     <section class="liked-reviewed-doctors">
@@ -66,6 +67,6 @@
     </section>
 </main>
 <footer th:replace="~{fragments/footer :: footer}"></footer>
-
+<script th:src="@{/js/user-favorites.js}"></script>
 </body>
 </html>

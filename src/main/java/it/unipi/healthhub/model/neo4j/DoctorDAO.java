@@ -40,7 +40,6 @@ public class DoctorDAO {
         this.name = name;
     }
 
-
     public List<String> getSpecializations() {
         return specializations;
     }
