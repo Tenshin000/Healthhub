@@ -146,5 +146,5 @@ pip install -r requirements.txt
 - Commands can be combined to automate the full pipeline.
 - Remote operations require SSH access and appropriate permissions to read/write in the target destination.
 - The `--transfer-csv` command may not work in all environments and could require additional configuration or manual file transfer.
-- For manual transfer, move the CSV files generated with `--export-csv` from the `csv` subdirectory within the import tool to the `import` volume mount point (e.g., `$HOME/neo4j/import/csv`).
+- For manual transfer, move the CSV files generated with `--export-csv` from the `csv` subdirectory within the import tool to the `import` volume mount point (e.g., `$HOME/neo4j/import/`).
 - Make sure Docker containers for MongoDB and Neo4j are running before executing the CLI commands.
