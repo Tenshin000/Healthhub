@@ -32,7 +32,7 @@
 
         <section class="contact-info">
             <h3>Contact Information</h3>
-            <p><strong>Address:</strong> <span th:text="${doctor?.address?.toShortString()}">Via Roma 1, Milano</span></p>
+            <p><strong>Address:</strong> <span th:text="${doctor?.address?.toString()}">Via Roma 1, Milano</span></p>
             <p><strong>Phone:</strong> <span th:each="number,iterStat : ${doctor?.phoneNumbers}"
                                              th:text="${number} + ${!iterStat.last ? ', ' : ''}"></span></p>
             <p><strong>Email:</strong> <span th:text="${doctor?.email}">mario.rossi@esempio.com</span></p>

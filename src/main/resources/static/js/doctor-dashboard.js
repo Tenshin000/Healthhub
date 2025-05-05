@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update the count of new patients this month
     const updateNewPatients = async () => {
-        const data = await fetchJSON('/api/doctor/analytics/newPatients');
+        const data = await fetchJSON('/api/doctor/analytics/patients');
         if(data !== null && patientCountElement){
             patientCountElement.textContent = data;
         }

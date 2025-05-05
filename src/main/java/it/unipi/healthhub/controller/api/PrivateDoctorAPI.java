@@ -456,7 +456,7 @@ public class PrivateDoctorAPI {
         }
     }
 
-    @GetMapping("/analytics/newPatients")
+    @GetMapping("/analytics/patients")
     public ResponseEntity<Integer> getNewPatientsAnalytics(HttpServletRequest request){
         HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
