@@ -28,6 +28,7 @@ def generate_user(username):
 
     phone_numbers = fake.phone_number()
     email = profile['mail']
+    gender = 'male' if gender == 'M' else "female"
 
     return {
         "fiscalCode": fiscal_code,
@@ -72,6 +73,14 @@ def refactor_doctor(doctor, usermap):
         if "cap" in address:
             address["postalCode"] = address["cap"]
             address.pop("cap",None)
+
+    if "servicies" in doctor:
+        services = doctor.get("servicies",[])
+        for serv in services:
+            try:
+                serv["price"] = float(serv["price"])
+            except (ValueError, TypeError):
+                serv["price"] = 0.0
 
     return {
         "name": doctor["name"],
