@@ -82,6 +82,9 @@ def refactor_doctor(doctor, usermap):
             except (ValueError, TypeError):
                 serv["price"] = 0.0
 
+    if not doctor.get("specializations"):
+        doctor["specializations"] = ["Medico di Base"]
+
     return {
         "name": doctor["name"],
         "email": email,
