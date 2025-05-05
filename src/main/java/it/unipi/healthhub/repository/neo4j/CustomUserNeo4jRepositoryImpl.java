@@ -1,7 +1,6 @@
 package it.unipi.healthhub.repository.neo4j;
 
 import it.unipi.healthhub.model.neo4j.DoctorDAO;
-
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.Result;
@@ -12,7 +11,7 @@ import org.neo4j.driver.Values;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CustomUserNeo4jRepositoryImpl implements CustomUserNeo4jRepository{
+public class CustomUserNeo4jRepositoryImpl implements CustomUserNeo4jRepository {
     // Field
     private final Driver driver;
 
@@ -21,7 +20,6 @@ public class CustomUserNeo4jRepositoryImpl implements CustomUserNeo4jRepository{
         this.driver = driver;
     }
 
-    // Methods
     /**
      * Recommends doctors based on seen specializations of the user.
      * Retrieves doctors recommended by other users who have interacted with similar doctors,
@@ -31,41 +29,42 @@ public class CustomUserNeo4jRepositoryImpl implements CustomUserNeo4jRepository{
      * @param limit Maximum number of doctors to recommend.
      * @return List of recommended doctors with their details.
      */
+    @Override
     public List<DoctorDAO> recommendDoctorsBySeenSpecializations(String userId, int limit) {
-        try(Session session = driver.session()){
+        try (Session session = driver.session()) {
             return session.readTransaction(tx -> {
                 Result result = tx.run(
-                        // Match the user and the doctors they have endorsed or reviewed
+                        // Find doctors reviewed/endorsed by the given user
                         "MATCH (u:User {id: $userId})-[:ENDORSED|REVIEWED]->(d:Doctor) " +
-                                // Find other users who have endorsed/reviewed the same doctors
+                                // Find other users who also reviewed/endorsed the same doctors
                                 "<-[:ENDORSED|REVIEWED]-(other:User)-[:ENDORSED|REVIEWED]->(rec:Doctor) " +
-                                // Exclude doctors that the original user has already interacted with
+                                // Exclude doctors already reviewed/endorsed by the given user
                                 "WHERE NOT (u)-[:ENDORSED|REVIEWED]->(rec) " +
-                                // Count how many times each doctor is recommended (popularity score)
-                                "WITH rec, count(*) AS popularityScore " +
-                                // Match again the doctors the user has already interacted with
+                                // Carry forward u to avoid losing the user filter
+                                "WITH rec, count(*) AS popularityScore, u " +
+                                // Get the specializations of doctors the user has reviewed/endorsed
                                 "MATCH (u)-[:ENDORSED|REVIEWED]->(d2:Doctor) " +
-                                // Extract specializations from those doctors
                                 "UNWIND d2.specializations AS spec " +
-                                // Collect all seen specializations into a list (distinct to avoid duplicates)
                                 "WITH rec, popularityScore, collect(DISTINCT spec) AS seenSpecs " +
-                                // Keep only recommended doctors whose all specializations were already seen by the user
-                                "WHERE ALL(recSpec IN rec.specializations WHERE recSpec IN seenSpecs) " +
-                                // Return doctor data
+                                // Recommend only those whose specs are all in the seen set
+                                "WHERE rec.specializations IS NOT NULL AND ALL(recSpec IN rec.specializations WHERE recSpec IN seenSpecs) " +
+                                // Return the recommended doctors ordered by popularity
                                 "RETURN rec.id AS id, rec.name AS name, rec.specializations AS specializations " +
-                                // Order by popularity score descending
                                 "ORDER BY popularityScore DESC " +
-                                // Limit the number of returned doctors
                                 "LIMIT $limit",
                         Values.parameters("userId", userId, "limit", limit)
                 );
                 List<DoctorDAO> doctors = new ArrayList<>();
                 while (result.hasNext()) {
-                    org.neo4j.driver.Record record = result.next();
+                    Record record = result.next();
+                    Value specValue = record.get("specializations");
+                    List<String> specializations = specValue.isNull()
+                            ? new ArrayList<>()
+                            : specValue.asList(Value::asString);
                     doctors.add(new DoctorDAO(
                             record.get("id").asString(),
                             record.get("name").asString(),
-                            record.get("specializations").asList(Value::asString)
+                            specializations
                     ));
                 }
                 return doctors;
@@ -82,41 +81,42 @@ public class CustomUserNeo4jRepositoryImpl implements CustomUserNeo4jRepository{
      * @param limit Maximum number of doctors to recommend.
      * @return List of recommended doctors with their details.
      */
-    public List<DoctorDAO> recommendDoctorsByNotSeenSpecializations(String userId, int limit){
-        try(Session session = driver.session()){
+    @Override
+    public List<DoctorDAO> recommendDoctorsByNotSeenSpecializations(String userId, int limit) {
+        try (Session session = driver.session()) {
             return session.readTransaction(tx -> {
                 Result result = tx.run(
-                        // Match the user and the doctors they have endorsed or reviewed
+                        // Find doctors reviewed/endorsed by the given user
                         "MATCH (u:User {id: $userId})-[:ENDORSED|REVIEWED]->(d:Doctor) " +
-                                // Find other users who have endorsed/reviewed the same doctors
+                                // Find other users who also reviewed/endorsed the same doctors
                                 "<-[:ENDORSED|REVIEWED]-(other:User)-[:ENDORSED|REVIEWED]->(rec:Doctor) " +
-                                // Exclude doctors that the original user has already interacted with
+                                // Exclude doctors already reviewed/endorsed by the given user
                                 "WHERE NOT (u)-[:ENDORSED|REVIEWED]->(rec) " +
-                                // Count how many times each doctor is recommended (popularity score)
-                                "WITH rec, count(*) AS popularityScore " +
-                                // Match again the doctors the user has already interacted with
+                                // Carry forward u to avoid losing the user filter
+                                "WITH rec, count(*) AS popularityScore, u " +
+                                // Get the specializations of doctors the user has reviewed/endorsed
                                 "MATCH (u)-[:ENDORSED|REVIEWED]->(d2:Doctor) " +
-                                // Extract specializations from those doctors
                                 "UNWIND d2.specializations AS spec " +
-                                // Collect all seen specializations into a list (distinct to avoid duplicates)
                                 "WITH rec, popularityScore, collect(DISTINCT spec) AS seenSpecs " +
-                                // Keep only recommended doctors whose all specializations are NOT among the user's seen ones
-                                "WHERE ALL(recSpec IN rec.specializations WHERE NOT recSpec IN seenSpecs) " +
-                                // Return doctor data
+                                // Recommend only those whose specs are all new to the user
+                                "WHERE rec.specializations IS NOT NULL AND ALL(recSpec IN rec.specializations WHERE NOT recSpec IN seenSpecs) " +
+                                // Return the recommended doctors ordered by popularity
                                 "RETURN rec.id AS id, rec.name AS name, rec.specializations AS specializations " +
-                                // Order by popularity score descending
                                 "ORDER BY popularityScore DESC " +
-                                // Limit the number of returned doctors
                                 "LIMIT $limit",
                         Values.parameters("userId", userId, "limit", limit)
                 );
                 List<DoctorDAO> doctors = new ArrayList<>();
                 while (result.hasNext()) {
-                    org.neo4j.driver.Record record = result.next();
+                    Record record = result.next();
+                    Value specValue = record.get("specializations");
+                    List<String> specializations = specValue.isNull()
+                            ? new ArrayList<>()
+                            : specValue.asList(Value::asString);
                     doctors.add(new DoctorDAO(
                             record.get("id").asString(),
                             record.get("name").asString(),
-                            record.get("specializations").asList(Value::asString)
+                            specializations
                     ));
                 }
                 return doctors;
@@ -132,31 +132,33 @@ public class CustomUserNeo4jRepositoryImpl implements CustomUserNeo4jRepository{
      * @param limit Maximum number of popular doctors to recommend.
      * @return List of popular doctors with their details.
      */
-    public List<DoctorDAO> recommendPopularDoctors(int limit){
-        try(Session session = driver.session()){
+    @Override
+    public List<DoctorDAO> recommendPopularDoctors(int limit) {
+        try (Session session = driver.session()) {
             return session.readTransaction(tx -> {
                 Result result = tx.run(
-                        // Match all doctors
-                        "MATCH (d:Doctor) " +
-                                // Optionally match relationships from users to each doctor via endorsement or review
+                        // Match all doctors with non-null specializations
+                        "MATCH (d:Doctor) WHERE d.specializations IS NOT NULL " +
+                                // Optionally match endorsements or reviews to compute popularity
                                 "OPTIONAL MATCH (u:User)-[r:ENDORSED|REVIEWED]->(d) " +
-                                // Count how many times each doctor has been endorsed or reviewed (popularity score)
                                 "WITH d, count(r) AS popularityScore " +
-                                // Return doctor data
+                                // Return popular doctors ordered by popularity
                                 "RETURN d.id AS id, d.name AS name, d.specializations AS specializations " +
-                                // Order by popularity score descending
                                 "ORDER BY popularityScore DESC " +
-                                // Limit the number of returned doctors
                                 "LIMIT $limit",
                         Values.parameters("limit", limit)
                 );
                 List<DoctorDAO> doctors = new ArrayList<>();
                 while (result.hasNext()) {
                     Record record = result.next();
+                    Value specValue = record.get("specializations");
+                    List<String> specializations = specValue.isNull()
+                            ? new ArrayList<>()
+                            : specValue.asList(Value::asString);
                     doctors.add(new DoctorDAO(
                             record.get("id").asString(),
                             record.get("name").asString(),
-                            record.get("specializations").asList(Value::asString)
+                            specializations
                     ));
                 }
                 return doctors;

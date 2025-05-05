@@ -203,14 +203,17 @@ public class UserService {
     public List<DoctorDAO> getRecommendedDoctors(String userId, int limit1, int limit2){
         List<DoctorDAO> recommendedDoctors = new ArrayList<>();
 
+        System.out.println("1");
         // Doctors with specializations already attended
         List<DoctorDAO> seenSpecDoctors = userNeo4jRepository.recommendDoctorsBySeenSpecializations(userId, limit1);
-
+        System.out.println("2");
         // Doctors with specializations new to the user
         List<DoctorDAO> unseenSpecDoctors = userNeo4jRepository.recommendDoctorsByNotSeenSpecializations(userId, limit2);
-
+        System.out.println("3");
         recommendedDoctors.addAll(seenSpecDoctors);
+        System.out.println("4");
         recommendedDoctors.addAll(unseenSpecDoctors);
+        System.out.println("5");
 
         // If the list is incomplete or empty, add popular doctors
         if(recommendedDoctors.size() < (limit1 + limit2)){
@@ -234,6 +237,7 @@ public class UserService {
                 }
             }
         }
+        System.out.println("6");
 
         return recommendedDoctors;
     }

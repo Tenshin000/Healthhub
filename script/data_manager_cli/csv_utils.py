@@ -11,10 +11,12 @@ def export_csv(host):
 
     users = list(db["users"].find())
     doctors = list(db["doctors"].find())
+
     with open(os.path.join(JSON_DIR,"user_likes.json"), 'r', encoding='utf-8') as f:
         likes = json.load(f)
 
-    usermap = {u["ousername"]: u for u in users}
+
+    usermap = {u["username"]: u for u in users}
     doctormap = {d["name"]: d for d in doctors}
 
     os.makedirs(CSV_DIR, exist_ok=True)
@@ -25,8 +27,11 @@ def export_csv(host):
     pd.DataFrame([{"id": str(d["_id"]), "name": d.get("name", ""), "specializations": ";".join(d.get("specializations", []))} for d in doctors])\
         .to_csv(os.path.join(CSV_DIR, "doctors.csv"), index=False)
     
-    reviews = [{"doctor_id": str(d["_id"]), "user_id": str(usermap[r["ousername"]]["_id"])} 
-               for d in doctors for r in d.get("reviews", []) if r["ousername"] in usermap]
+    reviews = [
+        {"doctor_id": str(d["_id"]), "user_id": str(review["patientId"])}
+        for d in doctors
+        for review in d.get("reviews", [])
+    ]
     pd.DataFrame(reviews).drop_duplicates()\
         .to_csv(os.path.join(CSV_DIR, "reviews.csv"), index=False)
 
