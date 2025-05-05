@@ -2,6 +2,8 @@
 async function fetchRecommendedDoctors(limit1 = 2, limit2 = 3){
     try{
         // Fetch GET with limit1 and limit2 parameters
+        // limit1 is for the recommended doctors with specializations you already used
+        // limit2 is for the recommended doctors without specializations you already used
         const response = await fetch(`/api/user/recommendations?limit1=${limit1}&limit2=${limit2}`);
         if(!response.ok){
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -13,7 +15,6 @@ async function fetchRecommendedDoctors(limit1 = 2, limit2 = 3){
         // Select the section and empty it
         const section = document.querySelector('.recommended-doctors');
         section.innerHTML = '';
-
 
         // Create the doctor cards container
         const cardsContainer = document.createElement('div');
