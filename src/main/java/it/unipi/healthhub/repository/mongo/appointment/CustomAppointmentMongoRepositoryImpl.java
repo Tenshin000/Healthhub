@@ -84,7 +84,7 @@ public class CustomAppointmentMongoRepositoryImpl implements CustomAppointmentMo
         for (DBObject doc : results.getMappedResults()) {
             Integer month = (Integer) doc.get("month");
             String monthString = new DateFormatSymbols(Locale.ENGLISH).getMonths()[month-1].toLowerCase();
-            Double total = (Double) doc.get("total");
+            Double total = (doc.get("total") instanceof Number) ? ((Number) doc.get("total")).doubleValue() : null;
             earningsByYear.put(monthString, total);
         }
 

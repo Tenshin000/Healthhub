@@ -15,7 +15,6 @@ def export_csv(host):
     with open(os.path.join(JSON_DIR,"user_likes.json"), 'r', encoding='utf-8') as f:
         likes = json.load(f)
 
-
     usermap = {u["username"]: u for u in users}
     doctormap = {d["name"]: d for d in doctors}
 
