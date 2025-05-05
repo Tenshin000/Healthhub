@@ -39,3 +39,6 @@ script/data_manager_cli/json/
 script/data_manager_cli/csv/
 src/main/java/it/unipi/healthhub/HealthhubApplication.java
 
+# Python virtual environments
+**/venv/
+**/.venv/
