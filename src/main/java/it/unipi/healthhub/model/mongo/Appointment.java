@@ -89,12 +89,14 @@ public class Appointment {
     public static class DoctorInfo {
         private String id;
         private String name;
+        private Address address;
 
         public DoctorInfo() {}
 
-        public DoctorInfo(String doctorId, String doctorName) {
+        public DoctorInfo(String doctorId, String doctorName, Address address) {
             this.id = doctorId;
             this.name = doctorName;
+            this.address = address;
         }
 
         public String getId() {
@@ -111,6 +113,14 @@ public class Appointment {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        public Address getAddress() {
+            return address;
+        }
+
+        public void setAddress(Address address) {
+            this.address = address;
         }
     }
 

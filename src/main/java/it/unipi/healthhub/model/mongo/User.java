@@ -15,6 +15,7 @@ public class User {
 
     protected String name;
     protected String password;
+    protected String fiscalCode;
     protected LocalDate dob;
     protected String gender;
     private String personalNumber;
@@ -36,6 +37,9 @@ public class User {
     public void setUsername(String username) {
         this.username = username;
     }
+
+    public String getFiscalCode(){ return fiscalCode; }
+    public void setFiscalCode(String fiscalCode){ this.fiscalCode = fiscalCode; }
 
     public String getGender() {
         return gender;

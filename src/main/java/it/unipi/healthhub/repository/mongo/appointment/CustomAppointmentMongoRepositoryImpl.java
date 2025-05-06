@@ -143,65 +143,46 @@ public class CustomAppointmentMongoRepositoryImpl implements CustomAppointmentMo
 
         return mongoTemplate.find(query, Appointment.class);
     }
-    
+
     @Override
     public Integer findNewPatientsVisitedByDoctorInCurrentMonth(String doctorId, Integer year, Integer month){
         LocalDateTime startOfMonth = LocalDate.of(year, month, 1).atStartOfDay();
         LocalDateTime endOfMonth = startOfMonth.plusMonths(1);
 
-        // 1. Find all doctor's appointments in this month
-        MatchOperation matchAppointmentsThisMonth = Aggregation.match(
+        // 1. Filter all appointments for this doctor
+        MatchOperation matchDoctor = Aggregation.match(
                 Criteria.where("doctor.id").is(doctorId)
-                        .and("date").gte(startOfMonth).lt(endOfMonth)
         );
 
-        // 2. Group by patient ID (we want a list of unique patients)
-        GroupOperation groupByPatient = Aggregation.group("patient.id");
+        // 2. Group by patient ID and compute the date of their first visit
+        GroupOperation groupByPatient = Aggregation.group("patient.id")
+                .min("date").as("firstVisitDate");
 
-        // 3. Perform aggregation
+        // 3. Keep only those patients whose first visit falls in the current month
+        MatchOperation matchFirstVisitInMonth = Aggregation.match(
+                Criteria.where("firstVisitDate").gte(startOfMonth).lt(endOfMonth)
+        );
+
+        // 4. Count how many unique new patients remain
+        CountOperation countNewPatients = Aggregation.count().as("newPatientsCount");
+
         Aggregation aggregation = Aggregation.newAggregation(
-                matchAppointmentsThisMonth,
-                groupByPatient
+                matchDoctor,
+                groupByPatient,
+                matchFirstVisitInMonth,
+                countNewPatients
         );
 
-        // 4. Execute aggregation
-        AggregationResults<PatientIdResult> results = mongoTemplate.aggregate(aggregation, Appointment.class, PatientIdResult.class);
-        List<PatientIdResult> patientIds = results.getMappedResults();
+        // Execute the aggregation pipeline
+        AggregationResults<org.bson.Document> results =
+                mongoTemplate.aggregate(aggregation, Appointment.class, org.bson.Document.class);
 
-        int newPatientsCount = 0;
-
-        // 5. For each patient, check if they had previous visits before this month
-        for(PatientIdResult patientIdResult : patientIds){
-            String patientId = patientIdResult.getId();
-
-            boolean hasPreviousAppointments = mongoTemplate.exists(
-                    Query.query(
-                            Criteria.where("doctor.id").is(doctorId)
-                                    .and("patient.id").is(patientId)
-                                    .and("date").lt(startOfMonth)
-                    ),
-                    Appointment.class
-            );
-
-            // If there are NO previous visits => it's a new patient
-            if(!hasPreviousAppointments){
-                newPatientsCount++;
-            }
+        List<org.bson.Document> mappedResults = results.getMappedResults();
+        if(mappedResults.isEmpty()){
+            return 0;
         }
-
-        return newPatientsCount;
-    }
-
-    // Internal helper class for group results
-    private static class PatientIdResult{
-        private String id;
-
-        public String getId(){
-            return id;
-        }
-
-        public void setId(String id){
-            this.id = id;
+        else{
+            return mappedResults.get(0).getInteger("newPatientsCount", 0);
         }
     }
 }

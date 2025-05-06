@@ -4,16 +4,18 @@ import java.time.LocalDate;
 
 public class UserDetailsDTO {
     private String fullName;
+    private String fiscalCode;
     private LocalDate birthDate;
     private String gender;
 
-    // Costruttori, getter e setter
+    // Constructors, getters and setters
 
     public UserDetailsDTO() {
     }
 
-    public UserDetailsDTO(String fullName, LocalDate birthDate, String gender) {
+    public UserDetailsDTO(String fullName, String fiscalCode, LocalDate birthDate, String gender) {
         this.fullName = fullName;
+        this.fiscalCode = fiscalCode;
         this.birthDate = birthDate;
         this.gender = gender;
     }
@@ -26,6 +28,9 @@ public class UserDetailsDTO {
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }
+
+    public String getFiscalCode(){ return this.fiscalCode; }
+    public void setFiscalCode(String fiscalCode){ this.fiscalCode = fiscalCode; }
 
     public LocalDate getBirthDate() {
         return birthDate;

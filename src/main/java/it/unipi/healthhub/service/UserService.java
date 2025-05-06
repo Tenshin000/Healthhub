@@ -91,6 +91,7 @@ public class UserService {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             user.setName(userDetails.getFullName());
+            user.setFiscalCode(userDetails.getFiscalCode());
             user.setDob(userDetails.getBirthDate());
             user.setGender(userDetails.getGender());
 
@@ -106,7 +107,7 @@ public class UserService {
         Optional<User> userOpt = userMongoRepository.findById(patientId);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            return new UserDetailsDTO(user.getName(), user.getDob(), user.getGender());
+            return new UserDetailsDTO(user.getName(),user.getFiscalCode(), user.getDob(), user.getGender());
         }
         return null;
     }

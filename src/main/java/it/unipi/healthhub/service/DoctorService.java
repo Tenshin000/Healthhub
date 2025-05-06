@@ -195,7 +195,7 @@ public class DoctorService {
         LocalDateTime appointmentDateTime = appointmentDto.getDate().atTime(timeSlot);
 
         appointment.setDate(appointmentDateTime);
-        appointment.setDoctor(new Appointment.DoctorInfo(doctor.getId(), doctor.getName()));
+        appointment.setDoctor(new Appointment.DoctorInfo(doctor.getId(), doctor.getName(), doctor.getAddress()));
         appointment.setPatient(new Appointment.PatientInfo(patient.getId(), patient.getName()));
         appointment.setVisitType(appointmentDto.getService());
         List<it.unipi.healthhub.model.mongo.Service> services = doctor.getServices();
@@ -497,6 +497,7 @@ public class DoctorService {
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
             doctor.setName(userDetails.getFullName());
+            doctor.setFiscalCode(userDetails.getFiscalCode());
             doctor.setDob(userDetails.getBirthDate());
             doctor.setGender(userDetails.getGender());
 

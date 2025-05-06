@@ -1,5 +1,5 @@
 function fetchAppointments() {
-    fetch('/api/user/appointments/upcoming')  // URL dell'endpoint API
+    fetch('/api/user/appointments/upcoming')  // API endpoint URL
         .then(response => response.json())
         .then(data => renderAppointments(data))
         .catch(error => console.error('Error fetching appointments:', error));
@@ -7,7 +7,7 @@ function fetchAppointments() {
 
 function renderAppointments(appointments) {
     const appointmentsList = document.getElementById('upcoming-appointments');
-    appointmentsList.innerHTML = '';  // Svuota la lista degli appuntamenti
+    appointmentsList.innerHTML = '';  // Clear the appointment list
 
     appointments.forEach(appointment => {
         const listItem = document.createElement('li');
@@ -21,15 +21,15 @@ function renderAppointments(appointments) {
 
         appointmentInfo.innerHTML = `
             <h3>Dr. ${appointment.doctor.name}</h3>
-            <p><strong>Data:</strong> ${date}</p>
-            <p><strong>Ora:</strong> ${slot}</p>
-            <p><strong>Servizio:</strong> ${appointment.visitType}</p>
-            <p><strong>Indirizzo:</strong> ${appointment.address}</p>
+            <p><strong>Date:</strong> ${date}</p>
+            <p><strong>Time:</strong> ${slot}</p>
+            <p><strong>Service:</strong> ${appointment.visitType}</p>
+            <p><strong>Address:</strong> ${appointment.address?.toString() ?? 'Undefined'}</p>
         `;
 
         const cancelButton = document.createElement('button');
         cancelButton.className = 'cancel-button';
-        cancelButton.textContent = 'Cancella';
+        cancelButton.textContent = 'Cancel';
         cancelButton.addEventListener('click', () => cancelAppointment(appointment.id));
 
         listItem.appendChild(appointmentInfo);
@@ -46,14 +46,14 @@ function cancelAppointment(appointmentId) {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            // Ricarica gli appuntamenti dopo la cancellazione
+            // Reload appointments after deletion
             fetchAppointments();
         })
         .catch(error => console.error('Error cancelling appointment:', error));
 }
 
 function fetchPastAppointments() {
-    fetch('/api/user/appointments/past')  // URL dell'endpoint API per appuntamenti passati
+    fetch('/api/user/appointments/past')  // API endpoint URL for past appointments
         .then(response => response.json())
         .then(data => renderPastAppointments(data))
         .catch(error => console.error('Error fetching past appointments:', error));
@@ -61,7 +61,7 @@ function fetchPastAppointments() {
 
 function renderPastAppointments(appointments) {
     const pastAppointmentsList = document.getElementById('past-appointments');
-    pastAppointmentsList.innerHTML = '';  // Svuota la lista degli appuntamenti
+    pastAppointmentsList.innerHTML = '';  // Clear the list of past appointments
 
     appointments.forEach(appointment => {
         const listItem = document.createElement('li');
@@ -73,13 +73,12 @@ function renderPastAppointments(appointments) {
         const date = appointment.date.split('T')[0];
         const slot = appointment.date.split('T')[1].slice(0, 5);
 
-
         appointmentInfo.innerHTML = `
             <h3>Dr. ${appointment.doctor.name}</h3>
-            <p><strong>Data:</strong> ${date}</p>
-            <p><strong>Ora:</strong> ${slot}</p>
-            <p><strong>Servizio:</strong> ${appointment.visitType}</p>
-            <p><strong>Indirizzo:</strong> ${appointment.address}</p>
+            <p><strong>Date:</strong> ${date}</p>
+            <p><strong>Time:</strong> ${slot}</p>
+            <p><strong>Service:</strong> ${appointment.visitType}</p>
+            <p><strong>Address:</strong> ${appointment.address}</p>
         `;
 
         listItem.appendChild(appointmentInfo);
@@ -88,7 +87,7 @@ function renderPastAppointments(appointments) {
 }
 
 function cancelPastAppointment(appointmentId) {
-    // Placeholder function - in realtà non si dovrebbe cancellare un appuntamento passato
+    // Placeholder function - you shouldn't be able to cancel a past appointment
     console.warn('Cannot cancel past appointments');
 }
 
