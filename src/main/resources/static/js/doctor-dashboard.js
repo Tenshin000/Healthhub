@@ -135,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
         targetElement.innerHTML = '';
         const fields = [
             { label: 'Name', value: user.name },
+            { label: 'Fiscal Code', value: user.fiscalCode },
             { label: 'Type of Visit', value: visitType },
             { label: 'Notes', value: patientNotes },
             { label: 'D.O.B', value: user.dob },

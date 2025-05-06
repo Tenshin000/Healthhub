@@ -5,6 +5,12 @@ function fetchAppointments() {
         .catch(error => console.error('Error fetching appointments:', error));
 }
 
+function formatAddress(addr) {
+    if(!addr)
+        return 'Undefined';
+    return `${addr.street}, ${addr.city}, ${addr.province}, ${addr.postalCode}, ${addr.country}`;
+}
+
 function renderAppointments(appointments) {
     const appointmentsList = document.getElementById('upcoming-appointments');
     appointmentsList.innerHTML = '';  // Clear the appointment list
@@ -24,21 +30,21 @@ function renderAppointments(appointments) {
             <p><strong>Date:</strong> ${date}</p>
             <p><strong>Time:</strong> ${slot}</p>
             <p><strong>Service:</strong> ${appointment.visitType}</p>
-            <p><strong>Address:</strong> ${appointment.address?.toString() ?? 'Undefined'}</p>
+            <p><strong>Address:</strong> ${formatAddress(appointment.doctor.address)}</p>
         `;
 
-        const cancelButton = document.createElement('button');
-        cancelButton.className = 'cancel-button';
-        cancelButton.textContent = 'Cancel';
-        cancelButton.addEventListener('click', () => cancelAppointment(appointment.id));
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'cancel-button';
+        deleteButton.textContent = 'Delete';
+        deleteButton.addEventListener('click', () => deleteAppointment(appointment.id));
 
         listItem.appendChild(appointmentInfo);
-        listItem.appendChild(cancelButton);
+        listItem.appendChild(deleteButton);
         appointmentsList.appendChild(listItem);
     });
 }
 
-function cancelAppointment(appointmentId) {
+function deleteAppointment(appointmentId) {
     fetch(`/api/user/appointments/${appointmentId}`, {
         method: 'DELETE'
     })
@@ -78,7 +84,7 @@ function renderPastAppointments(appointments) {
             <p><strong>Date:</strong> ${date}</p>
             <p><strong>Time:</strong> ${slot}</p>
             <p><strong>Service:</strong> ${appointment.visitType}</p>
-            <p><strong>Address:</strong> ${appointment.address}</p>
+            <p><strong>Address:</strong> ${formatAddress(appointment.doctor.address)}</p>
         `;
 
         listItem.appendChild(appointmentInfo);
@@ -86,9 +92,9 @@ function renderPastAppointments(appointments) {
     });
 }
 
-function cancelPastAppointment(appointmentId) {
-    // Placeholder function - you shouldn't be able to cancel a past appointment
-    console.warn('Cannot cancel past appointments');
+function deletePastAppointment(appointmentId) {
+    // Placeholder function - you shouldn't be able to delete a past appointment
+    console.warn('Cannot delete past appointments');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
