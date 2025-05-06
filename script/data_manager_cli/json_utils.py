@@ -49,7 +49,20 @@ def generate_users(data):
 def refactor_doctor(doctor, usermap):
     profile = fake.simple_profile()
     email = profile["mail"]
+    dob = profile["birthdate"]
+    gender = profile['sex']
     _, domain = email.split('@') 
+
+    orderRegistrationNumber = lambda: f"{random.choice(['RM','MI','FI','NA','TO'])}-{random.randint(1, 999999):06d}"
+
+    name = doctor["name"]
+    fiscal_code = (
+        name.split()[1][:3].upper().ljust(3, 'X') +
+        name.split()[0][:3].upper().ljust(3, 'X') +
+        dob.strftime("%y%m%d") +
+        ('M' if gender == 'M' else 'F') +
+        ''.join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", k=4))
+    )[:16]
 
     try:
         first_name, last_name = doctor["name"].split()
@@ -96,7 +109,10 @@ def refactor_doctor(doctor, usermap):
         "services": doctor["servicies"],
         "endorsementCount": 0,
         "reviews": reviews,
-        "reviewsCount": len(reviews)
+        "reviewsCount": len(reviews),
+        "dob": dob.strftime('%Y-%m-%d'),
+        "fiscal_code": fiscal_code,
+        "orderRegistrationNumber": orderRegistrationNumber()
     }
 
 def find_most_recent_review_date(doctors):
@@ -113,7 +129,7 @@ def find_most_recent_review_date(doctors):
                     continue
     return latest_date
 
-def postpone_reviews(doctors, manual_delta: timedelta = timedelta(weeks=4)):
+def postpone_reviews(doctors, manual_delta: timedelta = timedelta(weeks=0)):
     most_recent_date = find_most_recent_review_date(doctors)
     if not most_recent_date:
         print("Nessuna data valida trovata.")
@@ -149,7 +165,8 @@ def generate_appointment(doctor, patient, review_date, visit_type, price, notes)
         "date": generate_appointment_date(review_date),
         "doctor": {
             "_id": doctor["name"],
-            "name": doctor["name"]
+            "name": doctor["name"],
+            "address": doctor["address"]
         },
         "patient": {
             "_id": patient["username"],
@@ -216,6 +233,12 @@ def generate_user_likes(doctors, appointments):
 
     return user_likes
 
+def update_endorseCount(doctors, users_like):
+    doctormap = {doctor["name"]: doctor for doctor in doctors}
+    for _, endorsedDoctors in tqdm(users_like.items(), desc="Updating endorsementCount"):
+        for doc in endorsedDoctors:
+            doctormap[doc]["endorsementCount"] += 1
+
 def save(data, file):
     os.makedirs(JSON_DIR, exist_ok=True)
     with open(file, "w", encoding="utf-8") as f:
@@ -228,6 +251,7 @@ def generate_all_json(datasource):
     doctors = generate_doctors(data, users)
     appointments = generate_appointments(doctors, users)
     user_likes = generate_user_likes(doctors, appointments)
+    update_endorseCount(doctors, user_likes)
     
     save(users, os.path.join(JSON_DIR, "users.json"))
     save(doctors, os.path.join(JSON_DIR, "doctors.json"))

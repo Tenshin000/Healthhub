@@ -58,6 +58,22 @@ def import_data_to_mongo(host):
         db["doctors"].insert_many(data if isinstance(data, list) else [data])
 
         db["doctors"].update_many(
+            {"dob": {"$type": "string"}},  # Filtro per documenti che hanno "dob" come stringa
+            [
+                {
+                    "$set": {
+                        "dob": {
+                            "$dateFromString": {
+                                "dateString": "$dob",  # Campo da convertire
+                                "format": "%Y-%m-%d"  # Formato della data
+                            }
+                        }
+                    }
+                }
+            ]
+        )
+
+        db["doctors"].update_many(
             {
                 "reviews.date": {"$type": "string"}
             },
