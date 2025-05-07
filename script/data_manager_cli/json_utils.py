@@ -53,7 +53,7 @@ def refactor_doctor(doctor, usermap):
     gender = profile['sex']
     _, domain = email.split('@') 
 
-    orderRegistrationNumber = lambda: f"{random.choice(['RM','MI','FI','NA','TO'])}-{random.randint(1, 999999):06d}"
+    orderRegistrationNumber = lambda: f"{doctor["address"]["province"]}-{random.randint(1, 999999):06d}"
 
     name = doctor["name"]
     fiscal_code = (
@@ -166,12 +166,15 @@ def generate_appointment(doctor, patient, review_date, visit_type, price, notes)
         "doctor": {
             "_id": doctor["name"],
             "name": doctor["name"],
-            "address": doctor["address"]
+            "address": doctor["address"],
+            "email": doctor["email"]
         },
         "patient": {
             "_id": patient["username"],
             "name": patient["name"],
-            "fiscalCode": patient["fiscalCode"]
+            "fiscalCode": patient["fiscalCode"],
+            "email": patient["email"],
+            "gender": patient["gender"]
         },
         "visitType": visit_type,
         "patientNotes": notes,
