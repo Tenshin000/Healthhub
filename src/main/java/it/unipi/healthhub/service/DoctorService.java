@@ -46,6 +46,9 @@ public class DoctorService {
     @Autowired
     private AppointmentService appointmentService;
 
+    @Autowired
+    private FakeMailSender fakeMailSender;
+
     public List<Doctor> searchDoctors(String query) {
         if (query != null && !query.isEmpty()) {
             return doctorMongoRepository.findByNameContainingOrSpecializationsContainingOrAddressContaining(query, query, query);
@@ -239,7 +242,7 @@ public class DoctorService {
         if(taken){
             appointmentService.deleteAppointment(appointment.getId());
             doctorMongoRepository.freeScheduleSlot(appointment.getDoctor().getId(), year, week, keyDay, slotStart);
-            FakeMailSender.sendDeletedAppointmentMailByDoctor(appointment);
+            fakeMailSender.sendDeletedAppointmentMailByDoctor(appointment);
             return true;
         }
 

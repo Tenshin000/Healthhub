@@ -37,6 +37,8 @@ public class UserService {
     private DoctorMongoRepository doctorMongoRepository;
     @Autowired
     private AppointmentService appointmentService;
+    @Autowired
+    private FakeMailSender fakeMailSender;
 
     public List<User> getAllUser(){
         return userMongoRepository.findAll();
@@ -180,7 +182,7 @@ public class UserService {
         if(taken){
             appointmentService.deleteAppointment(appointment.getId());
             doctorMongoRepository.freeScheduleSlot(doctorId, year, week, keyDay, slotStart);
-            FakeMailSender.sendDeletedAppointmentMailByPatient(appointment);
+            fakeMailSender.sendDeletedAppointmentMailByPatient(appointment);
             return true;
         }
 

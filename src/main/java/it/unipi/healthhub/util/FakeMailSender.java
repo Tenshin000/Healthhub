@@ -1,47 +1,33 @@
 package it.unipi.healthhub.util;
 
 import it.unipi.healthhub.model.mongo.Appointment;
-import java.time.LocalDate;
+import org.springframework.stereotype.Service;
 
-public class FakeMailSender{
-    private static FakeMailSender instance;
+@Service("fakeMailSender")
+public class FakeMailSender implements MailSenderService {
+    // private final JavaMailSender mailSender;
     private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
-    private static final String PERSONAl_EMAIL = "customer.support@healthhub.com";
+    private static final String PERSONAL_EMAIL = "customer.support@healthhub.com";
 
-    private FakeMailSender(){
-        System.out.println("MailService initialized: " + PERSONAl_EMAIL);
+    private boolean emailValidator(String email){
+        return email != null && email.matches(EMAIL_REGEX);
     }
 
-    // Method to get the singleton instance
-    public static FakeMailSender getInstance() {
-        if (instance == null) {
-            instance = new FakeMailSender();
-        }
-        return instance;
-    }
-
-    public static boolean sendDeletedAppointmentMailByDoctor(Appointment appointment){
+    @Override
+    public boolean sendDeletedAppointmentMailByDoctor(Appointment appointment){
         String subject = "Healthhub - Deleted Appointment";
 
-        // For the gender of the patient
-        String salutation;
-        switch(appointment.getPatient().getGender().toLowerCase()){
-            case "male":
-                salutation = "Mr.";
-                break;
-            case "female":
-                salutation = "Mrs.";
-                break;
-            default:
-                salutation = "Mx.";
-                break;
-        }
+        String salutation = switch (appointment.getPatient().getGender().toLowerCase()){
+            case "male" -> "Mr.";
+            case "female" -> "Mrs.";
+            default -> "Mx.";
+        };
 
         String text = "Hi " + salutation + " " + appointment.getPatient().getName() + ". \n" +
                 "Your appointment with Dr. " + appointment.getDoctor().getName() +
                 " set for the " + appointment.getDate() +
-                " has been deleted. We apologize for the inconvenience. \n"  +
-                "Please. Book again on our website or contact your doctor. " +
+                " has been deleted. We apologize for the inconvenience. \n" +
+                "Please book again on our website or contact your doctor. " +
                 "Alternatively you can contact the doctor at this email address: " +
                 appointment.getDoctor().getEmail() + "\n" +
                 "We wish you a good day.";
@@ -49,37 +35,31 @@ public class FakeMailSender{
         return fakeSendEmail(appointment.getPatient().getEmail(), subject, text);
     }
 
-    public static boolean sendDeletedAppointmentMailByPatient(Appointment appointment){
+    @Override
+    public boolean sendDeletedAppointmentMailByPatient(Appointment appointment){
         String subject = "Healthhub - Deleted Appointment";
 
-        // For the gender of the patient
-        String salutation;
-        switch(appointment.getPatient().getGender().toLowerCase()){
-            case "male":
-                salutation = "Mr.";
-                break;
-            case "female":
-                salutation = "Mrs.";
-                break;
-            default:
-                salutation = "Mx.";
-                break;
-        }
+        String salutation = switch (appointment.getPatient().getGender().toLowerCase()){
+            case "male" -> "Mr.";
+            case "female" -> "Mrs.";
+            default -> "Mx.";
+        };
 
         String text = "Hi Dr. " + appointment.getDoctor().getName() + ". \n" +
-                "Your appointment with " + salutation + appointment.getPatient().getName() +
+                "Your appointment with " + salutation + " " + appointment.getPatient().getName() +
                 " set for the " + appointment.getDate() +
                 " has been deleted. We apologize for the inconvenience. \n" +
-                "You can contact the patient at this email address: " + appointment.getPatient().getEmail() + " \n" +
+                "You can contact the patient at this email address: " +
+                appointment.getPatient().getEmail() + "\n" +
                 "We wish you a good day.";
 
-        return fakeSendEmail(appointment.getPatient().getEmail(), subject, text);
+        return fakeSendEmail(appointment.getDoctor().getEmail(), subject, text);
     }
 
-    public static boolean fakeSendEmail(String email, String subject, String text){
-        if(getInstance().emailValidator(email)){
-            System.out.println("Sending email to: " + email + " with " + PERSONAl_EMAIL);
-            System.out.println("Email content:" + subject);
+    public boolean fakeSendEmail(String to, String subject, String text){
+        if(emailValidator(to)){
+            System.out.println("Sending email to: " + to + " with " + PERSONAL_EMAIL);
+            System.out.println("Email subject: " + subject);
             System.out.println("--------------------------------------------------");
             System.out.println(text);
             System.out.println("--------------------------------------------------");
@@ -92,7 +72,22 @@ public class FakeMailSender{
         }
     }
 
-    private boolean emailValidator(String email){
-        return (email != null && email.matches(EMAIL_REGEX));
+    /*
+    public boolean sendEmail(String to, String subject, String text) {
+        try{
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(text);
+            mailSender.send(message);
+            return true;
+        }
+        catch(MessagingException e){
+            e.printStackTrace();
+            return false;
+        }
     }
+     */
 }
