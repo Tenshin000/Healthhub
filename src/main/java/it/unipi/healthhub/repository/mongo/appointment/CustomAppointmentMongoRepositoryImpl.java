@@ -2,6 +2,7 @@ package it.unipi.healthhub.repository.mongo.appointment;
 
 import com.mongodb.DBObject;
 import it.unipi.healthhub.model.mongo.Appointment;
+import it.unipi.healthhub.model.mongo.User;
 import it.unipi.healthhub.util.DateUtil;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -184,5 +185,23 @@ public class CustomAppointmentMongoRepositoryImpl implements CustomAppointmentMo
         else{
             return mappedResults.get(0).getInteger("newPatientsCount", 0);
         }
+    }
+
+    @Override
+    public List<Appointment> findByDoctorIdAndWeek(String doctorId, Integer week, Integer year) {
+        // Calculate the start of the requested week (Monday at 00:00)
+        LocalDateTime startOfWeek = DateUtil.getFirstDayOfWeek(week, year).atStartOfDay();
+        // Calculate the start of the following week to use as exclusive upper bound
+        LocalDateTime endOfWeek   = DateUtil.getFirstDayOfWeek(week + 1, year).atStartOfDay();
+
+        // Build a query filtering by doctor id and date within [startOfWeek, endOfWeek)
+        Query query = new Query();
+        query.addCriteria(Criteria.where("doctor.id").is(doctorId)
+                .and("date").gte(startOfWeek).lt(endOfWeek));
+        // Optionally sort results in ascending order by date
+        query.with(Sort.by(Sort.Direction.ASC, "date"));
+
+        // Execute the query and return matching appointments
+        return mongoTemplate.find(query, Appointment.class);
     }
 }

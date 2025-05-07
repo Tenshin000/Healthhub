@@ -10,7 +10,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -338,17 +340,20 @@ public class PrivateDoctorAPI {
         Map<String, List<PrenotableSlot>> modelSlots = ScheduleConverter.convertToModelSlots(dtoSlots);
         schedule.setSlots(modelSlots);
 
-        Schedule newSchedule = doctorService.addSchedule(doctorId, schedule);
+        try{
+            Schedule newSchedule = doctorService.addSchedule(doctorId, schedule);
+            if (newSchedule != null) {
+                modelSlots = newSchedule.getSlots();
+                dtoSlots = ScheduleConverter.convertToDtoSlots(modelSlots);
 
-        if (newSchedule != null) {
-            modelSlots = newSchedule.getSlots();
-            dtoSlots = ScheduleConverter.convertToDtoSlots(modelSlots);
-
-            ScheduleDTO response = new ScheduleDTO(newSchedule.getWeek(), dtoSlots);
-
-            return ResponseEntity.ok(response);
-        } else {
-            return ResponseEntity.badRequest().build();
+                ScheduleDTO response = new ScheduleDTO(newSchedule.getWeek(), dtoSlots);
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.badRequest().build();
+            }
+        }
+        catch(IllegalArgumentException iae){
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
     }
 

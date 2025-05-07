@@ -1,7 +1,10 @@
 package it.unipi.healthhub.service;
 
 import it.unipi.healthhub.model.mongo.Appointment;
+import it.unipi.healthhub.model.mongo.Doctor;
+import it.unipi.healthhub.model.mongo.User;
 import it.unipi.healthhub.repository.mongo.AppointmentMongoRepository;
+import it.unipi.healthhub.util.FakeMailSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
