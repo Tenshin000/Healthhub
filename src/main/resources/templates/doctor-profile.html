@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doctor Profile</title>
     <link rel="stylesheet" th:href="@{/css/doctor-profile.css}">
+    <!-- Font Awesome 6 (CDN) -->
+    <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+            integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+    />
 </head>
 <body>
 <div class="container">
@@ -76,11 +84,14 @@
                 <div class="section">
                     <h3>Phone Numbers</h3>
                     <div id="phone-list">
+                        <!-- Each phone number tag with remove icon -->
                         <div th:each="phoneNumber, index : ${doctor.phoneNumbers}"
                              class="phone-number"
-                             th:text="${phoneNumber}"
-                             th:attr="data-index=${index.index}"
-                             onclick="removePhoneNumber(this)">
+                             th:attr="data-index=${index.index}">
+                            <span class="phone-text" th:text="${phoneNumber}"></span>
+                            <i class="fa-solid fa-xmark remove-icon"
+                               th:attr="data-index=${index.index}"
+                               onclick="removePhoneNumber(this)"></i>
                         </div>
                     </div>
                     <div class="form-group">
@@ -95,9 +106,9 @@
                     <div id="specializations">
                         <div th:each="specialization, index : ${doctor.specializations}"
                              class="specialization"
-                             th:text="${specialization}"
-                             th:attr="data-index=${index.index}"
-                             onclick="removeSpecialization(this)">
+                             th:attr="data-index=${index.index}">
+                            <span class="specialization-text" th:text="${specialization}"></span>
+                            <i class="fa-solid fa-xmark remove-icon" onclick="handleSpecializationTagClick(event)"></i>
                         </div>
                         <!-- Here goes dynamically generated list of specializations as tags -->
                     </div>
@@ -106,6 +117,8 @@
                         <button type="button" id="add-specialization">Add</button>
                     </div>
                 </div>
+
+                <!-- Here goes dynamically generated list of specializations as tags -->
 
                 <!-- Types of Visits and Prices Section -->
                 <div class="section">

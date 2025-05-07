@@ -79,56 +79,62 @@ function addPhoneNumber() {
     const phoneNumber = phoneInput.value.trim();
 
     if (phoneNumber !== '') {
-        // Call the backend to save the phone number
         fetch('/api/doctor/phones', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ phoneNumber: phoneNumber })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phoneNumber })
         })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to add phone number');
-                }
-                return response.json(); // Extract JSON data from response
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to add phone number');
+                return res.json();
             })
             .then(data => {
-                // Add the phone number to the interface
                 const phoneList = document.getElementById('phone-list');
                 const phoneTag = createPhoneTag(data.phoneNumber, data.index);
                 phoneList.appendChild(phoneTag);
-
-                console.log('Phone number added successfully:', data.phoneNumber);
             })
-            .catch(error => {
-                console.error('Error adding phone number:', error);
-                // Handle the error, e.g., show a message to the user
-            });
+            .catch(console.error);
 
-        // Clear input
         phoneInput.value = '';
     }
 }
 
 function createPhoneTag(phoneNumber, index) {
-    const phoneTag = document.createElement('div');
-    phoneTag.classList.add('phone-number');
-    phoneTag.setAttribute('data-index', index); // Add data-index attribute
-    phoneTag.textContent = phoneNumber;
-    phoneTag.addEventListener('click', handlePhoneTagClick);
-    return phoneTag;
+    const container = document.createElement('div');
+    container.classList.add('phone-number');
+    container.setAttribute('data-index', index);
+
+    const span = document.createElement('span');
+    span.classList.add('phone-text');
+    span.textContent = phoneNumber;
+    container.appendChild(span);
+
+    const icon = document.createElement('i');
+    icon.classList.add('fa-solid', 'fa-xmark', 'remove-icon');
+    icon.setAttribute('data-index', index);
+    icon.addEventListener('click', () => removePhoneNumber(container));
+    container.appendChild(icon);
+
+    return container;
 }
 
 // External function to handle click on phoneTag and remove phone number
 function handlePhoneTagClick(event) {
-    const phoneTag = event.target;
+    const icon = event.target;
+    const phoneTag = icon.closest('.phone-number');
     removePhoneNumber(phoneTag);
 }
 
 // Function to remove phone number by calling the server
 function removePhoneNumber(phoneTag) {
     const index = phoneTag.getAttribute('data-index');
+    const phoneList = document.getElementById('phone-list');
+
+    // If only one remains, block
+    if (phoneList.querySelectorAll('.phone-number').length <= 1) {
+        alert("You cannot remove the last phone number.");
+        return;
+    }
 
     fetch(`/api/doctor/phones/${index}`, {
         method: 'DELETE',
@@ -179,60 +185,64 @@ const addPhoneButton = document.getElementById('add-phone');
 addPhoneButton.addEventListener('click', addPhoneNumber);
 
 function addSpecialization() {
-    const specializationInput = document.getElementById('specialization-input');
-    const specializationValue = specializationInput.value.trim();
+    const input = document.getElementById('specialization-input');
+    const val = input.value.trim();
+    if (!val) return;
 
-    if (specializationValue !== '') {
-        // Call the backend to save the specialization
-        fetch('/api/doctor/specializations', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ specialization: specializationValue })
+    fetch('/api/doctor/specializations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ specialization: val })
+    })
+        .then(res => {
+            if (!res.ok) throw new Error('Failed to add specialization');
+            return res.json();
         })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to add specialization');
-                }
-                return response.json();
-            })
-            .then(data => {
-                // Add specialization to the interface
-                const specializationsContainer = document.getElementById('specializations');
-                const specializationTag = createSpecializationTag(data.specialization, data.index);
-                specializationsContainer.appendChild(specializationTag);
+        .then(data => {
+            const cont = document.getElementById('specializations');
+            cont.appendChild(createSpecializationTag(data.specialization, data.index));
+        })
+        .catch(console.error);
 
-                console.log('Phone number added successfully:', data.phoneNumber);
-            })
-            .catch(error => {
-                console.error('Error adding phone number:', error);
-                // Handle the error, e.g., show a message to the user
-            });
-
-        // Clear input
-        specializationInput.value = '';
-    }
+    input.value = '';
 }
 
 function createSpecializationTag(specialization, index) {
-    const specializationTag = document.createElement('div');
-    specializationTag.classList.add('specialization');
-    specializationTag.setAttribute('data-index', index); // Add data-index attribute
-    specializationTag.textContent = specialization;
-    specializationTag.addEventListener('click', handleSpecializationTagClick);
-    return specializationTag;
+    const container = document.createElement('div');
+    container.classList.add('specialization');
+    container.setAttribute('data-index', index);
+
+    const span = document.createElement('span');
+    span.classList.add('specialization-text');
+    span.textContent = specialization;
+    container.appendChild(span);
+
+    const icon = document.createElement('i');
+    icon.classList.add('fa-solid', 'fa-xmark', 'remove-icon');
+    icon.setAttribute('data-index', index);
+    icon.addEventListener('click', event => handleSpecializationTagClick(event));
+    container.appendChild(icon);
+
+    return container;
 }
 
 // External function to handle click on specialization tag and remove it
 function handleSpecializationTagClick(event) {
-    const specializationTag = event.target;
+    const icon = event.target;
+    const specializationTag = icon.closest('.specialization');
     removeSpecialization(specializationTag);
 }
 
 // Function to remove specialization by calling the server
 function removeSpecialization(specializationTag) {
     const index = specializationTag.getAttribute('data-index');
+    const specializationList = document.getElementById('specializations');
+
+    // If only one remains, block
+    if (specializationList.querySelectorAll('.specialization').length <= 1) {
+        alert("You cannot remove the last specialization.");
+        return;
+    }
 
     fetch(`/api/doctor/specializations/${index}`, {
         method: 'DELETE',

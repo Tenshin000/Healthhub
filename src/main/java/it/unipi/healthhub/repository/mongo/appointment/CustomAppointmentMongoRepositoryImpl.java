@@ -204,4 +204,21 @@ public class CustomAppointmentMongoRepositoryImpl implements CustomAppointmentMo
         // Execute the query and return matching appointments
         return mongoTemplate.find(query, Appointment.class);
     }
+
+    /**
+     * Checks whether there is at least one appointment in the past between a given doctor and a given patient.
+     *
+     * @param doctorId  doctor id
+     * @param patientId patient id
+     * @return true if there is at least one appointment with date < now, false otherwise
+     */
+    public boolean hasPastAppointment(String doctorId, String patientId){
+        Query q = new Query().addCriteria(
+                Criteria.where("doctor.id").is(doctorId)
+                        .and("patient.id").is(patientId)
+                        .and("date").lt(LocalDateTime.now())
+        );
+        // Is there at least one document that satisfies?
+        return mongoTemplate.exists(q, Appointment.class);
+    }
 }

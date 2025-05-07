@@ -456,7 +456,7 @@ public class DoctorService {
     @Transactional
     public Review addReview(String doctorId, String userId, ReviewDTO review) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
-        if (doctorOpt.isPresent()) {
+        if (doctorOpt.isPresent() && appointmentRepository.hasPastAppointment(doctorId, userId)) {
             Doctor doctor = doctorOpt.get();
 
             if (doctor.getReviews() == null) {
@@ -585,14 +585,17 @@ public class DoctorService {
                 doctor.setSpecializations(new ArrayList<>());
             }
 
-            int newIndex = doctor.getSpecializations().size();
-            doctor.getSpecializations().add(specialization);
-            doctorMongoRepository.save(doctor);
-            doctorNeo4jRepository.addSpecialization(doctorId, specialization);
-            return newIndex;
+            List<String> specializations = doctor.getSpecializations();
+            if (!specializations.contains(specialization)) {
+                specializations.add(specialization);
+                doctorMongoRepository.save(doctor);
+                doctorNeo4jRepository.addSpecialization(doctorId, specialization);
+                return specializations.size() - 1;
+            }
         }
         return null;
     }
+
 
     @Transactional
     public boolean removeSpecialization(String doctorId, Integer index) {
@@ -601,9 +604,9 @@ public class DoctorService {
             Doctor doctor = doctorOpt.get();
             List<String> specializations = doctor.getSpecializations();
             if (index >= 0 && index < specializations.size()) {
+                doctorNeo4jRepository.removeSpecialization(doctorId, specializations.get(index));
                 specializations.remove(index.intValue());
                 doctorMongoRepository.save(doctor);
-                doctorNeo4jRepository.removeSpecialization(doctorId, specializations.get(index));
                 return true;
             }
         }

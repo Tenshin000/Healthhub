@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/doctors")
@@ -189,14 +190,28 @@ public class DoctorAPI {
         HttpSession session = request.getSession(false);
         LocalDate currentDate = LocalDate.now();
         review.setDate(currentDate);
-        String name = (String) session.getAttribute("username");
-        review.setName(name);
         String patientId = (String) session.getAttribute("patientId");
+        Optional<User> userOpt = userService.getUserById(patientId);
+        if(userOpt.isPresent()){
+            review.setName(userOpt.get().getName());
 
-        Review newReview = doctorService.addReview(doctorId, patientId, review);
-        if (newReview != null) {
-            return ResponseEntity.ok(newReview);
-        } else {
+            // Check beforehand if the doctor id matches an existing doctor
+            Optional<Doctor> doctorOpt = doctorService.getDoctorById(doctorId);
+            if(doctorOpt.isPresent()){
+                // This way I already know that if it returns null it is because the patient has never been seen by the doctor and therefore cannot review him
+                Review newReview = doctorService.addReview(doctorId, patientId, review);
+                if(newReview != null){
+                    return ResponseEntity.ok(newReview);
+                }
+                else{
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                }
+            }
+            else{
+                return ResponseEntity.badRequest().build();
+            }
+        }
+        else{
             return ResponseEntity.badRequest().build();
         }
     }
