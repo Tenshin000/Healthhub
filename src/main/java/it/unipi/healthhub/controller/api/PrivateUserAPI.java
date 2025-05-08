@@ -71,10 +71,9 @@ public class PrivateUserAPI {
 
     @GetMapping("/recommendations")
     public ResponseEntity<?> getRecommendedDoctors(HttpServletRequest request,
-                                                   @RequestParam(defaultValue = "2") int limit1,
-                                                   @RequestParam(defaultValue = "2") int limit2){
+                                                   @RequestParam(defaultValue = "3") int limit){
         HttpSession session = request.getSession(false);
         String patientId = (String) session.getAttribute("patientId");
-        return ResponseEntity.ok(userService.getRecommendedDoctors(patientId, limit1, limit2));
+        return ResponseEntity.ok(userService.getRecommendedDoctors(patientId, limit));
     }
 }

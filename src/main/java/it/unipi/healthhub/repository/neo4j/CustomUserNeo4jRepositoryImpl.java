@@ -21,105 +21,50 @@ public class CustomUserNeo4jRepositoryImpl implements CustomUserNeo4jRepository 
     }
 
     /**
-     * Recommends doctors based on seen specializations of the user.
-     * Retrieves doctors recommended by other users who have interacted with similar doctors,
-     * considering only those whose specializations match those seen by the user.
+     * Recommends doctors to a specific user based on collaborative filtering:
+     * 1) Finds “similar” users who have at least 3 doctors in common via endorsement/review.
+     * 2) Gets their favorite doctors, excluding those already endorsed/reviewed by the target user.
+     * 3) Sorts the doctors by aggregated score and returns the top-N results.
      *
-     * @param userId The ID of the user for whom doctors are recommended.
+     * Complexity: O(E_shared + E_rec), where E_shared is the number of shared relationships
+     * and E_rec is the number of endorsement/review relationships of the similar users.
+     * The query is parameterized and uses indexes.
+     *
      * @param limit Maximum number of doctors to recommend.
      * @return List of recommended doctors with their details.
      */
     @Override
-    public List<DoctorDAO> recommendDoctorsBySeenSpecializations(String userId, int limit) {
+    public List<DoctorDAO> recommendDoctorsForUser(String userId, int limit) {
         try (Session session = driver.session()) {
             return session.readTransaction(tx -> {
-                Result result = tx.run(
-                        // Find doctors reviewed/endorsed by the given user
-                        "MATCH (u:User {id: $userId})-[:ENDORSED|REVIEWED]->(d:Doctor) " +
-                                // Find other users who also reviewed/endorsed the same doctors
-                                "<-[:ENDORSED|REVIEWED]-(other:User)-[:ENDORSED|REVIEWED]->(rec:Doctor) " +
-                                // Exclude doctors already reviewed/endorsed by the given user
-                                "WHERE NOT (u)-[:ENDORSED|REVIEWED]->(rec) " +
-                                // Carry forward u to avoid losing the user filter
-                                "WITH rec, count(*) AS popularityScore, u " +
-                                // Get the specializations of doctors the user has reviewed/endorsed
-                                "MATCH (u)-[:ENDORSED|REVIEWED]->(d2:Doctor) " +
-                                "UNWIND d2.specializations AS spec " +
-                                "WITH rec, popularityScore, collect(DISTINCT spec) AS seenSpecs " +
-                                // Recommend only those whose specs are all in the seen set
-                                "WHERE rec.specializations IS NOT NULL AND ALL(recSpec IN rec.specializations WHERE recSpec IN seenSpecs) " +
-                                // Return the recommended doctors ordered by popularity
-                                "RETURN rec.id AS id, rec.name AS name, rec.specializations AS specializations " +
-                                "ORDER BY popularityScore DESC " +
-                                "LIMIT $limit",
-                        Values.parameters("userId", userId, "limit", limit)
-                );
-                List<DoctorDAO> doctors = new ArrayList<>();
-                while (result.hasNext()) {
-                    Record record = result.next();
-                    Value specValue = record.get("specializations");
-                    List<String> specializations = specValue.isNull()
-                            ? new ArrayList<>()
-                            : specValue.asList(Value::asString);
-                    doctors.add(new DoctorDAO(
-                            record.get("id").asString(),
-                            record.get("name").asString(),
-                            specializations
-                    ));
-                }
-                return doctors;
-            });
-        }
-    }
+                String cypher =
+                        "MATCH (me:User {id:$uid})-[:ENDORSED|REVIEWED]->(d:Doctor)<-[:ENDORSED|REVIEWED]-(other:User) " +
+                                "WITH me, other, count(d) AS sharedCount " +
+                                "WHERE sharedCount >= 3 AND me <> other " +
+                                "LIMIT 200 " +
+                                // Get other doctors from 'other' that 'me' has not yet endorsed/reviewed
+                                "MATCH (other)-[r:ENDORSED|REVIEWED]->(rec:Doctor) " +
+                                "WHERE NOT (me)-[:ENDORSED|REVIEWED]->(rec) " +
+                                // Aggregate a score: more relationships and more similar users increase the score
+                                "WITH rec, sum(sharedCount) AS score, count(r) AS endorsements " +
+                                "ORDER BY score DESC, endorsements DESC " +
+                                "RETURN rec.id   AS id, " +
+                                "rec.name AS name, " +
+                                "rec.specializations AS specializations " +
+                                "LIMIT $limit";
 
-    /**
-     * Recommends doctors based on specializations not seen by the user.
-     * Retrieves doctors recommended by other users who have interacted with similar doctors,
-     * filtering out those whose specializations overlap with those already seen by the user.
-     *
-     * @param userId The ID of the user for whom doctors are recommended.
-     * @param limit Maximum number of doctors to recommend.
-     * @return List of recommended doctors with their details.
-     */
-    @Override
-    public List<DoctorDAO> recommendDoctorsByNotSeenSpecializations(String userId, int limit) {
-        try (Session session = driver.session()) {
-            return session.readTransaction(tx -> {
-                Result result = tx.run(
-                        // Find doctors reviewed/endorsed by the given user
-                        "MATCH (u:User {id: $userId})-[:ENDORSED|REVIEWED]->(d:Doctor) " +
-                                // Find other users who also reviewed/endorsed the same doctors
-                                "<-[:ENDORSED|REVIEWED]-(other:User)-[:ENDORSED|REVIEWED]->(rec:Doctor) " +
-                                // Exclude doctors already reviewed/endorsed by the given user
-                                "WHERE NOT (u)-[:ENDORSED|REVIEWED]->(rec) " +
-                                // Carry forward u to avoid losing the user filter
-                                "WITH rec, count(*) AS popularityScore, u " +
-                                // Get the specializations of doctors the user has reviewed/endorsed
-                                "MATCH (u)-[:ENDORSED|REVIEWED]->(d2:Doctor) " +
-                                "UNWIND d2.specializations AS spec " +
-                                "WITH rec, popularityScore, collect(DISTINCT spec) AS seenSpecs " +
-                                // Recommend only those whose specs are all new to the user
-                                "WHERE rec.specializations IS NOT NULL AND ALL(recSpec IN rec.specializations WHERE NOT recSpec IN seenSpecs) " +
-                                // Return the recommended doctors ordered by popularity
-                                "RETURN rec.id AS id, rec.name AS name, rec.specializations AS specializations " +
-                                "ORDER BY popularityScore DESC " +
-                                "LIMIT $limit",
-                        Values.parameters("userId", userId, "limit", limit)
-                );
-                List<DoctorDAO> doctors = new ArrayList<>();
+                Result result = tx.run(cypher,
+                        Values.parameters("uid", userId, "limit", limit));
+                List<DoctorDAO> out = new ArrayList<>(limit);
                 while (result.hasNext()) {
-                    Record record = result.next();
-                    Value specValue = record.get("specializations");
-                    List<String> specializations = specValue.isNull()
-                            ? new ArrayList<>()
-                            : specValue.asList(Value::asString);
-                    doctors.add(new DoctorDAO(
-                            record.get("id").asString(),
-                            record.get("name").asString(),
-                            specializations
+                    Record rec = result.next();
+                    out.add(new DoctorDAO(
+                            rec.get("id").asString(),
+                            rec.get("name").asString(),
+                            rec.get("specializations").asList(Value::asString)
                     ));
                 }
-                return doctors;
+                return out;
             });
         }
     }
