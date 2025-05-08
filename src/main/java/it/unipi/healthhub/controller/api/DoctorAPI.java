@@ -157,6 +157,9 @@ public class DoctorAPI {
     public ResponseEntity<EndorsementDTO> endorseDoctor(@PathVariable String doctorId, HttpServletRequest request) {
         HttpSession session = request.getSession(false);
 
+        if(session == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
         String patientId = (String) session.getAttribute("patientId");
         doctorService.endorse(doctorId, patientId);
         Integer endorsementCount = doctorService.getEndorsements(doctorId);
@@ -165,7 +168,12 @@ public class DoctorAPI {
     }
 
     @PostMapping("/{doctorId}/unendorse")
-    public ResponseEntity<EndorsementDTO> unendorseDoctor(@PathVariable String doctorId, HttpSession session) {
+    public ResponseEntity<EndorsementDTO> unendorseDoctor(@PathVariable String doctorId, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+
+        if(session == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
         String patientId = (String) session.getAttribute("patientId");
         doctorService.unendorse(doctorId, patientId);
         Integer endorsementCount = doctorService.getEndorsements(doctorId);

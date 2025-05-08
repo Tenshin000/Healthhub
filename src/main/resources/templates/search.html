@@ -15,11 +15,17 @@
                 const doctorElement = document.createElement('div');
                 doctorElement.innerHTML = `
                     <h4><a href="/doctors/${doctor.id}">${doctor.name}</a></h4>
-                    <p>Specializations: ${doctor.specialization}</p>
-                    <p>Location: ${doctor.location}</p>
+                    <p>Specializations: ${doctor.specializations}</p>
+                    <p>Location: ${formatAddress(doctor.address)}</p>
                 `;
                 resultsDiv.appendChild(doctorElement);
             });
+        }
+
+        function formatAddress(addr) {
+            if(!addr)
+                return 'Undefined';
+            return `${addr.street}, ${addr.city}, ${addr.province}, ${addr.postalCode}, ${addr.country}`;
         }
 
         document.addEventListener('DOMContentLoaded', (event) => {

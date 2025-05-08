@@ -1,4 +1,4 @@
-package it.unipi.healthhub.repository.neo4j;
+package it.unipi.healthhub.repository.neo4j.user;
 
 import it.unipi.healthhub.model.neo4j.DoctorDAO;
 import java.util.List;
