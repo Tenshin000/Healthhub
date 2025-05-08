@@ -108,11 +108,21 @@ document.addEventListener('DOMContentLoaded', function(){
                 });
 
                 if (response.ok) {
+                    // savedReview should contain { name, text, date, … }
+                    const savedReview = await response.json();
+
                     document.getElementById('newReview').value = '';
-                    fetchReviews(doctorId);  // Reload the reviews after adding a new one
-                } else {
-                    console.error('Error sending review');
+
+                    // We create the card and insert it at the top
+                    const reviewList = document.getElementById('reviewList');
+                    const newCard = createReviewCard(savedReview);
+                    reviewList.prepend(newCard);
+                    // fetchReviews(doctorId);  // Reload the reviews after adding a new one
                 }
+                else if (response.status === 403)
+                    alert('You cannot leave a review because you have never been visited by this doctor.');
+                else
+                    console.error('Error sending review');
             } catch (error) {
                 console.error('Error sending review:', error);
             }
@@ -123,13 +133,15 @@ document.addEventListener('DOMContentLoaded', function(){
         try {
             const response = await fetch(`/api/doctors/${doctorId}/reviews`, {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+                headers: { 'Content-Type': 'application/json' }
             });
 
             if (response.ok) {
-                const reviews = await response.json();
+                let reviews = await response.json();
+
+                // SORT by date DESC (b newer than a)
+                reviews.sort((a, b) => new Date(b.date) - new Date(a.date));
+
                 renderReviews(reviews);
             } else {
                 console.error('Error retrieving reviews');

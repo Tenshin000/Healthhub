@@ -215,20 +215,27 @@ textarea {
 /*CALENDAR*/
 
 .days {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
     gap: 10px;
-    overflow-x: hidden;
+    overflow: visible;    /* ensures nothing gets cut */
+    grid-auto-rows: minmax(230px, auto);
 }
 
 .day {
-    flex: 1;
-    padding: 5px;
-    min-height: 230px;
+    float: none;
+    flex: none;
     background-color: #efeff6;
-    float:left;
+    min-height: 230px;
+
+    /* maintain vertical alignment of timeslots */
     display: flex;
     flex-direction: column;
     gap: 5px;
+
+    /* I make sure it fills the cell */
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .datelabel {

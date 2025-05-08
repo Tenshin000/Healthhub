@@ -186,3 +186,15 @@ textarea:disabled {
     cursor: not-allowed;
     border-color: #ddd;
 }
+
+/* Style for the Sunday display */
+#sunday {
+    display: flex;
+    align-items: center;
+    gap: 0.5em; /* distanza tra label e p */
+}
+
+#sunday label,
+#sunday p {
+    margin: 0;
+}

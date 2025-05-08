@@ -26,17 +26,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function formatDate(date) {
         const year = date.getFullYear();
-        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Aggiunge lo zero se il mese è inferiore a 10
-        const day = date.getDate().toString().padStart(2, '0'); // Aggiunge lo zero se il giorno è inferiore a 10
+        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Adds leading zero if month is less than 10
+        const day = date.getDate().toString().padStart(2, '0'); // Adds leading zero if day is less than 10
         return `${year}-${month}-${day}`;
     }
 
-    function saveSchedule(){
+    function saveSchedule() {
         if (!templateSelected) {
             alert('Select a template first.');
             return;
         }
-
 
         let date = new Date(weekSelected);
         let schedule = {
@@ -54,6 +53,10 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify(schedule)
         })
             .then(response => {
+                if (response.status === 409) {
+                    alert('You have already scheduled this week');
+                    throw new Error('Conflict: Schedule already exists for this week.');
+                }
                 if (!response.ok) {
                     throw new Error('Failed to save schedule: ' + response.statusText);
                 }
@@ -69,26 +72,25 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => {
                 console.error('Error saving schedule:', error);
             });
-
     }
 
     function alreadyScheduled() {
         let activeWeek = calendar.view.activeStart;
 
-        // Converti activeWeek in LocalDate (solo data, senza ora)
+        // Convert activeWeek to LocalDate (date only, no time)
         let activeLocalDate = new Date(activeWeek);
 
-        activeLocalDate.setHours(0, 0, 0, 0); // Imposta ore, minuti, secondi e millisecondi a 0
+        activeLocalDate.setHours(0, 0, 0, 0); // Set hours, minutes, seconds, and milliseconds to 0
 
         let alreadyScheduled = false;
         schedules.forEach(schedule => {
-            // Converti schedule.week in LocalDate (solo data, senza ora)
+            // Convert schedule.week to LocalDate (date only, no time)
             let scheduleLocalDate = new Date(schedule.week);
-            scheduleLocalDate.setHours(0, 0, 0, 0); // Imposta ore, minuti, secondi e millisecondi a 0
+            scheduleLocalDate.setHours(0, 0, 0, 0); // Set hours, minutes, seconds, and milliseconds to 0
 
             console.log(scheduleLocalDate, activeLocalDate);
 
-            // Confronta solo il giorno (solo data, senza ora)
+            // Compare only the day (date only, no time)
             if (scheduleLocalDate.getTime() === activeLocalDate.getTime()) {
                 alreadyScheduled = true;
             }
@@ -96,7 +98,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         return alreadyScheduled;
     }
-
 
     function onlyThisWeek(){
         if(alreadyScheduled()){
@@ -108,24 +109,24 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('only-this-week').addEventListener('click', onlyThisWeek);
 
     function deleteSchedule() {
-        // Ottieni la data della settimana attiva dal calendario
+        // Get the active week date from the calendar
         let date = new Date(calendar.view.activeStart);
 
         console.log(formatDate(date));
 
-        // Costruisci l'oggetto di schedule da inviare
+        // Build the schedule object to send
         let schedule = {
             week: formatDate(date)
         };
 
-        // Invia la richiesta DELETE utilizzando fetch
+        // Send DELETE request using fetch
         fetch('/api/doctor/schedules', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
-                // Includi eventuali altri header necessari, come token di autenticazione
+                // Include any other necessary headers, such as authentication token
             },
-            body: JSON.stringify(schedule) // Invia l'oggetto schedule come corpo della richiesta
+            body: JSON.stringify(schedule) // Send the schedule object as the request body
         })
             .then(response => {
                 if (!response.ok) {
@@ -133,8 +134,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 console.log('Schedule deleted successfully');
                 clearSchedule();
-                // Esegui eventuali azioni aggiuntive dopo la cancellazione, come aggiornare l'interfaccia utente
-                fetchUpdatedSchedules(); // Esempio di funzione per aggiornare le schedule dopo la cancellazione
+                // Perform any additional actions after deletion, like updating the UI
+                fetchUpdatedSchedules(); // Example function to update schedules after deletion
             })
             .catch(error => {
                 console.error('Error deleting schedule:', error);
@@ -149,10 +150,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('clear-template').addEventListener('click', clearSchedule);
 
 
-    // Funzione per caricare il template nel calendario
+    // Function to load the template into the calendar
     function renderEvents(template = null) {
 
-        // Mappa dei giorni della settimana a partire da lunedì
+        // Map of weekdays starting from Monday
         const dayMap = {
             monday: 1,
             tuesday: 2,
@@ -189,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 let startOfWeek = new Date(schedule.week);
 
                 schedule.slots[day].forEach(slot => {
-                    // Calcola la data esatta per ogni slot
+                    // Calculate the exact date for each slot
                     let slotDate = new Date(startOfWeek);
                     slotDate.setDate(startOfWeek.getDate() + (dayIndex - startOfWeek.getDay()));
 
@@ -201,7 +202,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const [endHour, endMinute] = slot.end.split(':');
                     end.setHours(endHour, endMinute);
 
-                    // Creazione dell'oggetto evento
+                    // Create the event object
                     const event = {
                         start: start.toISOString(),
                         end: end.toISOString(),
@@ -216,7 +217,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-
         return events;
     }
 
@@ -226,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const dayIndex = dayMap[day];
 
             template.slots[day].forEach(slot => {
-                // Calcola la data esatta per ogni slot
+                // Calculate the exact date for each slot
                 let slotDate = new Date(startOfWeek);
                 slotDate.setDate(startOfWeek.getDate() + (dayIndex - startOfWeek.getDay()));
 
@@ -248,7 +248,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         return events;
     }
-
 
     function fetchUpdatedTemplates() {
         fetch('/api/doctor/templates')
@@ -283,7 +282,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error fetching updated schedules:', error);
             });
     }
-    // Funzione per rendere i template nella lista
+
+    // Function to render templates in the list
     function renderTemplates(templates) {
         const templateListEl = document.getElementById('template-list');
         templateListEl.innerHTML = ''; // Clear current list
@@ -310,29 +310,28 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Inizialmente carica i template dall'API
+    // Initially load templates from the API
     fetchUpdatedTemplates();
     fetchUpdatedSchedules();
 
-    
-    // Imposta il template predefinito
+    // Set the default template
     document.getElementById('set-default-template').addEventListener('click', function() {
         const selectedTemplate = document.querySelector('.template-item.selected');
         if (selectedTemplate) {
             const templateName = selectedTemplate.textContent;
 
-            // Trova il template corrispondente nella lista globale di templates
+            // Find the corresponding template in the global templates list
             const template = templates.find(template => template.name === templateName);
             template.default = true;
 
             if (template) {
-                // Esegui una richiesta PUT per impostare il template predefinito
+                // Perform a PUT request to set the default template
                 const putUrl = `/api/doctor/templates/default`;
                 fetch(putUrl, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
-                        // Aggiungi eventuali altri header necessari
+                        // Add any other necessary headers
                     },
                     body: JSON.stringify(template)
                 })
@@ -354,5 +353,4 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Select a template first.');
         }
     });
-
 });

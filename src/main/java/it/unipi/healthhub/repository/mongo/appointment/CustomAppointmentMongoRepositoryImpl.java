@@ -2,6 +2,7 @@ package it.unipi.healthhub.repository.mongo.appointment;
 
 import com.mongodb.DBObject;
 import it.unipi.healthhub.model.mongo.Appointment;
+import it.unipi.healthhub.model.mongo.User;
 import it.unipi.healthhub.util.DateUtil;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -143,65 +144,81 @@ public class CustomAppointmentMongoRepositoryImpl implements CustomAppointmentMo
 
         return mongoTemplate.find(query, Appointment.class);
     }
-    
+
     @Override
     public Integer findNewPatientsVisitedByDoctorInCurrentMonth(String doctorId, Integer year, Integer month){
         LocalDateTime startOfMonth = LocalDate.of(year, month, 1).atStartOfDay();
         LocalDateTime endOfMonth = startOfMonth.plusMonths(1);
 
-        // 1. Find all doctor's appointments in this month
-        MatchOperation matchAppointmentsThisMonth = Aggregation.match(
+        // 1. Filter all appointments for this doctor
+        MatchOperation matchDoctor = Aggregation.match(
                 Criteria.where("doctor.id").is(doctorId)
-                        .and("date").gte(startOfMonth).lt(endOfMonth)
         );
 
-        // 2. Group by patient ID (we want a list of unique patients)
-        GroupOperation groupByPatient = Aggregation.group("patient.id");
+        // 2. Group by patient ID and compute the date of their first visit
+        GroupOperation groupByPatient = Aggregation.group("patient.id")
+                .min("date").as("firstVisitDate");
 
-        // 3. Perform aggregation
+        // 3. Keep only those patients whose first visit falls in the current month
+        MatchOperation matchFirstVisitInMonth = Aggregation.match(
+                Criteria.where("firstVisitDate").gte(startOfMonth).lt(endOfMonth)
+        );
+
+        // 4. Count how many unique new patients remain
+        CountOperation countNewPatients = Aggregation.count().as("newPatientsCount");
+
         Aggregation aggregation = Aggregation.newAggregation(
-                matchAppointmentsThisMonth,
-                groupByPatient
+                matchDoctor,
+                groupByPatient,
+                matchFirstVisitInMonth,
+                countNewPatients
         );
 
-        // 4. Execute aggregation
-        AggregationResults<PatientIdResult> results = mongoTemplate.aggregate(aggregation, Appointment.class, PatientIdResult.class);
-        List<PatientIdResult> patientIds = results.getMappedResults();
+        // Execute the aggregation pipeline
+        AggregationResults<org.bson.Document> results =
+                mongoTemplate.aggregate(aggregation, Appointment.class, org.bson.Document.class);
 
-        int newPatientsCount = 0;
-
-        // 5. For each patient, check if they had previous visits before this month
-        for(PatientIdResult patientIdResult : patientIds){
-            String patientId = patientIdResult.getId();
-
-            boolean hasPreviousAppointments = mongoTemplate.exists(
-                    Query.query(
-                            Criteria.where("doctor.id").is(doctorId)
-                                    .and("patient.id").is(patientId)
-                                    .and("date").lt(startOfMonth)
-                    ),
-                    Appointment.class
-            );
-
-            // If there are NO previous visits => it's a new patient
-            if(!hasPreviousAppointments){
-                newPatientsCount++;
-            }
+        List<org.bson.Document> mappedResults = results.getMappedResults();
+        if(mappedResults.isEmpty()){
+            return 0;
         }
-
-        return newPatientsCount;
+        else{
+            return mappedResults.get(0).getInteger("newPatientsCount", 0);
+        }
     }
 
-    // Internal helper class for group results
-    private static class PatientIdResult{
-        private String id;
+    @Override
+    public List<Appointment> findByDoctorIdAndWeek(String doctorId, Integer week, Integer year) {
+        // Calculate the start of the requested week (Monday at 00:00)
+        LocalDateTime startOfWeek = DateUtil.getFirstDayOfWeek(week, year).atStartOfDay();
+        // Calculate the start of the following week to use as exclusive upper bound
+        LocalDateTime endOfWeek   = DateUtil.getFirstDayOfWeek(week + 1, year).atStartOfDay();
 
-        public String getId(){
-            return id;
-        }
+        // Build a query filtering by doctor id and date within [startOfWeek, endOfWeek)
+        Query query = new Query();
+        query.addCriteria(Criteria.where("doctor.id").is(doctorId)
+                .and("date").gte(startOfWeek).lt(endOfWeek));
+        // Optionally sort results in ascending order by date
+        query.with(Sort.by(Sort.Direction.ASC, "date"));
 
-        public void setId(String id){
-            this.id = id;
-        }
+        // Execute the query and return matching appointments
+        return mongoTemplate.find(query, Appointment.class);
+    }
+
+    /**
+     * Checks whether there is at least one appointment in the past between a given doctor and a given patient.
+     *
+     * @param doctorId  doctor id
+     * @param patientId patient id
+     * @return true if there is at least one appointment with date < now, false otherwise
+     */
+    public boolean hasPastAppointment(String doctorId, String patientId){
+        Query q = new Query().addCriteria(
+                Criteria.where("doctor.id").is(doctorId)
+                        .and("patient.id").is(patientId)
+                        .and("date").lt(LocalDateTime.now())
+        );
+        // Is there at least one document that satisfies?
+        return mongoTemplate.exists(q, Appointment.class);
     }
 }

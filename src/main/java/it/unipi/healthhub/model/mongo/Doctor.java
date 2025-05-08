@@ -7,8 +7,10 @@ import java.util.List;
 
 @Document(collection = "doctors")
 public class Doctor extends User {
+    protected String orderRegistrationNumber;
     private List<Service> services;
     private int endorsementCount;
+    private int reviewCount;
     private List<Review> reviews;
     private List<Schedule> schedules;
     private List<String> calendarTemplates;
@@ -25,6 +27,9 @@ public class Doctor extends User {
         phoneNumbers = new ArrayList<>();
     }
 
+    public String getOrderRegistrationNumber() { return orderRegistrationNumber; }
+    public void setOrderRegistrationNumber(String orderRegistrationNumber) { this.orderRegistrationNumber = orderRegistrationNumber; }
+
     public List<Service> getServices() {
         return services;
     }
@@ -38,6 +43,11 @@ public class Doctor extends User {
     public void setEndorsementCount(int endorsementCount) {
         this.endorsementCount = endorsementCount;
     }
+
+    public int getReviewCountCount() {
+        return reviewCount;
+    }
+    public void setReviewCountCount(int reviewCount) { this.reviewCount = reviewCount; }
 
     public List<Review> getReviews() {
         return reviews;
@@ -84,5 +94,4 @@ public class Doctor extends User {
                 ", password='" + getPassword() + '\'' +
                 ", dob=" + dob + "}";
     }
-
 }

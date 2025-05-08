@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HealthHub - Medici</title>
+    <title>HealthHub - Favorite Doctors</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/user-favorites.css}">
 </head>
@@ -13,52 +13,36 @@
 <main>
     <section class="recommended-doctors">
         <h2>No Doctor Recommended</h2>
-            <!--
-            <a href="/doctor/mario-rossi" class="doctor-card">
-                <div>
-                    <h3>Dr. Mario Rossi</h3>
-                    <p>Cardiologo</p>
-                </div>
-            </a>
-            <a href="/doctor/anna-bianchi" class="doctor-card">
-                <div>
-                    <h3>Dr.ssa Anna Bianchi</h3>
-                    <p>Dermatologo</p>
-                </div>
-            </a>
-            <a href="/doctor/luigi-verdi" class="doctor-card">
-                <div>
-                    <h3>Dr. Luigi Verdi</h3>
-                    <p>Neurologo</p>
-                </div>
-            </a>
-            -->
-        </div>
+        <!-- ... -->
     </section>
+
     <section class="liked-reviewed-doctors">
         <div class="liked-doctors">
             <h2>Endorsed Doctors</h2>
             <ul id="endorsed-doctors-list">
-                <!-- Placeholder data -->
                 <li th:each="doctor : ${endorsedDoctors}" class="doctor-item">
                     <a th:href="@{|/doctors/${doctor.id}|}">
                         <div>
                             <h3 th:text="${'Dr. ' + doctor.name}">Doctor Name</h3>
-                            <p th:text="${doctor.specializations[0]}">Specialty</p>
+                            <p th:text="${(doctor.specializations != null and !#lists.isEmpty(doctor.specializations)) ? doctor.specializations[0] : 'No specializations'}">
+                                Specialty
+                            </p>
                         </div>
                     </a>
                 </li>
             </ul>
         </div>
+
         <div class="reviewed-doctors">
             <h2>Reviewed Doctors</h2>
             <ul id="reviewed-doctors-list">
-                <!-- Placeholder data -->
                 <li th:each="doctor : ${reviewedDoctors}" class="doctor-item">
                     <a th:href="@{|/doctors/${doctor.id}|}">
                         <div>
                             <h3 th:text="${'Dr. ' + doctor.name}">Doctor Name</h3>
-                            <p th:text="${doctor.specializations[0]}">Specialty</p>
+                            <p th:text="${(doctor.specializations != null and !#lists.isEmpty(doctor.specializations)) ? doctor.specializations[0] : 'No specializations'}">
+                                Specialty
+                            </p>
                         </div>
                     </a>
                 </li>
@@ -66,6 +50,7 @@
         </div>
     </section>
 </main>
+
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 <script th:src="@{/js/user-favorites.js}"></script>
 </body>

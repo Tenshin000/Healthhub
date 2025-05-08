@@ -12,8 +12,8 @@ import it.unipi.healthhub.repository.mongo.TemplateMongoRepository;
 import it.unipi.healthhub.repository.mongo.UserMongoRepository;
 import it.unipi.healthhub.repository.neo4j.DoctorNeo4jRepository;
 import it.unipi.healthhub.repository.neo4j.UserNeo4jRepository;
+import it.unipi.healthhub.util.FakeMailSender;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +43,11 @@ public class DoctorService {
 
     @Autowired
     private AppointmentMongoRepository appointmentRepository;
+    @Autowired
+    private AppointmentService appointmentService;
+
+    @Autowired
+    private FakeMailSender fakeMailSender;
 
     public List<Doctor> searchDoctors(String query) {
         if (query != null && !query.isEmpty()) {
@@ -195,8 +200,8 @@ public class DoctorService {
         LocalDateTime appointmentDateTime = appointmentDto.getDate().atTime(timeSlot);
 
         appointment.setDate(appointmentDateTime);
-        appointment.setDoctor(new Appointment.DoctorInfo(doctor.getId(), doctor.getName()));
-        appointment.setPatient(new Appointment.PatientInfo(patient.getId(), patient.getName()));
+        appointment.setDoctor(new Appointment.DoctorInfo(doctor.getId(), doctor.getName(), doctor.getAddress(), doctor.getEmail()));
+        appointment.setPatient(new Appointment.PatientInfo(patient.getId(), patient.getName(), patient.getEmail(), patient.getGender()));
         appointment.setVisitType(appointmentDto.getService());
         List<it.unipi.healthhub.model.mongo.Service> services = doctor.getServices();
         if (services == null) {
@@ -216,26 +221,31 @@ public class DoctorService {
     public boolean cancelAnAppointment(String doctorId, String appointmentId){
         Optional<Appointment> appointmentOpt = appointmentRepository.findById(appointmentId);
 
-        if (appointmentOpt.isPresent()) {
+        if(appointmentOpt.isPresent() && appointmentOpt.get().getDoctor().getId().equals(doctorId)){
             Appointment appointment = appointmentOpt.get();
-
-            LocalDateTime dateTimeSlot = appointment.getDate();
-
-            Integer year = dateTimeSlot.getYear();
-            Integer week = dateTimeSlot.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
-            String keyDay = dateTimeSlot.getDayOfWeek().toString().toLowerCase();
-            String slotStart = dateTimeSlot.toLocalTime().toString();
-
-            // The function tries to update the slot's taken parameter in the schedule
-            // If the slot is occupied return false
-            boolean taken = doctorMongoRepository.checkScheduleSlot(doctorId, year, week, keyDay, slotStart);
-            if(taken){
-                appointmentRepository.deleteById(appointmentId);
-                doctorMongoRepository.freeScheduleSlot(doctorId, year, week, keyDay, slotStart);
-                return true;
-            }
-
+            return deleteAppointment(appointment);
         }
+        return false;
+    }
+
+    private boolean deleteAppointment(Appointment appointment){
+        LocalDateTime dateTimeSlot = appointment.getDate();
+
+        Integer year = dateTimeSlot.getYear();
+        Integer week = dateTimeSlot.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
+        String keyDay = dateTimeSlot.getDayOfWeek().toString().toLowerCase();
+        String slotStart = dateTimeSlot.toLocalTime().toString();
+
+        // The function tries to update the slot's taken parameter in the schedule
+        // If the slot is occupied return false
+        boolean taken = doctorMongoRepository.checkScheduleSlot(appointment.getDoctor().getId(), year, week, keyDay, slotStart);
+        if(taken){
+            appointmentService.deleteAppointment(appointment.getId());
+            doctorMongoRepository.freeScheduleSlot(appointment.getDoctor().getId(), year, week, keyDay, slotStart);
+            fakeMailSender.sendDeletedAppointmentMailByDoctor(appointment);
+            return true;
+        }
+
         return false;
     }
 
@@ -374,7 +384,7 @@ public class DoctorService {
         return null;
     }
 
-    public Schedule addSchedule(String doctorId, Schedule calendar) {
+    public Schedule addSchedule(String doctorId, Schedule calendar) throws IllegalArgumentException{
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
@@ -382,6 +392,12 @@ public class DoctorService {
             if (doctor.getSchedules() == null) {
                 doctor.setSchedules(new ArrayList<>());
             }
+
+            boolean alreadyExists = doctor.getSchedules().stream()
+                    .anyMatch(s -> s.getWeek().equals(calendar.getWeek()));
+
+            if(alreadyExists)
+                throw new IllegalArgumentException("A schedule for this week already exists.");
 
             doctor.getSchedules().add(calendar);
             doctorMongoRepository.save(doctor); // Save updated doctor with the new appointment
@@ -409,6 +425,15 @@ public class DoctorService {
             List<Schedule> calendars = doctor.getSchedules();
             for (int i = 0; i < calendars.size(); i++) {
                 if (calendars.get(i).getWeek().equals(calendarDate)) {
+                    // Use ISO week definition (week starts on Monday, week 1 is the one with the first Thursday)
+                    WeekFields weekFields = WeekFields.ISO;
+                    int week = calendarDate.get(weekFields.weekOfWeekBasedYear());
+                    int year = calendarDate.get(weekFields.weekBasedYear());
+
+                    List<Appointment> appointments = appointmentRepository.findByDoctorIdAndWeek(doctorId, week, year);
+                    for (Appointment appointment : appointments)
+                        deleteAppointment(appointment);
+
                     calendars.remove(i); // Remove calendar
                     doctorMongoRepository.save(doctor); // Save updated doctor without the removed calendar
                     return true;
@@ -417,6 +442,7 @@ public class DoctorService {
         }
         return false;
     }
+
 
     public List<Review> getReviews(String doctorId) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
@@ -430,7 +456,7 @@ public class DoctorService {
     @Transactional
     public Review addReview(String doctorId, String userId, ReviewDTO review) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
-        if (doctorOpt.isPresent()) {
+        if (doctorOpt.isPresent() && appointmentRepository.hasPastAppointment(doctorId, userId)) {
             Doctor doctor = doctorOpt.get();
 
             if (doctor.getReviews() == null) {
@@ -497,6 +523,7 @@ public class DoctorService {
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
             doctor.setName(userDetails.getFullName());
+            doctor.setFiscalCode(userDetails.getFiscalCode());
             doctor.setDob(userDetails.getBirthDate());
             doctor.setGender(userDetails.getGender());
 
@@ -558,14 +585,17 @@ public class DoctorService {
                 doctor.setSpecializations(new ArrayList<>());
             }
 
-            int newIndex = doctor.getSpecializations().size();
-            doctor.getSpecializations().add(specialization);
-            doctorMongoRepository.save(doctor);
-            doctorNeo4jRepository.addSpecialization(doctorId, specialization);
-            return newIndex;
+            List<String> specializations = doctor.getSpecializations();
+            if (!specializations.contains(specialization)) {
+                specializations.add(specialization);
+                doctorMongoRepository.save(doctor);
+                doctorNeo4jRepository.addSpecialization(doctorId, specialization);
+                return specializations.size() - 1;
+            }
         }
         return null;
     }
+
 
     @Transactional
     public boolean removeSpecialization(String doctorId, Integer index) {
@@ -574,9 +604,9 @@ public class DoctorService {
             Doctor doctor = doctorOpt.get();
             List<String> specializations = doctor.getSpecializations();
             if (index >= 0 && index < specializations.size()) {
+                doctorNeo4jRepository.removeSpecialization(doctorId, specializations.get(index));
                 specializations.remove(index.intValue());
                 doctorMongoRepository.save(doctor);
-                doctorNeo4jRepository.removeSpecialization(doctorId, specializations.get(index));
                 return true;
             }
         }

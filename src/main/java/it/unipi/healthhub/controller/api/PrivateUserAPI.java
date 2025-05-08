@@ -63,7 +63,7 @@ public class PrivateUserAPI {
 
     @DeleteMapping("/appointments/{appointmentId}")
     public ResponseEntity<?> deleteAppointment(@PathVariable String appointmentId) {
-        if (userService.deleteAppointment(appointmentId)) {
+        if (userService.cancelAppointment(appointmentId)) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().body("Error: Appointment not found");

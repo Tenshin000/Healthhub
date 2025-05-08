@@ -1,13 +1,19 @@
 function fetchAppointments() {
-    fetch('/api/user/appointments/upcoming')  // URL dell'endpoint API
+    fetch('/api/user/appointments/upcoming')  // API endpoint URL
         .then(response => response.json())
         .then(data => renderAppointments(data))
         .catch(error => console.error('Error fetching appointments:', error));
 }
 
+function formatAddress(addr) {
+    if(!addr)
+        return 'Undefined';
+    return `${addr.street}, ${addr.city}, ${addr.province}, ${addr.postalCode}, ${addr.country}`;
+}
+
 function renderAppointments(appointments) {
     const appointmentsList = document.getElementById('upcoming-appointments');
-    appointmentsList.innerHTML = '';  // Svuota la lista degli appuntamenti
+    appointmentsList.innerHTML = '';  // Clear the appointment list
 
     appointments.forEach(appointment => {
         const listItem = document.createElement('li');
@@ -21,24 +27,24 @@ function renderAppointments(appointments) {
 
         appointmentInfo.innerHTML = `
             <h3>Dr. ${appointment.doctor.name}</h3>
-            <p><strong>Data:</strong> ${date}</p>
-            <p><strong>Ora:</strong> ${slot}</p>
-            <p><strong>Servizio:</strong> ${appointment.visitType}</p>
-            <p><strong>Indirizzo:</strong> ${appointment.address}</p>
+            <p><strong>Date:</strong> ${date}</p>
+            <p><strong>Time:</strong> ${slot}</p>
+            <p><strong>Service:</strong> ${appointment.visitType}</p>
+            <p><strong>Address:</strong> ${formatAddress(appointment.doctor.address)}</p>
         `;
 
-        const cancelButton = document.createElement('button');
-        cancelButton.className = 'cancel-button';
-        cancelButton.textContent = 'Cancella';
-        cancelButton.addEventListener('click', () => cancelAppointment(appointment.id));
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'cancel-button';
+        deleteButton.textContent = 'Delete';
+        deleteButton.addEventListener('click', () => deleteAppointment(appointment.id));
 
         listItem.appendChild(appointmentInfo);
-        listItem.appendChild(cancelButton);
+        listItem.appendChild(deleteButton);
         appointmentsList.appendChild(listItem);
     });
 }
 
-function cancelAppointment(appointmentId) {
+function deleteAppointment(appointmentId) {
     fetch(`/api/user/appointments/${appointmentId}`, {
         method: 'DELETE'
     })
@@ -46,14 +52,14 @@ function cancelAppointment(appointmentId) {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            // Ricarica gli appuntamenti dopo la cancellazione
+            // Reload appointments after deletion
             fetchAppointments();
         })
         .catch(error => console.error('Error cancelling appointment:', error));
 }
 
 function fetchPastAppointments() {
-    fetch('/api/user/appointments/past')  // URL dell'endpoint API per appuntamenti passati
+    fetch('/api/user/appointments/past')  // API endpoint URL for past appointments
         .then(response => response.json())
         .then(data => renderPastAppointments(data))
         .catch(error => console.error('Error fetching past appointments:', error));
@@ -61,7 +67,7 @@ function fetchPastAppointments() {
 
 function renderPastAppointments(appointments) {
     const pastAppointmentsList = document.getElementById('past-appointments');
-    pastAppointmentsList.innerHTML = '';  // Svuota la lista degli appuntamenti
+    pastAppointmentsList.innerHTML = '';  // Clear the list of past appointments
 
     appointments.forEach(appointment => {
         const listItem = document.createElement('li');
@@ -73,13 +79,12 @@ function renderPastAppointments(appointments) {
         const date = appointment.date.split('T')[0];
         const slot = appointment.date.split('T')[1].slice(0, 5);
 
-
         appointmentInfo.innerHTML = `
             <h3>Dr. ${appointment.doctor.name}</h3>
-            <p><strong>Data:</strong> ${date}</p>
-            <p><strong>Ora:</strong> ${slot}</p>
-            <p><strong>Servizio:</strong> ${appointment.visitType}</p>
-            <p><strong>Indirizzo:</strong> ${appointment.address}</p>
+            <p><strong>Date:</strong> ${date}</p>
+            <p><strong>Time:</strong> ${slot}</p>
+            <p><strong>Service:</strong> ${appointment.visitType}</p>
+            <p><strong>Address:</strong> ${formatAddress(appointment.doctor.address)}</p>
         `;
 
         listItem.appendChild(appointmentInfo);
@@ -87,9 +92,9 @@ function renderPastAppointments(appointments) {
     });
 }
 
-function cancelPastAppointment(appointmentId) {
-    // Placeholder function - in realtà non si dovrebbe cancellare un appuntamento passato
-    console.warn('Cannot cancel past appointments');
+function deletePastAppointment(appointmentId) {
+    // Placeholder function - you shouldn't be able to delete a past appointment
+    console.warn('Cannot delete past appointments');
 }
 
 document.addEventListener('DOMContentLoaded', () => {

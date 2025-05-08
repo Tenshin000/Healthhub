@@ -89,12 +89,16 @@ public class Appointment {
     public static class DoctorInfo {
         private String id;
         private String name;
+        private Address address;
+        private String email;
 
         public DoctorInfo() {}
 
-        public DoctorInfo(String doctorId, String doctorName) {
+        public DoctorInfo(String doctorId, String doctorName, Address address, String email) {
             this.id = doctorId;
             this.name = doctorName;
+            this.address = address;
+            this.email = email;
         }
 
         public String getId() {
@@ -111,6 +115,22 @@ public class Appointment {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        public Address getAddress() {
+            return address;
+        }
+
+        public void setAddress(Address address) {
+            this.address = address;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
         }
     }
 
@@ -118,12 +138,16 @@ public class Appointment {
     public static class PatientInfo {
         private String id;
         private String name;
+        private String email;
+        private String gender;
 
         public PatientInfo() {}
 
-        public PatientInfo(String patientId, String patientName) {
+        public PatientInfo(String patientId, String patientName, String email, String gender) {
             this.id = patientId;
             this.name = patientName;
+            this.email = email;
+            this.gender = gender;
         }
 
         public String getId() {
@@ -140,6 +164,22 @@ public class Appointment {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public String getGender() {
+            return gender;
+        }
+
+        public void setGender(String gender) {
+            this.gender = gender;
         }
     }
 }

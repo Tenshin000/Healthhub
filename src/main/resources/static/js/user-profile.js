@@ -1,3 +1,4 @@
+// Function to fetch personal information from the backend
 function fetchPersonalInfo() {
     fetch('/api/user/details')
         .then(response => {
@@ -14,21 +15,24 @@ function fetchPersonalInfo() {
         });
 }
 
-// Funzione per inserire i valori nei campi di input
+// Function to populate input fields with personal info
 function renderPersonalInfo(personalInfo) {
     document.getElementById('fullName').value = personalInfo.fullName || '';
+    document.getElementById('fiscalCode').value = personalInfo.fiscalCode || '';
     document.getElementById('birthDate').value = personalInfo.birthDate || '';
     document.getElementById('gender').value = personalInfo.gender || 'male';
 }
 
-// Funzione per salvare i dati del form
+// Function to save personal info from the form
 function savePersonalInfo() {
     const fullName = document.getElementById('fullName').value;
+    const fiscalCode = document.getElementById('fiscalCode').value;
     const birthDate = document.getElementById('birthDate').value;
     const gender = document.getElementById('gender').value;
 
     const data = {
         fullName: fullName,
+        fiscalCode: fiscalCode,
         birthDate: birthDate,
         gender: gender
     };
@@ -48,17 +52,19 @@ function savePersonalInfo() {
         })
         .then(data => {
             console.log('Success:', data);
-            // Dopo aver salvato i dati, fai una fetch per ottenere i dati aggiornati
+            // After saving the data, fetch updated data again
             fetchPersonalInfo();
         })
         .catch(error => {
             console.error('Error saving personal info:', error);
-            // Puoi gestire l'errore qui, ad esempio mostrando un messaggio all'utente
+            // You can handle the error here, for example by showing a message to the user
         });
 }
 
+// Add event listener to the personal info save button
 document.getElementById('save-personal-info').addEventListener('click', savePersonalInfo);
 
+// Function to fetch contact information from the backend
 function fetchContactInfo() {
     fetch('/api/user/contacts')
         .then(response => {
@@ -72,11 +78,11 @@ function fetchContactInfo() {
         })
         .catch(error => {
             console.error('Error fetching contact info:', error);
-            // Puoi gestire l'errore qui, ad esempio mostrando un messaggio all'utente
+            // You can handle the error here, for example by showing a message to the user
         });
 }
 
-// Funzione per inserire i valori nei campi di input
+// Function to populate input fields with contact info
 function renderContactInfo(contactInfo) {
     document.getElementById('email').value = contactInfo.email || '';
     document.getElementById('phone').value = contactInfo.phoneNumber || '';
@@ -87,7 +93,6 @@ function renderContactInfo(contactInfo) {
     document.getElementById('country').value = contactInfo.country || '';
 }
 
-
 // Function to save contact information from the form
 function saveContactInfo() {
     const email = document.getElementById('email').value;
@@ -97,7 +102,6 @@ function saveContactInfo() {
     const province = document.getElementById('province').value;
     const postalCode = document.getElementById('CAP').value;
     const country = document.getElementById('country').value;
-
 
     // Create the data object to send
     const data = {
@@ -135,10 +139,10 @@ function saveContactInfo() {
         });
 }
 
-
-// Aggiungi un event listener al pulsante di salvataggio
+// Add event listener to the contact info save button
 document.getElementById('save-contact-info').addEventListener('click', saveContactInfo);
 
+// When the DOM is fully loaded, fetch initial personal and contact information
 document.addEventListener('DOMContentLoaded', () => {
     fetchPersonalInfo();
     fetchContactInfo();

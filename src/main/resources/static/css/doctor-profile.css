@@ -49,6 +49,7 @@ label {
 input[type="text"],
 input[type="tel"],
 input[type="date"],
+input[type="password"],
 select {
     width: -moz-available;
     width: -webkit-fill-available;
@@ -78,14 +79,18 @@ button.save-btn:hover {
 }
 
 #phone-list .phone-number {
-    display: inline-block;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
     background-color: #007bff;
     color: white;
-    padding: 5px 10px;
+    padding: 5px 25px 5px 10px;
     border-radius: 20px;
-    margin-right: 5px;
-    margin-bottom: 5px;
-    cursor: pointer;
+    margin: 2px;
+}
+
+.phone-number .phone-text {
+    pointer-events: none;
 }
 
 #specializations {
@@ -95,11 +100,32 @@ button.save-btn:hover {
 }
 
 .specialization {
+    position: relative;
+    padding: 5px 25px 5px 10px;
     background-color: #007bff;
     color: white;
-    padding: 5px 10px;
     border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    margin: 2px;
+}
+
+.specialization .specialization-text {
+    pointer-events: none;
+}
+
+.remove-icon {
+    position: absolute;
+    top: 30%;
+    right: 5%;
+    transform: translateY(-50%);
     cursor: pointer;
+    font-size: 0.6em;
+    color: white;
+}
+
+.remove-icon:hover {
+    color: #c0c0c0;
 }
 
 #visit-types {

@@ -13,6 +13,7 @@ import it.unipi.healthhub.repository.mongo.AppointmentMongoRepository;
 import it.unipi.healthhub.repository.mongo.DoctorMongoRepository;
 import it.unipi.healthhub.repository.mongo.UserMongoRepository;
 import it.unipi.healthhub.repository.neo4j.UserNeo4jRepository;
+import it.unipi.healthhub.util.FakeMailSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,10 @@ public class UserService {
     private AppointmentMongoRepository appointmentMongoRepository;
     @Autowired
     private DoctorMongoRepository doctorMongoRepository;
+    @Autowired
+    private AppointmentService appointmentService;
+    @Autowired
+    private FakeMailSender fakeMailSender;
 
     public List<User> getAllUser(){
         return userMongoRepository.findAll();
@@ -91,6 +96,7 @@ public class UserService {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             user.setName(userDetails.getFullName());
+            user.setFiscalCode(userDetails.getFiscalCode());
             user.setDob(userDetails.getBirthDate());
             user.setGender(userDetails.getGender());
 
@@ -106,7 +112,7 @@ public class UserService {
         Optional<User> userOpt = userMongoRepository.findById(patientId);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            return new UserDetailsDTO(user.getName(), user.getDob(), user.getGender());
+            return new UserDetailsDTO(user.getName(),user.getFiscalCode(), user.getDob(), user.getGender());
         }
         return null;
     }
@@ -154,26 +160,32 @@ public class UserService {
     }
 
     @Transactional
-    public boolean deleteAppointment(String appointmentId) {
+    public boolean cancelAppointment(String appointmentId) {
         Optional<Appointment> appointmentOpt = appointmentMongoRepository.findById(appointmentId);
         if (appointmentOpt.isPresent()) {
             Appointment appointment = appointmentOpt.get();
-
-            LocalDateTime dateTimeSlot = appointment.getDate();
-
-            Integer year = dateTimeSlot.getYear();
-            Integer week = dateTimeSlot.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
-            String keyDay = dateTimeSlot.getDayOfWeek().toString().toLowerCase();
-            String slotStart = dateTimeSlot.toLocalTime().toString();
-            String doctorId = appointment.getDoctor().getId();
-
-            boolean taken = doctorMongoRepository.checkScheduleSlot(doctorId, year, week, keyDay, slotStart);
-            if(taken){
-                appointmentMongoRepository.deleteById(appointmentId);
-                doctorMongoRepository.freeScheduleSlot(doctorId, year, week, keyDay, slotStart);
-                return true;
-            }
+            return deleteAppointment(appointment);
         }
+        return false;
+    }
+
+    private boolean deleteAppointment(Appointment appointment){
+        LocalDateTime dateTimeSlot = appointment.getDate();
+
+        Integer year = dateTimeSlot.getYear();
+        Integer week = dateTimeSlot.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
+        String keyDay = dateTimeSlot.getDayOfWeek().toString().toLowerCase();
+        String slotStart = dateTimeSlot.toLocalTime().toString();
+        String doctorId = appointment.getDoctor().getId();
+
+        boolean taken = doctorMongoRepository.checkScheduleSlot(doctorId, year, week, keyDay, slotStart);
+        if(taken){
+            appointmentService.deleteAppointment(appointment.getId());
+            doctorMongoRepository.freeScheduleSlot(doctorId, year, week, keyDay, slotStart);
+            fakeMailSender.sendDeletedAppointmentMailByPatient(appointment);
+            return true;
+        }
+
         return false;
     }
 

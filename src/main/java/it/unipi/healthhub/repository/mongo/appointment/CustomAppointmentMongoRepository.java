@@ -1,6 +1,7 @@
 package it.unipi.healthhub.repository.mongo.appointment;
 
 import it.unipi.healthhub.model.mongo.Appointment;
+import it.unipi.healthhub.model.mongo.User;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,4 +15,6 @@ public interface CustomAppointmentMongoRepository {
     List<Appointment> findByPatientIdFromDate(String patientId, LocalDate date);
     List<Appointment> findByPatientIdBeforeDate(String patientId, LocalDate date);
     Integer findNewPatientsVisitedByDoctorInCurrentMonth(String doctorId, Integer year, Integer month);
+    List<Appointment> findByDoctorIdAndWeek(String doctorId, Integer week, Integer year);
+    public boolean hasPastAppointment(String doctorId, String patientId);
 }

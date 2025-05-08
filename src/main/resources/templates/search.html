@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ricerca Medici - HealthHub</title>
+    <title>Search for Doctors - HealthHub</title>
     <link rel="stylesheet" th:href="@{/css/search.css}">
     <script>
         async function searchDoctors(query) {
@@ -15,8 +15,8 @@
                 const doctorElement = document.createElement('div');
                 doctorElement.innerHTML = `
                     <h4><a href="/doctors/${doctor.id}">${doctor.name}</a></h4>
-                    <p>Specializzazioni: ${doctor.specialization}</p>
-                    <p>Località: ${doctor.location}</p>
+                    <p>Specializations: ${doctor.specialization}</p>
+                    <p>Location: ${doctor.location}</p>
                 `;
                 resultsDiv.appendChild(doctorElement);
             });
@@ -39,16 +39,16 @@
 <main>
     <div class="hero">
         <div class="hero-content">
-            <h2>Ricerca Medici</h2>
+            <h2>Search for Doctors</h2>
             <form onsubmit="event.preventDefault(); searchDoctors(document.getElementById('query').value);">
-                <input type="text" id="query" placeholder="Cerca per nome, specialità, o località" class="search-input">
-                <button type="submit" class="search-button">Cerca</button>
+                <input type="text" id="query" placeholder="Search by name, specialty, or location" class="search-input">
+                <button type="submit" class="search-button">Search</button>
             </form>
         </div>
     </div>
 
     <section>
-        <h3>Risultati della Ricerca</h3>
+        <h3>Search Results</h3>
         <div id="results"></div>
     </section>
 </main>

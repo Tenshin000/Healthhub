@@ -1,6 +1,7 @@
 let distributionChart = null;
+
 $(document).ready(() => {
-    // Inizializzazione del datepicker con jQuery UI
+    // Initialization of the datepicker with jQuery UI
     $("#datepicker").datepicker({
         firstDay: 1,
         onSelect: (dateText) => {
@@ -8,23 +9,18 @@ $(document).ready(() => {
             fetchAppointmentsAnalytics(dateText).then((appointmentDistribution) => renderAppointmentsAnalytics(appointmentDistribution));
         }
     });
-    // Chiamata iniziale per recuperare gli appuntamenti della data corrente
+
+    // Initial call to fetch appointments for the current date
     fetchAppointments().then((appointments) => renderAppointments(appointments));
     fetchAppointmentsAnalytics().then((appointmentDistribution) => renderAppointmentsAnalytics(appointmentDistribution));
-
 });
 
 function getWeekNumber(date) {
-    // Copy date as UTC to avoid DST
     let d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    // Shift to the following Saturday to get the year
     d.setUTCDate(d.getUTCDate() + 6 - d.getUTCDay());
-    // Get the first day of the year
     let yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
     yearStart.setUTCDate(yearStart.getUTCDate() - yearStart.getUTCDay());
-    // Get difference between yearStart and d in milliseconds
-    // Reduce to whole weeks
-    return (Math.ceil((d - yearStart) / 6.048e8));
+    return Math.ceil((d - yearStart) / 6.048e8);
 }
 
 async function fetchAppointments(dateJQuery = null) {
@@ -35,14 +31,14 @@ async function fetchAppointments(dateJQuery = null) {
         const response = await fetch(`/api/doctor/appointments?date=${dateStr}`);
         return await response.json();
     } catch (error) {
-        console.error('Errore nel recupero degli appuntamenti:', error);
+        console.error('Error fetching appointments:', error);
     }
 }
 
 function formatDate(date) {
     const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Aggiunge lo zero se il mese è inferiore a 10
-    const day = date.getDate().toString().padStart(2, '0'); // Aggiunge lo zero se il giorno è inferiore a 10
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
     return `${year}-${month}-${day}`;
 }
 
@@ -94,12 +90,12 @@ function createAppointmentElement(appointment) {
     const viewButton = document.createElement('button');
     viewButton.textContent = 'View';
 
-    const cancelButton = document.createElement('button');
-    cancelButton.onclick = () => deleteAppointment(appointment.id);
-    cancelButton.textContent = 'Cancel';
+    const deleteButton = document.createElement('button');
+    deleteButton.onclick = () => deleteAppointment(appointment.id);
+    deleteButton.textContent = 'Delete';
 
     actionsDiv.appendChild(viewButton);
-    actionsDiv.appendChild(cancelButton);
+    actionsDiv.appendChild(deleteButton);
 
     div.appendChild(headerDiv);
     div.appendChild(notesP);
@@ -115,21 +111,19 @@ async function deleteAppointment(appointmentId) {
         });
 
         if (response.ok) {
-            // Recupera di nuovo gli appuntamenti per aggiornare la lista
             const date = $('#datepicker').datepicker('getDate');
-            //const formattedDate = formatDate(date);
             fetchAppointments(date).then((appointments) => renderAppointments(appointments));
             fetchAppointmentsAnalytics(date).then((appointmentDistribution) => renderAppointmentsAnalytics(appointmentDistribution));
         }
     } catch (error) {
-        console.error('Errore nella cancellazione dell\'appuntamento:', error);
+        console.error('Error deleting appointment:', error);
     }
 }
 
 function startOfWeek(d) {
     d = new Date(d);
     let day = d.getDay(),
-        diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+        diff = d.getDate() - day + (day === 0 ? -6 : 1);
     return new Date(d.setDate(diff));
 }
 
@@ -145,7 +139,6 @@ async function fetchAppointmentsAnalytics(dayText = null) {
             params.append('week', week);
         }
 
-
         const queryString = params.toString();
         const url = queryString ? `/api/doctor/analytics/visits/distribution?${queryString}` : '/api/doctor/analytics/visits/distribution';
 
@@ -156,21 +149,20 @@ async function fetchAppointmentsAnalytics(dayText = null) {
 
         return await response.json();
     } catch (error) {
-        console.error('Errore nel recupero dei dati:', error);
+        console.error('Error fetching data:', error);
         return null;
     }
 }
 
-
 let appDistrChartData = {
     type: 'bar',
     data: {
-        labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
         datasets: [{
             label: 'Appointments',
-            data: [12, 19, 3, 5, 2],
-            backgroundColor: ['rgba(54, 162, 235, 0.2)',],
-            borderColor: ['rgba(54, 162, 235, 1)',],
+            data: [12, 19, 3, 5, 2, 0], // Placeholder iniziale per sabato
+            backgroundColor: ['rgba(54, 162, 235, 0.2)'],
+            borderColor: ['rgba(54, 162, 235, 1)'],
             borderWidth: 1
         }]
     },
@@ -187,22 +179,21 @@ function renderAppointmentsAnalytics(appointmentDistribution) {
     if (distributionChart) {
         distributionChart.destroy();
     }
+
     const ctx = document.getElementById('app-distr-chart').getContext('2d');
+
     if (appointmentDistribution) {
-        let days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-        appointmentDistribution = {...appointmentDistribution};
+        let days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        appointmentDistribution = { ...appointmentDistribution };
         let orderedData = [];
+
         for (let i = 0; i < days.length; i++) {
-            let month = days[i].toLowerCase()
-            if (appointmentDistribution[month]) {
-                orderedData.push(appointmentDistribution[month]);
-            }
-            else {
-                orderedData.push(0);
-            }
+            let dayKey = days[i].toLowerCase();
+            orderedData.push(appointmentDistribution[dayKey] || 0);
         }
+
         console.log(orderedData);
-        appDistrChartData.data.datasets[0].data = orderedData
+        appDistrChartData.data.datasets[0].data = orderedData;
         appDistrChartData.data.labels = days;
         distributionChart = new Chart(ctx, appDistrChartData);
     }

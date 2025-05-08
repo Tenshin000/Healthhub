@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doctor Profile</title>
     <link rel="stylesheet" th:href="@{/css/doctor-profile.css}">
+    <!-- Font Awesome 6 (CDN) -->
+    <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+            integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+    />
 </head>
 <body>
 <div class="container">
@@ -21,6 +29,14 @@
                     <div class="form-group">
                         <label for="full-name">Full Name:</label>
                         <input type="text" id="full-name" name="full-name" placeholder="Full Name" th:value="${doctor.name}">
+                    </div>
+                    <div class="form-group">
+                        <label for="orderRegistrationNumber">Order Registration Number:</label>
+                        <input type="text" id="orderRegistrationNumber" name="orderRegistrationNumber" placeholder="Order Registration Number" th:value="${doctor.orderRegistrationNumber}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="fiscalCode">Fiscal Code:</label>
+                        <input type="text" id="fiscalCode" name="fiscalCode" placeholder="Fiscal Code" th:value="${doctor.fiscalCode}">
                     </div>
                     <div class="form-group">
                         <label for="birthdate">Date of Birth:</label>
@@ -68,11 +84,14 @@
                 <div class="section">
                     <h3>Phone Numbers</h3>
                     <div id="phone-list">
+                        <!-- Each phone number tag with remove icon -->
                         <div th:each="phoneNumber, index : ${doctor.phoneNumbers}"
                              class="phone-number"
-                             th:text="${phoneNumber}"
-                             th:attr="data-index=${index.index}"
-                             onclick="removePhoneNumber(this)">
+                             th:attr="data-index=${index.index}">
+                            <span class="phone-text" th:text="${phoneNumber}"></span>
+                            <i class="fa-solid fa-xmark remove-icon"
+                               th:attr="data-index=${index.index}"
+                               onclick="removePhoneNumber(this)"></i>
                         </div>
                     </div>
                     <div class="form-group">
@@ -87,9 +106,9 @@
                     <div id="specializations">
                         <div th:each="specialization, index : ${doctor.specializations}"
                              class="specialization"
-                             th:text="${specialization}"
-                             th:attr="data-index=${index.index}"
-                             onclick="removeSpecialization(this)">
+                             th:attr="data-index=${index.index}">
+                            <span class="specialization-text" th:text="${specialization}"></span>
+                            <i class="fa-solid fa-xmark remove-icon" onclick="handleSpecializationTagClick(event)"></i>
                         </div>
                         <!-- Here goes dynamically generated list of specializations as tags -->
                     </div>
@@ -98,6 +117,8 @@
                         <button type="button" id="add-specialization">Add</button>
                     </div>
                 </div>
+
+                <!-- Here goes dynamically generated list of specializations as tags -->
 
                 <!-- Types of Visits and Prices Section -->
                 <div class="section">
@@ -112,6 +133,26 @@
                         </div>
                     </div>
                     <button type="button" id="add-visit-type">Add</button>
+                </div>
+
+                <!-- Security Infos -->
+                <div class="section">
+                    <h2>Account Security</h2>
+                    <form>
+                        <div class="form-group">
+                            <label for="currentPassword">Current Password:</label>
+                            <input type="password" id="currentPassword" name="currentPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">New Password:</label>
+                            <input type="password" id="newPassword" name="newPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm New Password:</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" required>
+                        </div>
+                        <button type="submit">Update Password</button>
+                    </form>
                 </div>
             </form>
         </div>

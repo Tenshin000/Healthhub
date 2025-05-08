@@ -25,7 +25,7 @@ class DoctorScheduleCalendar {
     getWeekRange(date) {
         const startOfWeek = this.startOfWeek(date);
         const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(startOfWeek.getDate() + 6); // Fine domenica
+        endOfWeek.setDate(startOfWeek.getDate() + 6); // Ends on Sunday
 
         const startMonthDay = `${startOfWeek.toLocaleString('en-US', { month: 'short' })} ${startOfWeek.getDate()}`;
         const endDay = endOfWeek.getDate();
@@ -45,7 +45,7 @@ class DoctorScheduleCalendar {
             })
             .catch(error => {
                 console.error(error);
-                // Puoi gestire ulteriormente l'errore qui o rilanciarlo per gestirlo altrove
+                // You can handle the error here or rethrow it to handle it elsewhere
             });
     }
 
@@ -67,11 +67,10 @@ class DoctorScheduleCalendar {
         });
     }
 
-
     startOfWeek(d) {
         d = new Date(d);
         let day = d.getDay(),
-            diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+            diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is Sunday
         return new Date(d.setDate(diff));
     }
 
@@ -80,16 +79,16 @@ class DoctorScheduleCalendar {
 
         this.daysContainer.innerHTML = '';
 
-        const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-        const keyDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
-        for (let i = 0; i < 5; i++) {
+        const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const keyDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        for (let i = 0; i < 6; i++) {
             const day = new Date(startOfWeek);
             day.setDate(startOfWeek.getDate() + i);
 
             const dayDiv = document.createElement('div');
             dayDiv.classList.add('day');
 
-            // workaround per il formato della data
+            // Workaround for date format
             let year = day.getFullYear();
             let month = (day.getMonth() + 1).toString().padStart(2, '0');
             let dayOfMonth = day.getDate().toString().padStart(2, '0');
@@ -169,5 +168,4 @@ class DoctorScheduleCalendar {
         }
         return null;
     }
-
 }
