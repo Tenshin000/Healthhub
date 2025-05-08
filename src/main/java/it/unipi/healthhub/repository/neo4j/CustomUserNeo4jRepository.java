@@ -8,9 +8,6 @@ import java.util.List;
  * Contains complex recommendation queries that cannot be mapped automatically by SDN.
  */
 public interface CustomUserNeo4jRepository {
-    List<DoctorDAO> recommendDoctorsBySeenSpecializations(String userId, int limit);
-
-    List<DoctorDAO> recommendDoctorsByNotSeenSpecializations(String userId, int limit);
-
+    List<DoctorDAO> recommendDoctorsForUser(String userId, int limit);
     List<DoctorDAO> recommendPopularDoctors(int limit);
 }
