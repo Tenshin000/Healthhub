@@ -34,8 +34,8 @@ public class CustomUserNeo4jRepositoryImpl implements CustomUserNeo4jRepository 
      * @return List of recommended doctors with their details.
      */
     @Override
-    public List<DoctorDAO> recommendDoctorsForUser(String userId, int limit) {
-        try (Session session = driver.session()) {
+    public List<DoctorDAO> recommendDoctorsForUser(String userId, int limit){
+        try(Session session = driver.session()){
             return session.readTransaction(tx -> {
                 String cypher =
                         "MATCH (me:User {id:$uid})-[:ENDORSED|REVIEWED]->(d:Doctor)<-[:ENDORSED|REVIEWED]-(other:User) " +
@@ -43,7 +43,7 @@ public class CustomUserNeo4jRepositoryImpl implements CustomUserNeo4jRepository 
                                 "WHERE sharedCount >= 3 AND me <> other " +
                                 "LIMIT 200 " +
                                 // Get other doctors from 'other' that 'me' has not yet endorsed/reviewed
-                                "MATCH (other)-[r:ENDORSED|REVIEWED]->(rec:Doctor) " +
+                                "MATCH (other)-[r:ENDORSED|REVIEWED*1..3]->(rec:Doctor) " +
                                 "WHERE NOT (me)-[:ENDORSED|REVIEWED]->(rec) " +
                                 // Aggregate a score: more relationships and more similar users increase the score
                                 "WITH rec, sum(sharedCount) AS score, count(r) AS endorsements " +
@@ -78,8 +78,8 @@ public class CustomUserNeo4jRepositoryImpl implements CustomUserNeo4jRepository 
      * @return List of popular doctors with their details.
      */
     @Override
-    public List<DoctorDAO> recommendPopularDoctors(int limit) {
-        try (Session session = driver.session()) {
+    public List<DoctorDAO> recommendPopularDoctors(int limit){
+        try(Session session = driver.session()){
             return session.readTransaction(tx -> {
                 Result result = tx.run(
                         // Match all doctors with non-null specializations
@@ -94,7 +94,7 @@ public class CustomUserNeo4jRepositoryImpl implements CustomUserNeo4jRepository 
                         Values.parameters("limit", limit)
                 );
                 List<DoctorDAO> doctors = new ArrayList<>();
-                while (result.hasNext()) {
+                while(result.hasNext()){
                     Record record = result.next();
                     Value specValue = record.get("specializations");
                     List<String> specializations = specValue.isNull()

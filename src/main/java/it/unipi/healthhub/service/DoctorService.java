@@ -1,11 +1,10 @@
 package it.unipi.healthhub.service;
 
+import it.unipi.healthhub.dto.*;
 import it.unipi.healthhub.model.mongo.*;
-import it.unipi.healthhub.dto.AppointmentDTO;
-import it.unipi.healthhub.dto.ReviewDTO;
-import it.unipi.healthhub.dto.SpecializationDTO;
-import it.unipi.healthhub.dto.UserDetailsDTO;
 import it.unipi.healthhub.model.neo4j.DoctorDAO;
+import it.unipi.healthhub.projection.DoctorMongoProjection;
+import it.unipi.healthhub.projection.DoctorNeo4jProjection;
 import it.unipi.healthhub.repository.mongo.AppointmentMongoRepository;
 import it.unipi.healthhub.repository.mongo.DoctorMongoRepository;
 import it.unipi.healthhub.repository.mongo.TemplateMongoRepository;
@@ -41,6 +40,7 @@ public class DoctorService {
     @Autowired
     private UserNeo4jRepository userNeo4jRepository;
 
+
     @Autowired
     private AppointmentMongoRepository appointmentRepository;
     @Autowired
@@ -49,13 +49,23 @@ public class DoctorService {
     @Autowired
     private FakeMailSender fakeMailSender;
 
-    public List<Doctor> searchDoctors(String query) {
+    public List<DoctorMongoProjection> searchDoctorsMongo(String query) {
         if (query != null && !query.isEmpty()) {
-            return doctorMongoRepository.findByNameContainingOrSpecializationsContainingOrAddressContaining(query, query, query);
+            return doctorMongoRepository.searchDoctors(query);
         } else {
-            return doctorMongoRepository.findAll();
+            // return doctorMongoRepository.findAll();
+            return null;
         }
     }
+
+    public List<DoctorNeo4jProjection> searchDoctorsNeo4j(String patientId, String query) {
+        if(query != null && !query.isEmpty()) {
+            return doctorNeo4jRepository.findConnectedDoctorsBySteps(patientId, query);
+        } else {
+            return null;
+        }
+    }
+
     public List<Doctor> getAllDoctor(){
         return doctorMongoRepository.findAll();
     }
@@ -66,6 +76,8 @@ public class DoctorService {
 
     @Transactional
     public Doctor createDoctor(Doctor doctor){
+        it.unipi.healthhub.model.mongo.Service service = new it.unipi.healthhub.model.mongo.Service("Standard Visit", 0);
+        newService(doctor, service);
         Doctor newDoc = doctorMongoRepository.save(doctor);
         DoctorDAO doctorDAO = new DoctorDAO(newDoc.getId(), newDoc.getName(), newDoc.getSpecializations());
         doctorNeo4jRepository.save(doctorDAO);
@@ -102,16 +114,23 @@ public class DoctorService {
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
 
-            if (doctor.getServices() == null) {
-                doctor.setServices(new ArrayList<>());
-            }
+            int newIndex = newService(doctor, service);
 
-            int newIndex = doctor.getServices().size();
-            doctor.getServices().add(service); // Add service to doctor's list
+            // Add service to doctor's list
             doctorMongoRepository.save(doctor); // Save updated doctor with the new service
             return newIndex;
         }
         return null;
+    }
+
+    private Integer newService(Doctor doctor, it.unipi.healthhub.model.mongo.Service service){
+        if(doctor.getServices() == null){
+            doctor.setServices(new ArrayList<>());
+        }
+
+        int newIndex = doctor.getServices().size();
+        doctor.getServices().add(service);
+        return newIndex;
     }
 
     public List<it.unipi.healthhub.model.mongo.Service> getMyServices(String doctorId) {

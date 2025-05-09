@@ -7,7 +7,7 @@
     <link rel="stylesheet" th:href="@{/css/search.css}">
     <script>
         async function searchDoctors(query) {
-            const response = await fetch(`/api/doctors/search?query=${query}`);
+            const response = await fetch(`/api/search/doctors?query=${query}`);
             const doctors = await response.json();
             const resultsDiv = document.getElementById('results');
             resultsDiv.innerHTML = '';

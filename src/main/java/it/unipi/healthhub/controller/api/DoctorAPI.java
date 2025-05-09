@@ -27,7 +27,6 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/doctors")
 public class DoctorAPI {
-
     @Autowired
     private DoctorService doctorService;
 
@@ -36,14 +35,14 @@ public class DoctorAPI {
 
     @Autowired
     private AppointmentService appointmentService;
-
+/*
     // Metodo per la ricerca dei medici
     @GetMapping("/search")
     public ResponseEntity<List<Doctor>> search(@RequestParam(name = "query", required = false) String query) {
-        List<Doctor> doctors = doctorService.searchDoctors(query);
+        List<Doctor> doctors = doctorService.searchDoctorsMongo(query);
         return ResponseEntity.ok(doctors);
     }
-
+*/
     @GetMapping
     public List<Doctor> getAllDoctors() {
         return doctorService.getAllDoctor();
