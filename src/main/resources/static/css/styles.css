@@ -142,3 +142,20 @@ main {
 .footer-links a:hover {
     text-decoration: underline;
 }
+
+.error {
+    background-color: #dc3545;
+    color: white;
+    padding: 60px 20px;
+    text-align: center;
+    border-radius: 8px;
+}
+
+.error-content h2 {
+    margin: 0 0 20px 0;
+}
+
+.error-content p {
+    font-size: 1.2em;
+    margin: 0 0 20px 0;
+}
