@@ -37,6 +37,6 @@ public interface DoctorNeo4jRepository extends Neo4jRepository<DoctorDAO, String
             "WITH d, min(length(path)) AS steps " +
             "RETURN d as doctor, steps as score " +
             "ORDER BY steps " +
-            "LIMIT 500")
+            "LIMIT 250")
     List<DoctorNeo4jProjection> findConnectedDoctorsBySteps(@Param("uid") String patientId, @Param("search") String search);
 }

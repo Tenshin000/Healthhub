@@ -1,5 +1,6 @@
 package it.unipi.healthhub.controller.api;
 
+import it.unipi.healthhub.exception.ScheduleAlreadyExistsException;
 import it.unipi.healthhub.model.mongo.*;
 import it.unipi.healthhub.dto.*;
 import it.unipi.healthhub.service.AppointmentService;
@@ -352,7 +353,7 @@ public class PrivateDoctorAPI {
                 return ResponseEntity.badRequest().build();
             }
         }
-        catch(IllegalArgumentException iae){
+        catch(ScheduleAlreadyExistsException saee){
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
     }

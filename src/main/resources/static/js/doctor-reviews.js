@@ -13,15 +13,15 @@ document.addEventListener('DOMContentLoaded', function(){
                 const reviews = await response.json();
                 renderReviews(reviews);
             } else {
-                console.error('Errore durante il recupero delle recensioni');
+                console.error('Error retrieving reviews:');
             }
         } catch (error) {
-            console.error('Errore durante il recupero delle recensioni:', error);
+            console.error('Error retrieving reviews:', error);
         }
     }
 
     function createReviewCard(review, index) {
-        // Crea gli elementi necessari per la recensione
+        // Create the necessary elements for the review
         const reviewDiv = document.createElement('div');
         reviewDiv.classList.add('review');
 
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function(){
         deleteButton.textContent = 'Delete';
         deleteButton.addEventListener('click', () => deleteReview(index));
 
-        // Assembla gli elementi
+        // Assemble the elements
         headerInnerDiv.appendChild(h3);
         headerInnerDiv.appendChild(pDate);
 
@@ -82,22 +82,22 @@ document.addEventListener('DOMContentLoaded', function(){
             if (response.ok) {
                 fetchReviews();
             } else {
-                console.error('Errore durante l\'eliminazione della recensione');
+                console.error('Error deleting review');
             }
         } catch (error) {
-            console.error('Errore durante l\'eliminazione della recensione:', error);
+            console.error('Error deleting review:', error);
         }
     }
 
 
     function renderReviews(reviews) {
-        // Trova l'elemento che conterrà le recensioni
+        // Find the element that will contain the reviews
         const reviewsSection = document.getElementById('reviews');
 
-        // Rimuove le recensioni esistenti (se presenti)
+        // Remove existing reviews (if any)
         reviewsSection.innerHTML = '';
 
-        // Itera sulle recensioni fetchate e crea le review card
+        // Iterate over the fetched reviews and create the review cards
         reviews.forEach((review, index) => {
             const reviewCard = createReviewCard(review, index);
             reviewsSection.appendChild(reviewCard);

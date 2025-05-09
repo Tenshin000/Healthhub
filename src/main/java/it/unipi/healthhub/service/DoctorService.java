@@ -1,6 +1,8 @@
 package it.unipi.healthhub.service;
 
 import it.unipi.healthhub.dto.*;
+import it.unipi.healthhub.exception.DoctorNotFoundException;
+import it.unipi.healthhub.exception.ScheduleAlreadyExistsException;
 import it.unipi.healthhub.model.mongo.*;
 import it.unipi.healthhub.model.neo4j.DoctorDAO;
 import it.unipi.healthhub.projection.DoctorMongoProjection;
@@ -403,7 +405,7 @@ public class DoctorService {
         return null;
     }
 
-    public Schedule addSchedule(String doctorId, Schedule calendar) throws IllegalArgumentException{
+    public Schedule addSchedule(String doctorId, Schedule calendar) throws ScheduleAlreadyExistsException{
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
@@ -416,7 +418,7 @@ public class DoctorService {
                     .anyMatch(s -> s.getWeek().equals(calendar.getWeek()));
 
             if(alreadyExists)
-                throw new IllegalArgumentException("A schedule for this week already exists.");
+                throw new ScheduleAlreadyExistsException("A schedule for this week already exists.");
 
             doctor.getSchedules().add(calendar);
             doctorMongoRepository.save(doctor); // Save updated doctor with the new appointment
@@ -659,7 +661,7 @@ public class DoctorService {
     public void endorse(String doctorId, String patientId) {
         userNeo4jRepository.endorse(patientId, doctorId);
 
-        Doctor doc = doctorMongoRepository.findById(doctorId).orElseThrow(() -> new RuntimeException("Doctor Mongo not found"));
+        Doctor doc = doctorMongoRepository.findById(doctorId).orElseThrow(DoctorNotFoundException::new);
         doc.setEndorsementCount(doc.getEndorsementCount() + 1);
         doctorMongoRepository.save(doc);
     }
@@ -668,7 +670,7 @@ public class DoctorService {
     public void unendorse(String doctorId, String patientId) {
         userNeo4jRepository.unendorse(patientId, doctorId);
 
-        Doctor doc = doctorMongoRepository.findById(doctorId).orElseThrow(() -> new RuntimeException("Doctor Mongo not found"));
+        Doctor doc = doctorMongoRepository.findById(doctorId).orElseThrow(DoctorNotFoundException::new);
         doc.setEndorsementCount(doc.getEndorsementCount() - 1);
         doctorMongoRepository.save(doc);
     }

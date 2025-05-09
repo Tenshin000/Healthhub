@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DoctorDTO {
+    protected String id;
     protected String name;
     protected List<String> specializations;
     protected Address address;
@@ -15,17 +16,24 @@ public class DoctorDTO {
         specializations = new ArrayList<String>();
     }
 
-    public DoctorDTO(String name, List<String> specializations, Address address) {
+    public DoctorDTO(String id, String name, List<String> specializations, Address address) {
+        this.id = id;
         this.name = name;
         this.specializations = specializations;
         this.address = address;
     }
 
     public DoctorDTO(Doctor doctor){
+        this.id = doctor.getId();
         this.name = doctor.getName();
         this.specializations = doctor.getSpecializations();
         this.address = doctor.getAddress();
     }
+
+    public String getId() {
+        return id;
+    }
+    public void setId(String id) { this.id = id; }
 
     public String getName() {
         return name;

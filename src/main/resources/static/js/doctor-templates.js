@@ -1,5 +1,3 @@
-// script.js
-
 let templates = [];
 
 // Function to add a time slot input field for a specific day

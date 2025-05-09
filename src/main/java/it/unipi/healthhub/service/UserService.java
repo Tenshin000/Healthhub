@@ -3,6 +3,7 @@ package it.unipi.healthhub.service;
 import it.unipi.healthhub.dto.AppointmentDTO;
 import it.unipi.healthhub.dto.PatientContactsDTO;
 import it.unipi.healthhub.dto.UserDetailsDTO;
+import it.unipi.healthhub.exception.UserNotFoundException;
 import it.unipi.healthhub.model.mongo.Address;
 import it.unipi.healthhub.model.mongo.Appointment;
 import it.unipi.healthhub.model.mongo.Doctor;
@@ -86,7 +87,7 @@ public class UserService {
     }
 
     public boolean hasEndorsed(String patientId, String doctorId) {
-        UserDAO userDAO = userNeo4jRepository.findById(patientId).orElseThrow(() -> new RuntimeException("User not found"));
+        UserDAO userDAO = userNeo4jRepository.findById(patientId).orElseThrow(UserNotFoundException::new);
         return userDAO.getEndorsedDoctors().stream().anyMatch(doctor -> doctor.getId().equals(doctorId));
     }
 
@@ -191,7 +192,7 @@ public class UserService {
 
     @Transactional
     public List<Doctor> getEndorsedDoctors(String patientId) {
-        UserDAO userDAO = userNeo4jRepository.findById(patientId).orElseThrow(() -> new RuntimeException("User not found"));
+        UserDAO userDAO = userNeo4jRepository.findById(patientId).orElseThrow(UserNotFoundException::new);
         List<Doctor> endorsedDoctors = new ArrayList<>();
         userDAO.getEndorsedDoctors().forEach(doctorDAO -> {
             Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorDAO.getId());
@@ -202,7 +203,7 @@ public class UserService {
 
     @Transactional
     public List<Doctor> getReviewedDoctors(String userId) {
-        UserDAO userDAO = userNeo4jRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        UserDAO userDAO = userNeo4jRepository.findById(userId).orElseThrow(UserNotFoundException::new);
         List<Doctor> reviewedDoctors = new ArrayList<>();
         userDAO.getReviewedDoctors().forEach(doctorDAO -> {
             Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorDAO.getId());

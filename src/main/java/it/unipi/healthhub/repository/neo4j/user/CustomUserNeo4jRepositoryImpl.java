@@ -41,7 +41,7 @@ public class CustomUserNeo4jRepositoryImpl implements CustomUserNeo4jRepository 
                         "MATCH (me:User {id:$uid})-[:ENDORSED|REVIEWED]->(d:Doctor)<-[:ENDORSED|REVIEWED]-(other:User) " +
                                 "WITH me, other, count(d) AS sharedCount " +
                                 "WHERE sharedCount >= 3 AND me <> other " +
-                                "LIMIT 200 " +
+                                "LIMIT 250 " +
                                 // Get other doctors from 'other' that 'me' has not yet endorsed/reviewed
                                 "MATCH (other)-[r:ENDORSED|REVIEWED*1..3]->(rec:Doctor) " +
                                 "WHERE NOT (me)-[:ENDORSED|REVIEWED]->(rec) " +

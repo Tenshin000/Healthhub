@@ -123,7 +123,9 @@ public class CustomDoctorMongoRepositoryImpl implements CustomDoctorMongoReposit
         // 3) ordino per score crescente (0 = match su name, 1 = su specializzazioni, 2 = su city, 3 = su province)
         AggregationOperation sort = sort(Sort.Direction.ASC, "score");
 
-        Aggregation agg = newAggregation(match, project, sort);
+        AggregationOperation limit = limit(250);
+
+        Aggregation agg = newAggregation(match, project, sort, limit);
 
         AggregationResults<DoctorMongoProjection> results =
                 mongoTemplate.aggregate(agg, "doctors", DoctorMongoProjection.class);
