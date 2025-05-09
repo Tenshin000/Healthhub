@@ -62,7 +62,7 @@ public class SearchAPI {
         // 5) somma i punteggi, ordina e limita a 10, poi mappa in DTO
         return mongoList.stream()
                 .peek(dp -> dp.setScore(
-                        dp.getScore() + neoScores.getOrDefault(dp.getDoctor().getId(), 6L)
+                        dp.getScore() + neoScores.getOrDefault(dp.getDoctor().getId(), 25L)
                 ))
                 .sorted(Comparator.comparingLong(DoctorMongoProjection::getScore).reversed())
                 .limit(10)
