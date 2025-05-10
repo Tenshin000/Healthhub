@@ -9,6 +9,9 @@
 <body>
 <header th:replace="~{fragments/header :: header(${logged},${role})}"></header>
 <main>
+    <div th:if="${errorMessage}" class="error-message">
+        <p th:text="${errorMessage}"></p>
+    </div>
     <div class="container">
         <div class="register-form">
             <h2>Register as a Patient</h2>

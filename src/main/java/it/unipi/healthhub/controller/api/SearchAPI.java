@@ -34,15 +34,15 @@ public class SearchAPI {
             return Collections.emptyList();
         }
 
-        // 1) prendi da Mongo
+        // 1) take from Mongo
         List<DoctorMongoProjection> mongoList = doctorService.searchDoctorsMongo(query);
 
-        // 2) se non c'è patientId, restituisci subito i top‑10 di mongo
+        // 2) if there is no patientId, return mongo top‑10 immediately
         if (patientId == null) {
             return toTop10Dto(mongoList);
         }
 
-        // 3) altrimenti prendi anche da Neo4j
+        // 3) otherwise you can also get it from Neo4j
         List<DoctorNeo4jProjection> neo4jList = doctorService.searchDoctorsNeo4j(patientId, query);
 
         if (neo4jList.isEmpty()) {
@@ -52,14 +52,14 @@ public class SearchAPI {
             return Collections.emptyList();
         }
 
-        // 4) mappa id→score da Neo4j
+        // 4) map id→score from Neo4j
         Map<String, Long> neoScores = neo4jList.stream()
                 .collect(Collectors.toMap(
                         d -> d.getDoctor().getId(),
                         DoctorNeo4jProjection::getScore
                 ));
 
-        // 5) somma i punteggi, ordina e limita a 10, poi mappa in DTO
+        // 5) sum scores, sort and limit to 10, then map to DTO
         return mongoList.stream()
                 .peek(dp -> dp.setScore(
                         dp.getScore() + neoScores.getOrDefault(dp.getDoctor().getId(), 6L)
@@ -74,9 +74,7 @@ public class SearchAPI {
         return new DoctorDTO(d);
     }
 
-    /**
-     * Ordina per score e prende i primi 10 doctor, poi DTO.
-     */
+    // Sort by score and take top 10 doctors, then DTO.
     private List<DoctorDTO> toTop10Dto(List<DoctorMongoProjection> list) {
         return list.stream()
                 .sorted(Comparator.comparingLong(DoctorMongoProjection::getScore).reversed())

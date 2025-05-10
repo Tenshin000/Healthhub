@@ -51,6 +51,26 @@ public class UserService {
 
     @Transactional
     public User createUser(User user){
+        User controlUser = userMongoRepository.findByUsername(user.getUsername());
+        if(controlUser != null){
+            return null;
+        }
+
+        controlUser = userMongoRepository.findByEmail(user.getEmail());
+        if(controlUser != null){
+            return null;
+        }
+
+        Doctor controlDoctor = doctorMongoRepository.findByUsername(user.getUsername());
+        if(controlDoctor != null){
+            return null;
+        }
+
+        controlDoctor = doctorMongoRepository.findByEmail(user.getEmail());
+        if(controlDoctor != null){
+            return null;
+        }
+
         User savedUser = userMongoRepository.save(user);
         UserDAO userDAO = new UserDAO(savedUser.getId(), savedUser.getName());
         userNeo4jRepository.save(userDAO);
@@ -58,14 +78,12 @@ public class UserService {
     }
 
     @Transactional
-    public User updateUser(String id, User user){
-        Optional<User> userOptional = userMongoRepository.findById(id);
-        if(userOptional.isPresent()){
-            User userToUpdate = userOptional.get();
-            // Update the user
-            return userMongoRepository.save(userToUpdate);
+    public User updateUser(String id, User userData){
+        if (!userMongoRepository.existsById(id)) {
+            throw new UserNotFoundException("User not found with id: " + id);
         }
-        return null;
+        userData.setId(id);
+        return userMongoRepository.save(userData);
     }
 
     public void deleteUser(String id){
@@ -84,6 +102,24 @@ public class UserService {
         }
 
         return null;
+    }
+
+    public User findByEmail(String email){
+        return userMongoRepository.findByEmail(email);
+    }
+
+    public boolean changePassword(String id, String currentPassword, String newPassword){
+        Optional<User> userOpt = getUserById(id);
+        if(userOpt.isPresent()){
+            User user = userOpt.get();
+            if(currentPassword.equals(user.getPassword())){
+                user.setPassword(newPassword);
+                updateUser(user.getId(), user);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public boolean hasEndorsed(String patientId, String doctorId) {
@@ -188,6 +224,10 @@ public class UserService {
         }
 
         return false;
+    }
+
+    public boolean sendPasswordReset(String email, String link){
+        return fakeMailSender.sendPasswordResetLink(email, link);
     }
 
     @Transactional

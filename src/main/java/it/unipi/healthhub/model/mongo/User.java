@@ -91,6 +91,5 @@ public class User {
                 ", password='" + password + '\'' +
                 ", dob=" + dob + "}";
     }
-
 }
 

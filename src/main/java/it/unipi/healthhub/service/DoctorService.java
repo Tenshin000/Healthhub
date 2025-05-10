@@ -78,6 +78,26 @@ public class DoctorService {
 
     @Transactional
     public Doctor createDoctor(Doctor doctor){
+        User controlUser = userMongoRepository.findByUsername(doctor.getUsername());
+        if(controlUser != null){
+            return null;
+        }
+
+        controlUser = userMongoRepository.findByEmail(doctor.getEmail());
+        if(controlUser != null){
+            return null;
+        }
+
+        Doctor controlDoctor = doctorMongoRepository.findByUsername(doctor.getUsername());
+        if(controlDoctor != null){
+            return null;
+        }
+
+        controlDoctor = doctorMongoRepository.findByEmail(doctor.getEmail());
+        if(controlDoctor != null){
+            return null;
+        }
+
         it.unipi.healthhub.model.mongo.Service service = new it.unipi.healthhub.model.mongo.Service("Standard Visit", 0);
         newService(doctor, service);
         Doctor newDoc = doctorMongoRepository.save(doctor);
@@ -86,20 +106,36 @@ public class DoctorService {
         return newDoc;
     }
 
-    public Doctor updateDoctor(String id, Doctor doctor){
-        Optional<Doctor> doctorOptional = doctorMongoRepository.findById(id);
-        if(doctorOptional.isPresent()){
-            Doctor doctorToUpdate = doctorOptional.get();
-            // Update the doctor
-            return doctorMongoRepository.save(doctorToUpdate);
+    public Doctor updateDoctor(String id, Doctor doctorData){
+        if (!doctorMongoRepository.existsById(id)) {
+            throw new DoctorNotFoundException("Doctor not found with id: " + id);
         }
-        return null;
+        doctorData.setId(id);
+        return doctorMongoRepository.save(doctorData);
     }
 
     @Transactional
     public void deleteDoctor(String id){
         doctorNeo4jRepository.deleteDoctor(id);
         doctorMongoRepository.deleteById(id);
+    }
+
+    public Doctor findByEmail(String email){
+        return doctorMongoRepository.findByEmail(email);
+    }
+
+    public boolean changePassword(String id, String currentPassword, String newPassword){
+        Optional<Doctor> doctorOpt = getDoctorById(id);
+        if(doctorOpt.isPresent()){
+            Doctor doctor = doctorOpt.get();
+            if(currentPassword.equals(doctor.getPassword())){
+                doctor.setPassword(newPassword);
+                updateDoctor(doctor.getId(), doctor);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public List<it.unipi.healthhub.model.mongo.Service> getServices(String doctorId) {
@@ -268,6 +304,10 @@ public class DoctorService {
         }
 
         return false;
+    }
+
+    public boolean sendPasswordReset(String email, String link){
+        return fakeMailSender.sendPasswordResetLink(email, link);
     }
 
     public List<CalendarTemplate> getTemplates(String doctorId) {
@@ -517,10 +557,13 @@ public class DoctorService {
         return false;
     }
 
-    public Doctor loginDoctor(String username, String password) {
+    public Doctor loginDoctor(String username, String password){
         Doctor doctor = doctorMongoRepository.findByUsername(username);
 
-        if (doctor != null && doctor.getPassword().equals(password)) {
+        if(doctor == null)
+            doctor = doctorMongoRepository.findByEmail(username);
+
+        if(doctor != null && doctor.getPassword().equals(password)){
             return doctor;
         }
 
@@ -539,19 +582,20 @@ public class DoctorService {
     }
 
     @Transactional
-    public UserDetailsDTO updateUserDetails(String doctorId, UserDetailsDTO userDetails) {
+    public DoctorDetailsDTO updateDoctorDetails(String doctorId, DoctorDetailsDTO doctorDetails) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
-            doctor.setName(userDetails.getFullName());
-            doctor.setFiscalCode(userDetails.getFiscalCode());
-            doctor.setDob(userDetails.getBirthDate());
-            doctor.setGender(userDetails.getGender());
+            doctor.setName(doctorDetails.getFullName());
+            doctor.setOrderRegistrationNumber(doctorDetails.getOrderRegistrationNumber());
+            doctor.setFiscalCode(doctorDetails.getFiscalCode());
+            doctor.setDob(doctorDetails.getBirthDate());
+            doctor.setGender(doctorDetails.getGender());
 
-            doctorNeo4jRepository.updateName(doctorId, userDetails.getFullName());
+            doctorNeo4jRepository.updateName(doctorId, doctorDetails.getFullName());
 
             doctorMongoRepository.save(doctor); // Save updated doctor with the updated user details
-            return userDetails;
+            return doctorDetails;
         }
         return null;
     }

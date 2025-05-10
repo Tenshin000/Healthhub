@@ -1,5 +1,6 @@
 package it.unipi.healthhub.controller.api;
 
+import it.unipi.healthhub.dto.PasswordChangeDTO;
 import it.unipi.healthhub.model.mongo.User;
 import it.unipi.healthhub.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
