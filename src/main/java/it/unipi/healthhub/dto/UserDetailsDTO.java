@@ -1,5 +1,7 @@
 package it.unipi.healthhub.dto;
 
+import it.unipi.healthhub.model.mongo.Address;
+
 import java.time.LocalDate;
 
 public class UserDetailsDTO {
@@ -7,6 +9,9 @@ public class UserDetailsDTO {
     private String fiscalCode;
     private LocalDate birthDate;
     private String gender;
+    private String personalNumber;
+    private String email;
+    private Address address;
 
     // Constructors, getters and setters
 
@@ -18,6 +23,16 @@ public class UserDetailsDTO {
         this.fiscalCode = fiscalCode;
         this.birthDate = birthDate;
         this.gender = gender;
+    }
+
+    public UserDetailsDTO(String fullName, String fiscalCode, LocalDate birthDate, String gender, String personalNumber, String email, Address address) {
+        this.fullName = fullName;
+        this.fiscalCode = fiscalCode;
+        this.birthDate = birthDate;
+        this.gender = gender;
+        this.personalNumber = personalNumber;
+        this.email = email;
+        this.address = address;
     }
 
     // Getter e Setter
@@ -46,6 +61,27 @@ public class UserDetailsDTO {
 
     public void setGender(String gender) {
         this.gender = gender;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
+    public String getPersonalNumber() {
+        return personalNumber;
+    }
+    public void setPersonalNumber(String personalNumber) {
+        this.personalNumber = personalNumber;
     }
 }
 

@@ -3,10 +3,12 @@ package it.unipi.healthhub.controller.api;
 import it.unipi.healthhub.dto.PasswordChangeDTO;
 import it.unipi.healthhub.dto.PatientContactsDTO;
 import it.unipi.healthhub.dto.UserDetailsDTO;
+import it.unipi.healthhub.model.mongo.User;
 import it.unipi.healthhub.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,6 +34,37 @@ public class PrivateUserAPI {
         HttpSession session = request.getSession(false);
         String patientId = (String) session.getAttribute("patientId");
         return ResponseEntity.ok(userService.updateUserDetails(patientId, userDetails));
+    }
+
+    @GetMapping("/details/view")
+    public ResponseEntity<UserDetailsDTO> getView(@RequestParam String email) {
+        if(email == null || email.isBlank()) {
+            return ResponseEntity
+                    .badRequest()
+                    .build();
+        }
+
+        // 2. Recupera l'utente dal servizio
+        User user = userService.findByEmail(email);
+        if(user == null){
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .build();
+        }
+
+        // 3. Mappa l'entità User su UserViewDTO
+        UserDetailsDTO dto = new UserDetailsDTO();
+        dto.setFullName(user.getName());
+        dto.setFiscalCode(user.getFiscalCode());
+        dto.setBirthDate(user.getDob());
+        dto.setGender(user.getGender());
+        dto.setPersonalNumber(user.getPersonalNumber());
+        dto.setEmail(user.getEmail());
+        dto.setAddress(user.getAddress());
+
+        // 4. Ritorna 200 OK con il DTO
+        return ResponseEntity
+                .ok(dto);
     }
 
     @GetMapping("/contacts")

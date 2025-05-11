@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Appointments Management</title>
   <link rel="stylesheet" th:href="@{/css/doctor-appointments.css}">
+  <!-- Font Awesome 6 (CDN) -->
+  <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer"
+  />
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.9.0/main.min.css" rel="stylesheet">
   <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -69,6 +77,14 @@
       </div>
     </div>
   </main>
+</div>
+<div id="user-modal-overlay" class="hidden">
+  <div class="modal-content">
+      <button class="modal-close"><i class="fas fa-xmark"></i></button>
+      <div class="modal-content">
+          <!-- Here we will dynamically insert user info -->
+      </div>
+  </div>
 </div>
 </body>
 </html>
