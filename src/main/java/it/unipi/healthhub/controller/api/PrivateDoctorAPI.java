@@ -232,7 +232,7 @@ public class PrivateDoctorAPI {
         if (removed) {
             return ResponseEntity.ok("Service removed successfully");
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok("Service not found");
         }
     }
 

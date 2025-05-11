@@ -377,6 +377,7 @@ function removeServiceHandler(event) {
     })
         .then(response => {
             if (!response.ok) {
+                console.log('Failed to delete service');
                 throw new Error('Failed to delete service');
             }
             return fetchUpdatedServices();
