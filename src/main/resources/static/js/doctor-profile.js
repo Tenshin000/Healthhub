@@ -41,12 +41,14 @@ saveAddressButton.addEventListener('click', () => {
 const savePersonalInfoButton = document.querySelector('button[data-field="personal-info"]');
 savePersonalInfoButton.addEventListener('click', () => {
     const fullName = document.getElementById('full-name').value.trim();
+    const orderRegistrationNumber = document.getElementById('orderRegistrationNumber').value.trim();
     const fiscalCode = document.getElementById('fiscalCode').value.trim();
     const birthDate = document.getElementById('birthdate').value.trim();
     const gender = document.getElementById('gender').value;
 
-    const userDetails = {
+    const doctorDetails = {
         fullName: fullName,
+        orderRegistrationNumber: orderRegistrationNumber,
         fiscalCode: fiscalCode,
         birthDate: birthDate,
         gender: gender
@@ -57,7 +59,7 @@ savePersonalInfoButton.addEventListener('click', () => {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(userDetails)
+        body: JSON.stringify(doctorDetails)
     }).then(response => {
         if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -70,7 +72,6 @@ savePersonalInfoButton.addEventListener('click', () => {
         console.error('Error updating user details:', error);
         // Handle the error, e.g., show a message to the user
     });
-
 });
 
 // Function to add phone number
@@ -455,6 +456,50 @@ function newEmptyService() {
     const serviceCard = createServiceCard();
     addServiceCardToContainer(serviceCard, 'specializations');
 }
+
+// Function to update password
+function updatePassword(event){
+    event.preventDefault();
+
+    const currentPwd = document.getElementById('currentPassword').value;
+    const newPwd     = document.getElementById('newPassword').value;
+    const confirmPwd = document.getElementById('confirmPassword').value;
+
+    if (newPwd !== confirmPwd) {
+        alert('The new password and confirmation do not match.');
+        return;
+    }
+
+    const payload = {
+        currentPassword: currentPwd,
+        newPassword: newPwd
+    };
+
+    fetch('/api/doctor/password', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+        .then(response => {
+            if (!response.ok) throw new Error('Network error during update');
+        })
+        .then(data => {
+            console.log('Password updated successfully', data);
+            alert('Password updated successfully!');
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value     = '';
+            document.getElementById('confirmPassword').value = '';
+        })
+        .catch(error => {
+            console.error('Error updating password:', error);
+            alert('An error occurred: ' + error.message);
+        });
+}
+
+// Add event listener to the security form submit
+document.getElementById('update-password')
+    .closest('form')
+    .addEventListener('submit', updatePassword);
 
 // Event listener for adding visit type
 const addVisitTypeButton = document.getElementById('add-visit-type');

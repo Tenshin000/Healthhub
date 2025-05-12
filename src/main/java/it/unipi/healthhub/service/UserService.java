@@ -3,6 +3,7 @@ package it.unipi.healthhub.service;
 import it.unipi.healthhub.dto.AppointmentDTO;
 import it.unipi.healthhub.dto.PatientContactsDTO;
 import it.unipi.healthhub.dto.UserDetailsDTO;
+import it.unipi.healthhub.exception.UserNotFoundException;
 import it.unipi.healthhub.model.mongo.Address;
 import it.unipi.healthhub.model.mongo.Appointment;
 import it.unipi.healthhub.model.mongo.Doctor;
@@ -50,6 +51,26 @@ public class UserService {
 
     @Transactional
     public User createUser(User user){
+        User controlUser = userMongoRepository.findByUsername(user.getUsername());
+        if(controlUser != null){
+            return null;
+        }
+
+        controlUser = userMongoRepository.findByEmail(user.getEmail());
+        if(controlUser != null){
+            return null;
+        }
+
+        Doctor controlDoctor = doctorMongoRepository.findByUsername(user.getUsername());
+        if(controlDoctor != null){
+            return null;
+        }
+
+        controlDoctor = doctorMongoRepository.findByEmail(user.getEmail());
+        if(controlDoctor != null){
+            return null;
+        }
+
         User savedUser = userMongoRepository.save(user);
         UserDAO userDAO = new UserDAO(savedUser.getId(), savedUser.getName());
         userNeo4jRepository.save(userDAO);
@@ -57,14 +78,12 @@ public class UserService {
     }
 
     @Transactional
-    public User updateUser(String id, User user){
-        Optional<User> userOptional = userMongoRepository.findById(id);
-        if(userOptional.isPresent()){
-            User userToUpdate = userOptional.get();
-            // Update the user
-            return userMongoRepository.save(userToUpdate);
+    public User updateUser(String id, User userData){
+        if (!userMongoRepository.existsById(id)) {
+            throw new UserNotFoundException("User not found with id: " + id);
         }
-        return null;
+        userData.setId(id);
+        return userMongoRepository.save(userData);
     }
 
     public void deleteUser(String id){
@@ -85,8 +104,26 @@ public class UserService {
         return null;
     }
 
+    public User findByEmail(String email){
+        return userMongoRepository.findByEmail(email);
+    }
+
+    public boolean changePassword(String id, String currentPassword, String newPassword){
+        Optional<User> userOpt = getUserById(id);
+        if(userOpt.isPresent()){
+            User user = userOpt.get();
+            if(currentPassword.equals(user.getPassword())){
+                user.setPassword(newPassword);
+                updateUser(user.getId(), user);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public boolean hasEndorsed(String patientId, String doctorId) {
-        UserDAO userDAO = userNeo4jRepository.findById(patientId).orElseThrow(() -> new RuntimeException("User not found"));
+        UserDAO userDAO = userNeo4jRepository.findById(patientId).orElseThrow(UserNotFoundException::new);
         return userDAO.getEndorsedDoctors().stream().anyMatch(doctor -> doctor.getId().equals(doctorId));
     }
 
@@ -189,9 +226,13 @@ public class UserService {
         return false;
     }
 
+    public boolean sendPasswordReset(String email, String link){
+        return fakeMailSender.sendPasswordResetLink(email, link);
+    }
+
     @Transactional
     public List<Doctor> getEndorsedDoctors(String patientId) {
-        UserDAO userDAO = userNeo4jRepository.findById(patientId).orElseThrow(() -> new RuntimeException("User not found"));
+        UserDAO userDAO = userNeo4jRepository.findById(patientId).orElseThrow(UserNotFoundException::new);
         List<Doctor> endorsedDoctors = new ArrayList<>();
         userDAO.getEndorsedDoctors().forEach(doctorDAO -> {
             Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorDAO.getId());
@@ -202,7 +243,7 @@ public class UserService {
 
     @Transactional
     public List<Doctor> getReviewedDoctors(String userId) {
-        UserDAO userDAO = userNeo4jRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        UserDAO userDAO = userNeo4jRepository.findById(userId).orElseThrow(UserNotFoundException::new);
         List<Doctor> reviewedDoctors = new ArrayList<>();
         userDAO.getReviewedDoctors().forEach(doctorDAO -> {
             Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorDAO.getId());

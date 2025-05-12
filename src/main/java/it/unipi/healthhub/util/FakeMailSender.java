@@ -56,6 +56,31 @@ public class FakeMailSender implements MailSenderService {
         return fakeSendEmail(appointment.getDoctor().getEmail(), subject, text);
     }
 
+    /**
+     * Send a password‑reset link to the given email.
+     * @param to       the recipient email address
+     * @param resetLink the full URL the user clicks to reset their password
+     * @return true if “sent” successfully
+     */
+    @Override
+    public boolean sendPasswordResetLink(String to, String resetLink){
+        if(!emailValidator(to)){
+            System.out.println("Failed to send password‑reset email: invalid address.");
+            return false;
+        }
+
+        String subject = "HealthHub - Password Reset";
+        String text =  "Hello,\n\n"
+                + "We received a request to reset your password. "
+                + "Please click the link below to choose a new password:\n\n"
+                + resetLink + "\n\n"
+                + "If you did not request a password reset, you can safely ignore this email.\n\n"
+                + "Best regards,\n"
+                + "The HealthHub Team";
+
+        return fakeSendEmail(to, subject, text);
+    }
+
     public boolean fakeSendEmail(String to, String subject, String text){
         if(emailValidator(to)){
             System.out.println("Sending email to: " + to + " with " + PERSONAL_EMAIL);

@@ -10,10 +10,10 @@ import java.util.List;
 
 public interface DoctorMongoRepository extends MongoRepository<Doctor, String>, CustomDoctorMongoRepository {
     Doctor findByUsername(String username);
-    // Doctor findById(ObjectId id);
+    Doctor findByEmail(String email);
     List<Doctor> findBySpecializations(String specialization);
     List<Doctor> findByServices(String service);
     List<Doctor> findByPhoneNumbers(String phoneNumber);
     List<Doctor> findByEndorsementCount(int endorsementCount);
-    List<Doctor> findByNameContainingOrSpecializationsContainingOrAddressContaining(String query, String query1, String query2);
+    // List<Doctor> findByNameContainingOrSpecializationsContainingOrAddressContaining(String query, String query1, String query2);
 }

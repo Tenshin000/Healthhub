@@ -51,7 +51,10 @@ document.addEventListener('DOMContentLoaded', function(){
                 body: JSON.stringify({ endorsed: hasEndorsed })
             });
 
-            if (!response.ok) {
+            if(response.status == 401){
+                alert("Login to endorse this doctor!");
+            }
+            else if(!response.ok){
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
 

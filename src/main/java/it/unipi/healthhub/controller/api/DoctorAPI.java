@@ -27,7 +27,6 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/doctors")
 public class DoctorAPI {
-
     @Autowired
     private DoctorService doctorService;
 
@@ -36,14 +35,14 @@ public class DoctorAPI {
 
     @Autowired
     private AppointmentService appointmentService;
-
+/*
     // Metodo per la ricerca dei medici
     @GetMapping("/search")
     public ResponseEntity<List<Doctor>> search(@RequestParam(name = "query", required = false) String query) {
-        List<Doctor> doctors = doctorService.searchDoctors(query);
+        List<Doctor> doctors = doctorService.searchDoctorsMongo(query);
         return ResponseEntity.ok(doctors);
     }
-
+*/
     @GetMapping
     public List<Doctor> getAllDoctors() {
         return doctorService.getAllDoctor();
@@ -157,6 +156,9 @@ public class DoctorAPI {
     public ResponseEntity<EndorsementDTO> endorseDoctor(@PathVariable String doctorId, HttpServletRequest request) {
         HttpSession session = request.getSession(false);
 
+        if(session == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
         String patientId = (String) session.getAttribute("patientId");
         doctorService.endorse(doctorId, patientId);
         Integer endorsementCount = doctorService.getEndorsements(doctorId);
@@ -165,7 +167,12 @@ public class DoctorAPI {
     }
 
     @PostMapping("/{doctorId}/unendorse")
-    public ResponseEntity<EndorsementDTO> unendorseDoctor(@PathVariable String doctorId, HttpSession session) {
+    public ResponseEntity<EndorsementDTO> unendorseDoctor(@PathVariable String doctorId, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+
+        if(session == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
         String patientId = (String) session.getAttribute("patientId");
         doctorService.unendorse(doctorId, patientId);
         Integer endorsementCount = doctorService.getEndorsements(doctorId);

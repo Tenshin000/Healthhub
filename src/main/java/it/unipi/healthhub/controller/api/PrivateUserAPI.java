@@ -1,5 +1,6 @@
 package it.unipi.healthhub.controller.api;
 
+import it.unipi.healthhub.dto.PasswordChangeDTO;
 import it.unipi.healthhub.dto.PatientContactsDTO;
 import it.unipi.healthhub.dto.UserDetailsDTO;
 import it.unipi.healthhub.service.UserService;
@@ -75,5 +76,19 @@ public class PrivateUserAPI {
         HttpSession session = request.getSession(false);
         String patientId = (String) session.getAttribute("patientId");
         return ResponseEntity.ok(userService.getRecommendedDoctors(patientId, limit));
+    }
+
+    @PutMapping("/password")
+    public ResponseEntity<Void> changePassword(HttpServletRequest request, @RequestBody PasswordChangeDTO passwords){
+        HttpSession session = request.getSession(false);
+        String patientId = (String) session.getAttribute("patientId");
+
+        boolean ok = userService.changePassword(patientId, passwords.getCurrentPassword(), passwords.getNewPassword());
+        if(ok){
+            return ResponseEntity.noContent().build();
+        }
+        else{
+            return ResponseEntity.status(400).build();
+        }
     }
 }

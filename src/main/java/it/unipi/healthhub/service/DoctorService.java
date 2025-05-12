@@ -1,11 +1,12 @@
 package it.unipi.healthhub.service;
 
+import it.unipi.healthhub.dto.*;
+import it.unipi.healthhub.exception.DoctorNotFoundException;
+import it.unipi.healthhub.exception.ScheduleAlreadyExistsException;
 import it.unipi.healthhub.model.mongo.*;
-import it.unipi.healthhub.dto.AppointmentDTO;
-import it.unipi.healthhub.dto.ReviewDTO;
-import it.unipi.healthhub.dto.SpecializationDTO;
-import it.unipi.healthhub.dto.UserDetailsDTO;
 import it.unipi.healthhub.model.neo4j.DoctorDAO;
+import it.unipi.healthhub.projection.DoctorMongoProjection;
+import it.unipi.healthhub.projection.DoctorNeo4jProjection;
 import it.unipi.healthhub.repository.mongo.AppointmentMongoRepository;
 import it.unipi.healthhub.repository.mongo.DoctorMongoRepository;
 import it.unipi.healthhub.repository.mongo.TemplateMongoRepository;
@@ -41,6 +42,7 @@ public class DoctorService {
     @Autowired
     private UserNeo4jRepository userNeo4jRepository;
 
+
     @Autowired
     private AppointmentMongoRepository appointmentRepository;
     @Autowired
@@ -49,13 +51,23 @@ public class DoctorService {
     @Autowired
     private FakeMailSender fakeMailSender;
 
-    public List<Doctor> searchDoctors(String query) {
+    public List<DoctorMongoProjection> searchDoctorsMongo(String query) {
         if (query != null && !query.isEmpty()) {
-            return doctorMongoRepository.findByNameContainingOrSpecializationsContainingOrAddressContaining(query, query, query);
+            return doctorMongoRepository.searchDoctors(query);
         } else {
-            return doctorMongoRepository.findAll();
+            // return doctorMongoRepository.findAll();
+            return null;
         }
     }
+
+    public List<DoctorNeo4jProjection> searchDoctorsNeo4j(String patientId, String query) {
+        if(query != null && !query.isEmpty()) {
+            return doctorNeo4jRepository.findConnectedDoctorsBySteps(patientId, query);
+        } else {
+            return null;
+        }
+    }
+
     public List<Doctor> getAllDoctor(){
         return doctorMongoRepository.findAll();
     }
@@ -66,26 +78,64 @@ public class DoctorService {
 
     @Transactional
     public Doctor createDoctor(Doctor doctor){
+        User controlUser = userMongoRepository.findByUsername(doctor.getUsername());
+        if(controlUser != null){
+            return null;
+        }
+
+        controlUser = userMongoRepository.findByEmail(doctor.getEmail());
+        if(controlUser != null){
+            return null;
+        }
+
+        Doctor controlDoctor = doctorMongoRepository.findByUsername(doctor.getUsername());
+        if(controlDoctor != null){
+            return null;
+        }
+
+        controlDoctor = doctorMongoRepository.findByEmail(doctor.getEmail());
+        if(controlDoctor != null){
+            return null;
+        }
+
+        it.unipi.healthhub.model.mongo.Service service = new it.unipi.healthhub.model.mongo.Service("Standard Visit", 0);
+        newService(doctor, service);
         Doctor newDoc = doctorMongoRepository.save(doctor);
         DoctorDAO doctorDAO = new DoctorDAO(newDoc.getId(), newDoc.getName(), newDoc.getSpecializations());
         doctorNeo4jRepository.save(doctorDAO);
         return newDoc;
     }
 
-    public Doctor updateDoctor(String id, Doctor doctor){
-        Optional<Doctor> doctorOptional = doctorMongoRepository.findById(id);
-        if(doctorOptional.isPresent()){
-            Doctor doctorToUpdate = doctorOptional.get();
-            // Update the doctor
-            return doctorMongoRepository.save(doctorToUpdate);
+    public Doctor updateDoctor(String id, Doctor doctorData){
+        if (!doctorMongoRepository.existsById(id)) {
+            throw new DoctorNotFoundException("Doctor not found with id: " + id);
         }
-        return null;
+        doctorData.setId(id);
+        return doctorMongoRepository.save(doctorData);
     }
 
     @Transactional
     public void deleteDoctor(String id){
         doctorNeo4jRepository.deleteDoctor(id);
         doctorMongoRepository.deleteById(id);
+    }
+
+    public Doctor findByEmail(String email){
+        return doctorMongoRepository.findByEmail(email);
+    }
+
+    public boolean changePassword(String id, String currentPassword, String newPassword){
+        Optional<Doctor> doctorOpt = getDoctorById(id);
+        if(doctorOpt.isPresent()){
+            Doctor doctor = doctorOpt.get();
+            if(currentPassword.equals(doctor.getPassword())){
+                doctor.setPassword(newPassword);
+                updateDoctor(doctor.getId(), doctor);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public List<it.unipi.healthhub.model.mongo.Service> getServices(String doctorId) {
@@ -102,16 +152,23 @@ public class DoctorService {
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
 
-            if (doctor.getServices() == null) {
-                doctor.setServices(new ArrayList<>());
-            }
+            int newIndex = newService(doctor, service);
 
-            int newIndex = doctor.getServices().size();
-            doctor.getServices().add(service); // Add service to doctor's list
+            // Add service to doctor's list
             doctorMongoRepository.save(doctor); // Save updated doctor with the new service
             return newIndex;
         }
         return null;
+    }
+
+    private Integer newService(Doctor doctor, it.unipi.healthhub.model.mongo.Service service){
+        if(doctor.getServices() == null){
+            doctor.setServices(new ArrayList<>());
+        }
+
+        int newIndex = doctor.getServices().size();
+        doctor.getServices().add(service);
+        return newIndex;
     }
 
     public List<it.unipi.healthhub.model.mongo.Service> getMyServices(String doctorId) {
@@ -249,6 +306,10 @@ public class DoctorService {
         return false;
     }
 
+    public boolean sendPasswordReset(String email, String link){
+        return fakeMailSender.sendPasswordResetLink(email, link);
+    }
+
     public List<CalendarTemplate> getTemplates(String doctorId) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         if(doctorOpt.isPresent()){
@@ -384,7 +445,7 @@ public class DoctorService {
         return null;
     }
 
-    public Schedule addSchedule(String doctorId, Schedule calendar) throws IllegalArgumentException{
+    public Schedule addSchedule(String doctorId, Schedule calendar) throws ScheduleAlreadyExistsException{
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
@@ -397,7 +458,7 @@ public class DoctorService {
                     .anyMatch(s -> s.getWeek().equals(calendar.getWeek()));
 
             if(alreadyExists)
-                throw new IllegalArgumentException("A schedule for this week already exists.");
+                throw new ScheduleAlreadyExistsException("A schedule for this week already exists.");
 
             doctor.getSchedules().add(calendar);
             doctorMongoRepository.save(doctor); // Save updated doctor with the new appointment
@@ -496,10 +557,13 @@ public class DoctorService {
         return false;
     }
 
-    public Doctor loginDoctor(String username, String password) {
+    public Doctor loginDoctor(String username, String password){
         Doctor doctor = doctorMongoRepository.findByUsername(username);
 
-        if (doctor != null && doctor.getPassword().equals(password)) {
+        if(doctor == null)
+            doctor = doctorMongoRepository.findByEmail(username);
+
+        if(doctor != null && doctor.getPassword().equals(password)){
             return doctor;
         }
 
@@ -518,19 +582,20 @@ public class DoctorService {
     }
 
     @Transactional
-    public UserDetailsDTO updateUserDetails(String doctorId, UserDetailsDTO userDetails) {
+    public DoctorDetailsDTO updateDoctorDetails(String doctorId, DoctorDetailsDTO doctorDetails) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
-            doctor.setName(userDetails.getFullName());
-            doctor.setFiscalCode(userDetails.getFiscalCode());
-            doctor.setDob(userDetails.getBirthDate());
-            doctor.setGender(userDetails.getGender());
+            doctor.setName(doctorDetails.getFullName());
+            doctor.setOrderRegistrationNumber(doctorDetails.getOrderRegistrationNumber());
+            doctor.setFiscalCode(doctorDetails.getFiscalCode());
+            doctor.setDob(doctorDetails.getBirthDate());
+            doctor.setGender(doctorDetails.getGender());
 
-            doctorNeo4jRepository.updateName(doctorId, userDetails.getFullName());
+            doctorNeo4jRepository.updateName(doctorId, doctorDetails.getFullName());
 
             doctorMongoRepository.save(doctor); // Save updated doctor with the updated user details
-            return userDetails;
+            return doctorDetails;
         }
         return null;
     }
@@ -640,7 +705,7 @@ public class DoctorService {
     public void endorse(String doctorId, String patientId) {
         userNeo4jRepository.endorse(patientId, doctorId);
 
-        Doctor doc = doctorMongoRepository.findById(doctorId).orElseThrow(() -> new RuntimeException("Doctor Mongo not found"));
+        Doctor doc = doctorMongoRepository.findById(doctorId).orElseThrow(DoctorNotFoundException::new);
         doc.setEndorsementCount(doc.getEndorsementCount() + 1);
         doctorMongoRepository.save(doc);
     }
@@ -649,7 +714,7 @@ public class DoctorService {
     public void unendorse(String doctorId, String patientId) {
         userNeo4jRepository.unendorse(patientId, doctorId);
 
-        Doctor doc = doctorMongoRepository.findById(doctorId).orElseThrow(() -> new RuntimeException("Doctor Mongo not found"));
+        Doctor doc = doctorMongoRepository.findById(doctorId).orElseThrow(DoctorNotFoundException::new);
         doc.setEndorsementCount(doc.getEndorsementCount() - 1);
         doctorMongoRepository.save(doc);
     }

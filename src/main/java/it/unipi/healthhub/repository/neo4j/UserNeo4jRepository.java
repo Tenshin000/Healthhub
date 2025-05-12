@@ -1,5 +1,6 @@
 package it.unipi.healthhub.repository.neo4j;
 
+import it.unipi.healthhub.repository.neo4j.user.CustomUserNeo4jRepository;
 import it.unipi.healthhub.model.neo4j.DoctorDAO;
 import it.unipi.healthhub.model.neo4j.UserDAO;
 import org.springframework.data.neo4j.repository.Neo4jRepository;

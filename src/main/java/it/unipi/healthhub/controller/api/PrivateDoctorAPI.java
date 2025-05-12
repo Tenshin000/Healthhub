@@ -1,5 +1,6 @@
 package it.unipi.healthhub.controller.api;
 
+import it.unipi.healthhub.exception.ScheduleAlreadyExistsException;
 import it.unipi.healthhub.model.mongo.*;
 import it.unipi.healthhub.dto.*;
 import it.unipi.healthhub.service.AppointmentService;
@@ -68,10 +69,10 @@ public class PrivateDoctorAPI {
     }
 
     @PutMapping("/details")
-    public ResponseEntity<UserDetailsDTO> updateMyDetails(@RequestBody UserDetailsDTO userDetails, HttpServletRequest request) {
+    public ResponseEntity<DoctorDetailsDTO> updateMyDetails(@RequestBody DoctorDetailsDTO doctorDetails, HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
-        return ResponseEntity.ok(doctorService.updateUserDetails(doctorId, userDetails));
+        return ResponseEntity.ok(doctorService.updateDoctorDetails(doctorId, doctorDetails));
     }
 
     @PostMapping("/phones")
@@ -352,7 +353,7 @@ public class PrivateDoctorAPI {
                 return ResponseEntity.badRequest().build();
             }
         }
-        catch(IllegalArgumentException iae){
+        catch(ScheduleAlreadyExistsException saee){
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
     }
@@ -411,6 +412,19 @@ public class PrivateDoctorAPI {
             return ResponseEntity.ok("Review removed successfully");
         } else {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/password")
+    public ResponseEntity<Void> changePassword(HttpServletRequest request, @RequestBody PasswordChangeDTO passwords) {
+        HttpSession session = request.getSession(false);
+        String doctorId = (String) session.getAttribute("doctorId");
+
+        boolean ok = doctorService.changePassword(doctorId, passwords.getCurrentPassword(), passwords.getNewPassword());
+        if (ok) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.status(400).build();
         }
     }
 
