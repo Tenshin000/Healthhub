@@ -289,7 +289,6 @@ document.addEventListener('DOMContentLoaded', function() {
         templateListEl.innerHTML = ''; // Clear current list
 
         templates.forEach(template => {
-            console.log(template);
             const div = document.createElement('div');
             div.classList.add('template-item');
             div.setAttribute('data-template-id', template.id);
