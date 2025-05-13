@@ -12,16 +12,16 @@ public class CalendarTemplate {
     private String id;
     private String name;
     private Map<String, List<Slot>> slots;
-    private boolean active;
+    private boolean isDefault;
 
     // Constructor
     public CalendarTemplate() {}
 
-    public CalendarTemplate(String id, String name, Map<String, List<Slot>> slots, boolean active) {
+    public CalendarTemplate(String id, String name, Map<String, List<Slot>> slots, boolean isDefault) {
         this.id = id;
         this.name = name;
         this.slots = slots;
-        this.active = active;
+        this.isDefault = isDefault;
     }
 
     // Getters and Setters
@@ -49,12 +49,12 @@ public class CalendarTemplate {
         this.slots = slots;
     }
 
-    public boolean isActive() {
-        return active;
+    public boolean isDefault(){
+        return isDefault;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
+    public void setDefault(boolean isDefault) {
+        this.isDefault = isDefault;
     }
 
     public String toString() {
@@ -62,7 +62,7 @@ public class CalendarTemplate {
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", slots=" + slots +
-                ", active=" + active +
+                ", default=" + isDefault +
                 '}';
     }
 

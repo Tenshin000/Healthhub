@@ -308,7 +308,7 @@ public class PrivateDoctorAPI {
                 Map<String, List<Slot>> modelSlots = template.getSlots();
                 Map<String, List<TemplateDTO.SlotDTO>> dtoSlots = TemplateConverter.convertToDtoSlots(modelSlots);
 
-                TemplateDTO templateDto = new TemplateDTO(template.getId(), template.getName(), dtoSlots, template.isActive());
+                TemplateDTO templateDto = new TemplateDTO(template.getId(), template.getName(), dtoSlots, template.isDefault());
                 response.add(templateDto);
             }
             return ResponseEntity.ok(response);
