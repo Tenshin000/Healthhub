@@ -352,7 +352,7 @@ public class DoctorService {
                 CalendarTemplate existingTemplate = existingTemplateOpt.get();
                 existingTemplate.setName(updatedTemplate.getName());
                 existingTemplate.setSlots(updatedTemplate.getSlots());
-                existingTemplate.setActive(updatedTemplate.isActive());
+                existingTemplate.setDefault(updatedTemplate.isDefault());
 
                 return templateRepository.save(existingTemplate);
             }
@@ -400,7 +400,7 @@ public class DoctorService {
                     Optional<CalendarTemplate> templateOpt = templateRepository.findById(id);
                     if (templateOpt.isPresent()) {
                         CalendarTemplate template = templateOpt.get();
-                        template.setActive(id.equals(templateId));
+                        template.setDefault(id.equals(templateId));
                         templateRepository.save(template);
                     }
                 }

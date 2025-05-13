@@ -294,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function() {
             div.setAttribute('data-template-id', template.id);
             div.textContent = template.name;
 
-            if (template.isDefault) {
+            if (template.default) {
                 div.classList.add('default-template');
             }
 
@@ -322,7 +322,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Find the corresponding template in the global templates list
             const template = templates.find(template => template.name === templateName);
-            template.isDefault = true;
+            template.default = true;
 
             if (template) {
                 // Perform a PUT request to set the default template
