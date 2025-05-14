@@ -14,6 +14,7 @@ import it.unipi.healthhub.repository.mongo.UserMongoRepository;
 import it.unipi.healthhub.repository.neo4j.DoctorNeo4jRepository;
 import it.unipi.healthhub.repository.neo4j.UserNeo4jRepository;
 import it.unipi.healthhub.util.FakeMailSender;
+import it.unipi.healthhub.util.TemplateConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
@@ -410,6 +411,24 @@ public class DoctorService {
         return false;
     }
 
+    public CalendarTemplate getDefaultTemplate(String doctorId) {
+        Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
+        if (doctorOpt.isPresent()) {
+            Doctor doctor = doctorOpt.get();
+            List<String> templateIds = doctor.getCalendarTemplates();
+            for (String id : templateIds) {
+                Optional<CalendarTemplate> templateOpt = templateRepository.findById(id);
+                if (templateOpt.isPresent()) {
+                    CalendarTemplate template = templateOpt.get();
+                    if (template.isDefault()) {
+                        return template;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     public Pair<Schedule, Integer> getSchedule(String doctorId, Integer year, Integer week) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         if(doctorOpt.isPresent()){
@@ -735,5 +754,26 @@ public class DoctorService {
     public Integer getAnalyticsNewPatientsByMonth(String doctorId, int year, int month){
         // Returns the count of patients who were visited for the first time in the month and year indicated
         return appointmentRepository.findNewPatientsVisitedByDoctorInCurrentMonth(doctorId, year, month);
+    }
+
+    public void cleanOldSchedules(){
+        doctorMongoRepository.cleanOldSchedules();
+        return;
+    }
+
+    public void setupNewSchedules(){
+        List<Doctor> doctors = doctorMongoRepository.findDoctorsMissingSchedulesInNext4Weeks();
+        for (Doctor doctor : doctors) {
+            CalendarTemplate defaultTemplate = getDefaultTemplate(doctor.getId());
+            List<Date> missingSchedules = doctorMongoRepository.findSchedulesWithinNext4Weeks(doctor.getId());
+            for (Date date : missingSchedules) {
+                LocalDate week = LocalDate.parse(date.toString());
+                Schedule schedule = new Schedule();
+                schedule.setWeek(week);
+                schedule.setSlots(TemplateConverter.convertToModelPrenotableSlots(defaultTemplate.getSlots()));
+                addSchedule(doctor.getId(), schedule);
+            }
+        }
+        return;
     }
 }

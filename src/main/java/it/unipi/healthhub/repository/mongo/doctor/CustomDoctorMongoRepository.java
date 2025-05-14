@@ -1,8 +1,10 @@
 package it.unipi.healthhub.repository.mongo.doctor;
 
-import it.unipi.healthhub.dto.DoctorDTO;
+import it.unipi.healthhub.model.mongo.Doctor;
 import it.unipi.healthhub.projection.DoctorMongoProjection;
+import org.bson.Document;
 
+import java.util.Date;
 import java.util.List;
 
 public interface CustomDoctorMongoRepository {
@@ -10,4 +12,7 @@ public interface CustomDoctorMongoRepository {
     void bookScheduleSlot(String doctorId, Integer year, Integer week, String keyDay, String slotStart);
     void freeScheduleSlot(String doctorId, Integer year, Integer week, String keyDay, String slotStart);
     public List<DoctorMongoProjection> searchDoctors(String text);
+    void cleanOldSchedules();
+    List<Doctor> findDoctorsMissingSchedulesInNext4Weeks();
+    List<Date> findSchedulesWithinNext4Weeks(String doctorId);
 }
