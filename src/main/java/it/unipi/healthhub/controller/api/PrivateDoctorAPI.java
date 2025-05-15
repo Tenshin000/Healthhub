@@ -205,8 +205,6 @@ public class PrivateDoctorAPI {
         }
     }
 
-
-
     @PutMapping("/services/{index}")
     public ResponseEntity<String> updateVisitType(@PathVariable Integer index, @RequestBody ServiceDTO serviceDto, HttpServletRequest request) {
         HttpSession session = request.getSession(false);

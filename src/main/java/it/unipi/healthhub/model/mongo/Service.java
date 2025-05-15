@@ -1,7 +1,6 @@
 package it.unipi.healthhub.model.mongo;
 
 public class Service {
-
     private String service;
     private double price;
 

@@ -1,5 +1,3 @@
-// script.js
-
 // Event listener for saving address
 const saveAddressButton = document.querySelector('button[data-field="address"]');
 saveAddressButton.addEventListener('click', () => {

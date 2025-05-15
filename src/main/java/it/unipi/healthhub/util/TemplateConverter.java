@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class TemplateConverter {
-
     public static Map<String, List<Slot>> convertToModelSlots(Map<String, List<TemplateDTO.SlotDTO>> dtoSlots) {
         return dtoSlots.entrySet().stream()
                 .collect(Collectors.toMap(

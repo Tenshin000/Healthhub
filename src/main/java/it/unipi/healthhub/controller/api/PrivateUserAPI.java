@@ -44,7 +44,7 @@ public class PrivateUserAPI {
                     .build();
         }
 
-        // 2. Recupera l'utente dal servizio
+        // Retrieve user from service
         User user = userService.findByEmail(email);
         if(user == null){
             return ResponseEntity
@@ -52,7 +52,7 @@ public class PrivateUserAPI {
                     .build();
         }
 
-        // 3. Mappa l'entità User su UserViewDTO
+        // Map User entity to PatientContactsDTO
         PatientContactsDTO dto = new PatientContactsDTO();
         dto.setName(user.getName());
         dto.setFiscalCode(user.getFiscalCode());
@@ -61,7 +61,7 @@ public class PrivateUserAPI {
         dto.setPhoneNumber(user.getPersonalNumber());
         dto.setEmail(user.getEmail());
 
-        // 4. Ritorna 200 OK con il DTO
+        // Returns 200 OK with DTO
         return ResponseEntity
                 .ok(dto);
     }

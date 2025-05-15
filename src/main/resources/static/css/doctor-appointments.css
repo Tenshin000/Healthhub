@@ -50,8 +50,8 @@ header {
 }
 
 .small-box {
-    height: auto; /* altezza automatica per adattarsi al contenuto */
-    overflow: hidden; /* per evitare il riversamento dei contenuti */
+    height: auto; /* auto-height to fit content */
+    overflow: hidden; /* to avoid content spilling */
 }
 
 .app-distr-graph canvas {
@@ -60,8 +60,8 @@ header {
 }
 
 .large-box.appointments {
-    max-height: calc(100vh - 140px); /* altezza massima per la sezione degli appuntamenti */
-    overflow-y: auto; /* scroll verticale se necessario */
+    max-height: calc(100vh - 140px); /* max height for appointment section */
+    overflow-y: auto; /* vertical scroll if necessary */
 }
 
 .appointment {
@@ -155,5 +155,4 @@ header {
 
 .modal-body {
     margin-top: 30px;
-    /* ... */
 }

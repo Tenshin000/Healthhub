@@ -4,7 +4,6 @@ public class EndorsementDTO {
     private Integer endorsementCount;
     private boolean hasEndorsed;
 
-
     public EndorsementDTO() {
     }
 

@@ -23,5 +23,4 @@ public class HomeController {
         ControllerUtil.setSessionModel(model, request);
         return "search";
     }
-
 }

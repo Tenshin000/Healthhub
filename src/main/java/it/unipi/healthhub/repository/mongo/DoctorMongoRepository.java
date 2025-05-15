@@ -15,5 +15,4 @@ public interface DoctorMongoRepository extends MongoRepository<Doctor, String>, 
     List<Doctor> findByServices(String service);
     List<Doctor> findByPhoneNumbers(String phoneNumber);
     List<Doctor> findByEndorsementCount(int endorsementCount);
-    // List<Doctor> findByNameContainingOrSpecializationsContainingOrAddressContaining(String query, String query1, String query2);
 }
