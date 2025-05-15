@@ -286,12 +286,12 @@ async function showUserDetails(email) {
         // Popola il modal
         const body = document.querySelector('#user-modal-overlay .modal-body');
         body.innerHTML = `
-            <h3>${userDetails.fullName}</h3>
+            <h3>${userDetails.name}</h3>
             <p><strong>Fiscal Code:</strong> ${userDetails.fiscalCode}</p>
             <p><strong>Birthdate:</strong> ${userDetails.birthDate || 'N/D'}</p>
             <p><strong>Gender:</strong> ${userDetails.gender}</p>
             <p><strong>Email:</strong> ${userDetails.email}</p>
-            <p><strong>Personal Phone:</strong> ${userDetails.personalNumber || 'N/A'}</p>
+            <p><strong>Personal Phone:</strong> ${userDetails.phoneNumber || 'N/A'}</p>
         `;
 
         // Show overlay

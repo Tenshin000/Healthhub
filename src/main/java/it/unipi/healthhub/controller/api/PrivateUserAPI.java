@@ -37,7 +37,7 @@ public class PrivateUserAPI {
     }
 
     @GetMapping("/details/view")
-    public ResponseEntity<UserDetailsDTO> getView(@RequestParam String email) {
+    public ResponseEntity<PatientContactsDTO> getView(@RequestParam String email) {
         if(email == null || email.isBlank()) {
             return ResponseEntity
                     .badRequest()
@@ -53,14 +53,13 @@ public class PrivateUserAPI {
         }
 
         // 3. Mappa l'entità User su UserViewDTO
-        UserDetailsDTO dto = new UserDetailsDTO();
-        dto.setFullName(user.getName());
+        PatientContactsDTO dto = new PatientContactsDTO();
+        dto.setName(user.getName());
         dto.setFiscalCode(user.getFiscalCode());
         dto.setBirthDate(user.getDob());
         dto.setGender(user.getGender());
-        dto.setPersonalNumber(user.getPersonalNumber());
+        dto.setPhoneNumber(user.getPersonalNumber());
         dto.setEmail(user.getEmail());
-        dto.setAddress(user.getAddress());
 
         // 4. Ritorna 200 OK con il DTO
         return ResponseEntity

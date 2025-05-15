@@ -158,10 +158,7 @@ public class UserService {
         Optional<User> userOpt = userMongoRepository.findById(patientId);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            if(user.getAddress() != null)
-                return new PatientContactsDTO(user.getEmail(), user.getPersonalNumber(), user.getAddress().getStreet(), user.getAddress().getCity(), user.getAddress().getProvince(), user.getAddress().getPostalCode(), user.getAddress().getCountry());
-            else
-                return new PatientContactsDTO(user.getEmail(), user.getPersonalNumber());
+            return new PatientContactsDTO(user.getEmail(), user.getPersonalNumber());
         }
         return null;
     }
@@ -173,13 +170,9 @@ public class UserService {
             User user = userOpt.get();
             user.setEmail(userContacts.getEmail());
             user.setPersonalNumber(userContacts.getPhoneNumber());
-
-            Address address = new Address(userContacts.getStreet(), userContacts.getCity(), userContacts.getProvince(), userContacts.getPostalCode(), userContacts.getCountry());
-
-            user.setAddress(address);
-
+            
             userMongoRepository.save(user); // Save updated doctor with the updated user details
-            return new PatientContactsDTO(user.getEmail(), user.getPersonalNumber(), user.getAddress().getStreet(), user.getAddress().getCity(), user.getAddress().getProvince(), user.getAddress().getPostalCode(), user.getAddress().getCountry());
+            return new PatientContactsDTO(user.getName(), user.getEmail(), user.getFiscalCode(), user.getDob(), user.getGender(), user.getPersonalNumber());
         }
         return null;
     }

@@ -75,31 +75,16 @@ function fetchContactInfo() {
 function renderContactInfo(contactInfo) {
     document.getElementById('email').value    = contactInfo.email || '';
     document.getElementById('phone').value    = contactInfo.phoneNumber || '';
-    document.getElementById('street').value   = contactInfo.street || '';
-    document.getElementById('city').value     = contactInfo.city || '';
-    document.getElementById('province').value = contactInfo.province || '';
-    document.getElementById('CAP').value      = contactInfo.postalCode || '';
-    document.getElementById('country').value  = contactInfo.country || '';
 }
 
 // Function to save contact information from the form
 function saveContactInfo() {
     const email      = document.getElementById('email').value;
     const phone      = document.getElementById('phone').value;
-    const street     = document.getElementById('street').value;
-    const city       = document.getElementById('city').value;
-    const province   = document.getElementById('province').value;
-    const postalCode = document.getElementById('CAP').value;
-    const country    = document.getElementById('country').value;
 
     const data = {
         email,
-        phoneNumber: phone,
-        street,
-        city,
-        province,
-        postalCode,
-        country
+        phoneNumber: phone
     };
 
     fetch('/api/user/contacts', {

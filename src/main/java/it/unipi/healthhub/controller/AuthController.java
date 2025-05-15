@@ -89,7 +89,6 @@ public class AuthController {
     public String registerUser(HttpServletRequest request, @ModelAttribute User user, Model model) {
         User controlUser = null;
         try {
-            user.setAddress(createAddress(request));
             String phone = request.getParameter("phone");
             user.setPersonalNumber(phone);
             controlUser = userService.createUser(user);
