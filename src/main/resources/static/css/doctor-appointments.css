@@ -143,8 +143,14 @@ header {
     right: 10px;
     background: transparent;
     border: none;
-    font-size: 1.2em;
+    font-size: 24px;
+    color: black;
     cursor: pointer;
+    z-index: 1000;
+}
+
+.modal-close i {
+    pointer-events: none;
 }
 
 .modal-body {

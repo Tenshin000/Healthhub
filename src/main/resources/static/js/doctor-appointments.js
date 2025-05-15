@@ -248,6 +248,7 @@ function createAppointmentElement(appointment) {
     actionsDiv.className = 'appointment-actions';
 
     const viewButton = document.createElement('button');
+    viewButton.dataset.email = appointment.patient.email || '';
     viewButton.textContent = 'View';
     viewButton.onclick = () => {
         const userEmail = viewButton.dataset.email;
@@ -290,11 +291,7 @@ async function showUserDetails(email) {
             <p><strong>Birthdate:</strong> ${userDetails.birthDate || 'N/D'}</p>
             <p><strong>Gender:</strong> ${userDetails.gender}</p>
             <p><strong>Email:</strong> ${userDetails.email}</p>
-            <p><strong>Personal Phone:</strong> ${userDetails.phone || 'N/A'}</p>
-            <p><strong>Street:</strong> ${userDetails.address.street || 'N/D'}</p>
-            <p><strong>City:</strong> ${userDetails.address.city || 'N/D'}</p>
-            <p><strong>Province:</strong> ${userDetails.address.province || 'N/D'}</p>
-            <p><strong>Country:</strong> ${userDetails.address.country || 'N/D'}</p>
+            <p><strong>Personal Phone:</strong> ${userDetails.personalNumber || 'N/A'}</p>
         `;
 
         // Show overlay
