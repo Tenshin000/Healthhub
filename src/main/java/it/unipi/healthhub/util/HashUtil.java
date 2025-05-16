@@ -14,7 +14,7 @@ public class HashUtil {
             }
             return sb.toString();
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Errore di hashing: " + e.getMessage());
+            throw new RuntimeException("Hashing Error: " + e.getMessage());
         }
     }
 }
