@@ -47,7 +47,7 @@ public class UserService {
 
     private String sanitizeForMongo(String input) {
         if (input == null) return null;
-        return input.replaceAll("[\\$\\.]", "_");
+        return input.replaceAll("[\\$]", "_");
     }
 
     private void sanitizeFieldMongo(Consumer<String> setter, Supplier<String> getter) {
@@ -65,19 +65,19 @@ public class UserService {
         sanitizeFieldMongo(user::setPersonalNumber, user::getPersonalNumber);
     }
 
-    private String sanitizeForNeo(String input) {
+    private String sanitizeForNeo4j(String input) {
         if (input == null) return null;
         return input.replaceAll("[\\$\\.]", "_");
     }
 
     private void sanitizeFieldNeo4j(Consumer<String> setter, Supplier<String> getter) {
-        setter.accept(sanitizeForNeo(getter.get()));
+        setter.accept(sanitizeForNeo4j(getter.get()));
     }
 
     private void sanitizeStringListNeo4j(List<String> list) {
         if (list != null) {
             for (int i = 0; i < list.size(); i++) {
-                list.set(i, sanitizeForNeo(list.get(i)));
+                list.set(i, sanitizeForNeo4j(list.get(i)));
             }
         }
     }

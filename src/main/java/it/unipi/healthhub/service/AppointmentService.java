@@ -25,7 +25,7 @@ public class AppointmentService {
         if (input == null)
             return null;
         // Remove any '$' or '.' that may create operator injection
-        return input.replaceAll("[\\$\\.]", "_");
+        return input.replaceAll("[\\$]", "_");
     }
 
     // Generic helper to sanitize a field avoiding code repetition

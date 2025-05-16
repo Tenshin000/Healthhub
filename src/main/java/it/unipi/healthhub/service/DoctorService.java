@@ -58,8 +58,8 @@ public class DoctorService {
     private String sanitizeForMongo(String input) {
         if (input == null)
             return null;
-        // Remove any '$' or '.' that may create operator injection
-        return input.replaceAll("[\\$\\.]", "_");
+        // Remove any '$' that may create operator injection
+        return input.replaceAll("[\\$]", "_");
     }
 
     private void sanitizeFieldMongo(Consumer<String> setter, Supplier<String> getter) {
@@ -76,7 +76,6 @@ public class DoctorService {
         }
         return mutableList;
     }
-
 
     private void sanitizeAddress(Address address) {
         if (address != null) {
@@ -156,7 +155,7 @@ public class DoctorService {
     }
 
     // Remove any '$' or '.' that may create operator injection in Cypher parameters
-    private String sanitizeForNeo(String input) {
+    private String sanitizeForNeo4j(String input) {
         if (input == null)
             return null;
         return input.replaceAll("[\\$\\.]", "_");
@@ -164,15 +163,16 @@ public class DoctorService {
 
     // Generic helper to sanitize a String field
     private void sanitizeFieldNeo4j(Consumer<String> setter, Supplier<String> getter) {
-        setter.accept(sanitizeForNeo(getter.get()));
+        setter.accept(sanitizeForNeo4j(getter.get()));
     }
 
     // Helper to sanitize String lists
-    private List<String> sanitizeStringListNeo4j(List<String> list) {
-        if (list == null) return null;
-        return list.stream()
-                .map(this::sanitizeForNeo)
-                .collect(Collectors.toList());
+    private void sanitizeStringListNeo4j(List<String> list) {
+        if (list == null)
+            return;
+        list = list.stream()
+                .map(this::sanitizeForNeo4j)
+                .toList();
     }
 
 
@@ -738,11 +738,13 @@ public class DoctorService {
             Doctor doctor = doctorOpt.get();
             doctor.setName(doctorDetails.getFullName());
             doctor.setOrderRegistrationNumber(doctorDetails.getOrderRegistrationNumber());
+            doctor.setEmail(doctorDetails.getEmail());
             doctor.setFiscalCode(doctorDetails.getFiscalCode());
             doctor.setDob(doctorDetails.getBirthDate());
             doctor.setGender(doctorDetails.getGender());
 
-            doctorNeo4jRepository.updateName(doctorId, doctorDetails.getFullName());
+
+            doctorNeo4jRepository.updateName(doctorId, sanitizeForNeo4j(doctorDetails.getFullName()));
 
             sanitizeDoctorMongo(doctor);
             doctorMongoRepository.save(doctor); // Save updated doctor with the updated user details
