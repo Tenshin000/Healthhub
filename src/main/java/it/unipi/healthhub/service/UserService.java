@@ -115,6 +115,7 @@ public class UserService {
 
     @Transactional
     public User createUser(User user) {
+        sanitizeUserMongo(user);
         if (userMongoRepository.findByUsername(user.getUsername()) != null ||
                 userMongoRepository.findByEmail(user.getEmail()) != null ||
                 doctorMongoRepository.findByUsername(user.getUsername()) != null ||
@@ -122,7 +123,6 @@ public class UserService {
             return null;
         }
 
-        sanitizeUserMongo(user);
         User savedUser = userMongoRepository.save(user);
         UserDAO userDAO = new UserDAO(savedUser.getId(), savedUser.getName());
         sanitizeUserNeo4j(userDAO);
@@ -140,17 +140,19 @@ public class UserService {
         return userMongoRepository.save(userData);
     }
 
-    public void deleteUser(String id) {
+    public void deleteUser(String id) {;
         userMongoRepository.deleteById(id);
     }
 
     public User loginUser(String username, String password) {
+        username = sanitizeForMongo(username);
         User user = userMongoRepository.findByUsername(username);
         if (user == null) user = userMongoRepository.findByEmail(username);
         return (user != null && user.getPassword().equals(password)) ? user : null;
     }
 
     public User findByEmail(String email) {
+        email = sanitizeForMongo(email);
         return userMongoRepository.findByEmail(email);
     }
 

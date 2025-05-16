@@ -216,6 +216,8 @@ public class DoctorService {
 
     @Transactional
     public Doctor createDoctor(Doctor doctor){
+        sanitizeDoctorMongo(doctor);
+
         User controlUser = userMongoRepository.findByUsername(doctor.getUsername());
         if(controlUser != null){
             return null;
