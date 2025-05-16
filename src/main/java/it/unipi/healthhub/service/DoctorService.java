@@ -13,18 +13,20 @@ import it.unipi.healthhub.repository.mongo.TemplateMongoRepository;
 import it.unipi.healthhub.repository.mongo.UserMongoRepository;
 import it.unipi.healthhub.repository.neo4j.DoctorNeo4jRepository;
 import it.unipi.healthhub.repository.neo4j.UserNeo4jRepository;
+import it.unipi.healthhub.util.DateUtil;
 import it.unipi.healthhub.util.FakeMailSender;
+import it.unipi.healthhub.util.ScheduleConverter;
 import it.unipi.healthhub.util.TemplateConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.temporal.WeekFields;
 import java.util.*;
+import java.util.stream.Collectors;
+
 
 @Service
 public class DoctorService {
@@ -758,22 +760,34 @@ public class DoctorService {
 
     public void cleanOldSchedules(){
         doctorMongoRepository.cleanOldSchedules();
-        return;
     }
 
-    public void setupNewSchedules(){
+    public void setupNewSchedules() {
         List<Doctor> doctors = doctorMongoRepository.findDoctorsMissingSchedulesInNext4Weeks();
+        LocalDate start = LocalDate.now();
+        LocalDate end = start.plusWeeks(4);
+        List<LocalDate> allMondays = DateUtil.getAllMondays(start, end);
+
         for (Doctor doctor : doctors) {
-            CalendarTemplate defaultTemplate = getDefaultTemplate(doctor.getId());
-            List<Date> missingSchedules = doctorMongoRepository.findSchedulesWithinNext4Weeks(doctor.getId());
-            for (Date date : missingSchedules) {
-                LocalDate week = LocalDate.parse(date.toString());
-                Schedule schedule = new Schedule();
-                schedule.setWeek(week);
-                schedule.setSlots(TemplateConverter.convertToModelPrenotableSlots(defaultTemplate.getSlots()));
-                addSchedule(doctor.getId(), schedule);
-            }
+            setupDoctorSchedules(doctor, allMondays);
         }
-        return;
+    }
+
+    private void setupDoctorSchedules(Doctor doctor, List<LocalDate> allMondays) {
+        CalendarTemplate defaultTemplate = getDefaultTemplate(doctor.getId());
+        List<Date> foundSchedules = doctorMongoRepository.findSchedulesWithinNext4Weeks(doctor.getId());
+
+        Set<LocalDate> foundDates = foundSchedules.stream()
+                .map(DateUtil::convertToLocalDate)
+                .collect(Collectors.toSet());
+
+        List<LocalDate> missingMondays = allMondays.stream()
+                .filter(d -> !foundDates.contains(d))
+                .toList();
+
+        for (LocalDate monday : missingMondays) {
+            Schedule schedule = ScheduleConverter.buildScheduleForMonday(monday, defaultTemplate);
+            addSchedule(doctor.getId(), schedule);
+        }
     }
 }

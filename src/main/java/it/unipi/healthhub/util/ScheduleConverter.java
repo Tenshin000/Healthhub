@@ -1,11 +1,14 @@
 package it.unipi.healthhub.util;
 
 import it.unipi.healthhub.dto.ScheduleDTO;
+import it.unipi.healthhub.model.mongo.CalendarTemplate;
 import it.unipi.healthhub.model.mongo.PrenotableSlot;
+import it.unipi.healthhub.model.mongo.Schedule;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.time.LocalDate;
 
 public class ScheduleConverter {
 
@@ -37,5 +40,12 @@ public class ScheduleConverter {
                                 ))
                                 .collect(Collectors.toList())
                 ));
+    }
+
+    public static Schedule buildScheduleForMonday(LocalDate monday, CalendarTemplate template) {
+        Schedule schedule = new Schedule();
+        schedule.setWeek(monday);
+        schedule.setSlots(TemplateConverter.convertToModelPrenotableSlots(template.getSlots()));
+        return schedule;
     }
 }
