@@ -5,6 +5,7 @@ import it.unipi.healthhub.dto.PatientContactsDTO;
 import it.unipi.healthhub.dto.UserDetailsDTO;
 import it.unipi.healthhub.model.mongo.User;
 import it.unipi.healthhub.service.UserService;
+import it.unipi.healthhub.util.HashUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,6 +115,8 @@ public class PrivateUserAPI {
     public ResponseEntity<Void> changePassword(HttpServletRequest request, @RequestBody PasswordChangeDTO passwords){
         HttpSession session = request.getSession(false);
         String patientId = (String) session.getAttribute("patientId");
+        passwords.setCurrentPassword(HashUtil.hashPassword(passwords.getCurrentPassword()));
+        passwords.setNewPassword(HashUtil.hashPassword(passwords.getNewPassword()));
 
         boolean ok = userService.changePassword(patientId, passwords.getCurrentPassword(), passwords.getNewPassword());
         if(ok){

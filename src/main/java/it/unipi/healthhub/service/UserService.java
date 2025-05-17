@@ -23,11 +23,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.WeekFields;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
 
 @Service
 public class UserService {
+
     @Autowired
     private UserMongoRepository userMongoRepository;
     @Autowired
@@ -41,91 +43,133 @@ public class UserService {
     @Autowired
     private FakeMailSender fakeMailSender;
 
-    public List<User> getAllUser(){
+    // --- Utilities for sanitization ---
+
+    private String sanitizeForMongo(String input) {
+        if (input == null) return null;
+        return input.replaceAll("[\\$]", "_");
+    }
+
+    private void sanitizeFieldMongo(Consumer<String> setter, Supplier<String> getter) {
+        setter.accept(sanitizeForMongo(getter.get()));
+    }
+
+    private void sanitizeUserMongo(User user) {
+        if (user == null) return;
+        sanitizeFieldMongo(user::setName, user::getName);
+        sanitizeFieldMongo(user::setUsername, user::getUsername);
+        sanitizeFieldMongo(user::setPassword, user::getPassword);
+        sanitizeFieldMongo(user::setFiscalCode, user::getFiscalCode);
+        sanitizeFieldMongo(user::setGender, user::getGender);
+        sanitizeFieldMongo(user::setEmail, user::getEmail);
+        sanitizeFieldMongo(user::setPersonalNumber, user::getPersonalNumber);
+    }
+
+    private String sanitizeForNeo4j(String input) {
+        if (input == null) return null;
+        return input.replaceAll("[\\$\\.]", "_");
+    }
+
+    private void sanitizeFieldNeo4j(Consumer<String> setter, Supplier<String> getter) {
+        setter.accept(sanitizeForNeo4j(getter.get()));
+    }
+
+    private void sanitizeStringListNeo4j(List<String> list) {
+        if (list != null) {
+            for (int i = 0; i < list.size(); i++) {
+                list.set(i, sanitizeForNeo4j(list.get(i)));
+            }
+        }
+    }
+
+    private void sanitizeDoctorNeo4j(DoctorDAO doctor) {
+        if (doctor == null) return;
+        sanitizeFieldNeo4j(doctor::setId, doctor::getId);
+        sanitizeFieldNeo4j(doctor::setName, doctor::getName);
+        sanitizeStringListNeo4j(doctor.getSpecializations());
+    }
+
+    private void sanitizeUserNeo4j(UserDAO user) {
+        if (user == null) return;
+        sanitizeFieldNeo4j(user::setId, user::getId);
+        sanitizeFieldNeo4j(user::setName, user::getName);
+
+        if (user.getEndorsedDoctors() != null) {
+            user.getEndorsedDoctors().forEach(this::sanitizeDoctorNeo4j);
+        }
+
+        if (user.getReviewedDoctors() != null) {
+            user.getReviewedDoctors().forEach(this::sanitizeDoctorNeo4j);
+        }
+    }
+
+    // --- User Management ---
+
+    public List<User> getAllUser() {
         return userMongoRepository.findAll();
     }
 
-    public Optional<User> getUserById(String id){
+    public Optional<User> getUserById(String id) {
         return userMongoRepository.findById(id);
     }
 
     @Transactional
-    public User createUser(User user){
-        User controlUser = userMongoRepository.findByUsername(user.getUsername());
-        if(controlUser != null){
-            return null;
-        }
-
-        controlUser = userMongoRepository.findByEmail(user.getEmail());
-        if(controlUser != null){
-            return null;
-        }
-
-        Doctor controlDoctor = doctorMongoRepository.findByUsername(user.getUsername());
-        if(controlDoctor != null){
-            return null;
-        }
-
-        controlDoctor = doctorMongoRepository.findByEmail(user.getEmail());
-        if(controlDoctor != null){
+    public User createUser(User user) {
+        sanitizeUserMongo(user);
+        if (userMongoRepository.findByUsername(user.getUsername()) != null ||
+                userMongoRepository.findByEmail(user.getEmail()) != null ||
+                doctorMongoRepository.findByUsername(user.getUsername()) != null ||
+                doctorMongoRepository.findByEmail(user.getEmail()) != null) {
             return null;
         }
 
         User savedUser = userMongoRepository.save(user);
         UserDAO userDAO = new UserDAO(savedUser.getId(), savedUser.getName());
+        sanitizeUserNeo4j(userDAO);
         userNeo4jRepository.save(userDAO);
         return savedUser;
     }
 
     @Transactional
-    public User updateUser(String id, User userData){
+    public User updateUser(String id, User userData) {
         if (!userMongoRepository.existsById(id)) {
             throw new UserNotFoundException("User not found with id: " + id);
         }
         userData.setId(id);
+        sanitizeUserMongo(userData);
         return userMongoRepository.save(userData);
     }
 
-    public void deleteUser(String id){
+    public void deleteUser(String id) {;
         userMongoRepository.deleteById(id);
     }
 
     public User loginUser(String username, String password) {
+        username = sanitizeForMongo(username);
         User user = userMongoRepository.findByUsername(username);
-
-        if(user == null)
-            user = userMongoRepository.findByEmail(username);
-
-        if(user != null && user.getPassword().equals(password)) {
-            System.out.println("User found");
-            return user;
-        }
-
-        return null;
+        if (user == null) user = userMongoRepository.findByEmail(username);
+        return (user != null && user.getPassword().equals(password)) ? user : null;
     }
 
-    public User findByEmail(String email){
+    public User findByEmail(String email) {
+        email = sanitizeForMongo(email);
         return userMongoRepository.findByEmail(email);
     }
 
-    public boolean changePassword(String id, String currentPassword, String newPassword){
+    public boolean changePassword(String id, String currentPassword, String newPassword) {
         Optional<User> userOpt = getUserById(id);
-        if(userOpt.isPresent()){
+        if (userOpt.isPresent()) {
             User user = userOpt.get();
-            if(currentPassword.equals(user.getPassword())){
+            if (currentPassword.equals(user.getPassword())) {
                 user.setPassword(newPassword);
                 updateUser(user.getId(), user);
                 return true;
             }
         }
-
         return false;
     }
 
-    public boolean hasEndorsed(String patientId, String doctorId) {
-        UserDAO userDAO = userNeo4jRepository.findById(patientId).orElseThrow(UserNotFoundException::new);
-        return userDAO.getEndorsedDoctors().stream().anyMatch(doctor -> doctor.getId().equals(doctorId));
-    }
+    // --- User Details & Contacts ---
 
     @Transactional
     public UserDetailsDTO updateUserDetails(String patientId, UserDetailsDTO userDetails) {
@@ -139,19 +183,17 @@ public class UserService {
 
             userNeo4jRepository.updateName(patientId, userDetails.getFullName());
 
-            userMongoRepository.save(user); // Save updated doctor with the updated user details
+            sanitizeUserMongo(user);
+            userMongoRepository.save(user);
             return userDetails;
         }
         return null;
     }
 
     public UserDetailsDTO getUserDetails(String patientId) {
-        Optional<User> userOpt = userMongoRepository.findById(patientId);
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            return new UserDetailsDTO(user.getName(),user.getFiscalCode(), user.getDob(), user.getGender());
-        }
-        return null;
+        return userMongoRepository.findById(patientId)
+                .map(user -> new UserDetailsDTO(user.getName(), user.getFiscalCode(), user.getDob(), user.getGender()))
+                .orElse(null);
     }
 
     public PatientContactsDTO getUserContacts(String patientId) {
@@ -170,67 +212,61 @@ public class UserService {
             User user = userOpt.get();
             user.setEmail(userContacts.getEmail());
             user.setPersonalNumber(userContacts.getPhoneNumber());
-            
+            sanitizeUserMongo(user);
             userMongoRepository.save(user); // Save updated doctor with the updated user details
             return new PatientContactsDTO(user.getName(), user.getEmail(), user.getFiscalCode(), user.getDob(), user.getGender(), user.getPersonalNumber());
         }
         return null;
     }
 
+    // --- Appointment Management ---
+
     @Transactional
     public List<Appointment> getUpcomingAppointments(String patientId) {
-        LocalDate currentDate = LocalDate.now();
-        return appointmentMongoRepository.findByPatientIdFromDate(patientId, currentDate);
+        return appointmentMongoRepository.findByPatientIdFromDate(patientId, LocalDate.now());
     }
 
     @Transactional
     public List<Appointment> getPastAppointments(String patientId) {
-        LocalDate currentDate = LocalDate.now();
-        return appointmentMongoRepository.findByPatientIdBeforeDate(patientId, currentDate);
+        return appointmentMongoRepository.findByPatientIdBeforeDate(patientId, LocalDate.now());
     }
 
     @Transactional
     public boolean cancelAppointment(String appointmentId) {
-        Optional<Appointment> appointmentOpt = appointmentMongoRepository.findById(appointmentId);
-        if (appointmentOpt.isPresent()) {
-            Appointment appointment = appointmentOpt.get();
-            return deleteAppointment(appointment);
-        }
-        return false;
+        return appointmentMongoRepository.findById(appointmentId)
+                .map(this::deleteAppointment)
+                .orElse(false);
     }
 
-    private boolean deleteAppointment(Appointment appointment){
+    private boolean deleteAppointment(Appointment appointment) {
         LocalDateTime dateTimeSlot = appointment.getDate();
-
         Integer year = dateTimeSlot.getYear();
         Integer week = dateTimeSlot.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
         String keyDay = dateTimeSlot.getDayOfWeek().toString().toLowerCase();
         String slotStart = dateTimeSlot.toLocalTime().toString();
         String doctorId = appointment.getDoctor().getId();
 
-        boolean taken = doctorMongoRepository.checkScheduleSlot(doctorId, year, week, keyDay, slotStart);
-        if(taken){
+        if (doctorMongoRepository.checkScheduleSlot(doctorId, year, week, keyDay, slotStart)) {
             appointmentService.deleteAppointment(appointment.getId());
             doctorMongoRepository.freeScheduleSlot(doctorId, year, week, keyDay, slotStart);
             fakeMailSender.sendDeletedAppointmentMailByPatient(appointment);
             return true;
         }
-
         return false;
     }
 
-    public boolean sendPasswordReset(String email, String link){
-        return fakeMailSender.sendPasswordResetLink(email, link);
+    // --- Neo4j Relations & Recommendations ---
+
+    public boolean hasEndorsed(String patientId, String doctorId) {
+        UserDAO userDAO = userNeo4jRepository.findById(patientId).orElseThrow(UserNotFoundException::new);
+        return userDAO.getEndorsedDoctors().stream().anyMatch(doctor -> doctor.getId().equals(doctorId));
     }
 
     @Transactional
     public List<Doctor> getEndorsedDoctors(String patientId) {
         UserDAO userDAO = userNeo4jRepository.findById(patientId).orElseThrow(UserNotFoundException::new);
         List<Doctor> endorsedDoctors = new ArrayList<>();
-        userDAO.getEndorsedDoctors().forEach(doctorDAO -> {
-            Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorDAO.getId());
-            doctorOpt.ifPresent(endorsedDoctors::add);
-        });
+        userDAO.getEndorsedDoctors().forEach(doc -> doctorMongoRepository.findById(doc.getId()).ifPresent(endorsedDoctors::add));
         return endorsedDoctors;
     }
 
@@ -238,36 +274,26 @@ public class UserService {
     public List<Doctor> getReviewedDoctors(String userId) {
         UserDAO userDAO = userNeo4jRepository.findById(userId).orElseThrow(UserNotFoundException::new);
         List<Doctor> reviewedDoctors = new ArrayList<>();
-        userDAO.getReviewedDoctors().forEach(doctorDAO -> {
-            Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorDAO.getId());
-            doctorOpt.ifPresent(reviewedDoctors::add);
-        });
+        userDAO.getReviewedDoctors().forEach(doc -> doctorMongoRepository.findById(doc.getId()).ifPresent(reviewedDoctors::add));
         return reviewedDoctors;
     }
 
     @Transactional
-    public List<DoctorDAO> getRecommendedDoctors(String userId, int limit){
-        // Get recommended Doctors
+    public List<DoctorDAO> getRecommendedDoctors(String userId, int limit) {
         List<DoctorDAO> recommendedDoctors = userNeo4jRepository.recommendDoctorsForUser(userId, limit);
 
-        // If the list is incomplete or empty, add popular doctors
-        if(recommendedDoctors.size() < limit){
+        if (recommendedDoctors.size() < limit) {
             int remaining = limit - recommendedDoctors.size();
-
-            // Only retrieve doctors that have not already been added
             Set<String> alreadyAddedIds = recommendedDoctors.stream()
                     .map(DoctorDAO::getId)
                     .collect(Collectors.toSet());
 
-            // We take more and then filter
             List<DoctorDAO> popularDoctors = userNeo4jRepository.recommendPopularDoctors(remaining * 2);
-
-            // Add only those not already present
-            if(!popularDoctors.isEmpty()){
-                for(DoctorDAO doctor : popularDoctors){
-                    if(!alreadyAddedIds.contains(doctor.getId())){
+            if (!popularDoctors.isEmpty()) {
+                for (DoctorDAO doctor : popularDoctors) {
+                    if (!alreadyAddedIds.contains(doctor.getId())) {
                         recommendedDoctors.add(doctor);
-                        if(recommendedDoctors.size() == limit)
+                        if (recommendedDoctors.size() == limit)
                             break;
                     }
                 }
@@ -275,5 +301,11 @@ public class UserService {
         }
 
         return recommendedDoctors;
+    }
+
+    // --- Mail Operations ---
+
+    public boolean sendPasswordReset(String email, String link) {
+        return fakeMailSender.sendPasswordResetLink(email, link);
     }
 }

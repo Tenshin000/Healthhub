@@ -13,6 +13,7 @@ import it.unipi.healthhub.repository.mongo.TemplateMongoRepository;
 import it.unipi.healthhub.repository.mongo.UserMongoRepository;
 import it.unipi.healthhub.repository.neo4j.DoctorNeo4jRepository;
 import it.unipi.healthhub.repository.neo4j.UserNeo4jRepository;
+import it.unipi.healthhub.service.AppointmentService;
 import it.unipi.healthhub.util.FakeMailSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -24,6 +25,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.WeekFields;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Service
 public class DoctorService {
@@ -50,6 +54,140 @@ public class DoctorService {
 
     @Autowired
     private FakeMailSender fakeMailSender;
+
+    private String sanitizeForMongo(String input) {
+        if (input == null)
+            return null;
+        // Remove any '$' that may create operator injection
+        return input.replaceAll("[\\$]", "_");
+    }
+
+    private void sanitizeFieldMongo(Consumer<String> setter, Supplier<String> getter) {
+        setter.accept(sanitizeForMongo(getter.get()));
+    }
+
+    private List<String> sanitizeStringListMongo(List<String> list) {
+        if (list == null) {
+            return null;
+        }
+        List<String> mutableList = new ArrayList<>(list);
+        for (int i = 0; i < mutableList.size(); i++) {
+            mutableList.set(i, sanitizeForMongo(mutableList.get(i)));
+        }
+        return mutableList;
+    }
+
+    private void sanitizeAddress(Address address) {
+        if (address != null) {
+            sanitizeFieldMongo(address::setStreet, address::getStreet);
+            sanitizeFieldMongo(address::setCity, address::getCity);
+            sanitizeFieldMongo(address::setProvince, address::getProvince);
+            sanitizeFieldMongo(address::setCountry, address::getCountry);
+            sanitizeFieldMongo(address::setPostalCode, address::getPostalCode);
+        }
+    }
+
+    private void sanitizeReview(Review review) {
+        if (review == null)
+            return;
+        sanitizeFieldMongo(review::setName, review::getName);
+        sanitizeFieldMongo(review::setText, review::getText);
+        sanitizeFieldMongo(review::setPatientId, review::getPatientId);
+    }
+
+    private void sanitizeService(it.unipi.healthhub.model.mongo.Service service) {
+        if (service == null)
+            return;
+        sanitizeFieldMongo(service::setService, service::getService);
+    }
+
+    private void sanitizeTemplate(CalendarTemplate template) {
+        if(template == null)
+            return;
+
+        // Sanitize id and name
+        sanitizeFieldMongo(template::setId, template::getId);
+    }
+
+    // Sanitize User fields
+    private void sanitizeUserMongo(User user) {
+        if (user == null)
+            return;
+        sanitizeFieldMongo(user::setName, user::getName);
+        sanitizeFieldMongo(user::setUsername, user::getUsername);
+        sanitizeFieldMongo(user::setPassword, user::getPassword);
+        sanitizeFieldMongo(user::setFiscalCode, user::getFiscalCode);
+        sanitizeFieldMongo(user::setGender, user::getGender);
+        sanitizeFieldMongo(user::setEmail, user::getEmail);
+        sanitizeFieldMongo(user::setPersonalNumber, user::getPersonalNumber);
+
+        sanitizeAddress(user.getAddress());
+    }
+
+    // Sanitize Doctor (including User fields)
+    private void sanitizeDoctorMongo(Doctor doctor) {
+        if (doctor == null)
+            return;
+
+        // Sanitize User inherited fields
+        sanitizeUserMongo(doctor);
+
+        // Sanitize Doctor specific fields
+        sanitizeFieldMongo(doctor::setOrderRegistrationNumber, doctor::getOrderRegistrationNumber);
+
+        sanitizeStringListMongo(doctor.getCalendarTemplates());
+        sanitizeStringListMongo(doctor.getSpecializations());
+        sanitizeStringListMongo(doctor.getPhoneNumbers());
+
+        // Sanitize each review
+        if(doctor.getReviews() != null){
+            for(Review review : doctor.getReviews()){
+                sanitizeReview(review);
+            }
+        }
+
+        // Sanitize each service
+        if(doctor.getServices() != null) {
+            for(it.unipi.healthhub.model.mongo.Service service : doctor.getServices()){
+                sanitizeService(service);
+            }
+        }
+    }
+
+    // Remove any '$' or '.' that may create operator injection in Cypher parameters
+    private String sanitizeForNeo4j(String input) {
+        if (input == null)
+            return null;
+        return input.replaceAll("[\\$\\.]", "_");
+    }
+
+    // Generic helper to sanitize a String field
+    private void sanitizeFieldNeo4j(Consumer<String> setter, Supplier<String> getter) {
+        setter.accept(sanitizeForNeo4j(getter.get()));
+    }
+
+    // Helper to sanitize String lists
+    private void sanitizeStringListNeo4j(List<String> list) {
+        if (list == null)
+            return;
+        list = list.stream()
+                .map(this::sanitizeForNeo4j)
+                .toList();
+    }
+
+
+    // Sanitize DoctorDAO (nodo Doctor)
+    private void sanitizeDoctorNeo4j(DoctorDAO doctor) {
+        if (doctor == null)
+            return;
+
+        // Sanitize id and name
+        sanitizeFieldNeo4j(doctor::setId, doctor::getId);
+        sanitizeFieldNeo4j(doctor::setName, doctor::getName);
+
+        // Sanitize specializations list
+        sanitizeStringListNeo4j(doctor.getSpecializations());
+    }
 
     public List<DoctorMongoProjection> searchDoctorsMongo(String query) {
         if (query != null && !query.isEmpty()) {
@@ -78,6 +216,8 @@ public class DoctorService {
 
     @Transactional
     public Doctor createDoctor(Doctor doctor){
+        sanitizeDoctorMongo(doctor);
+
         User controlUser = userMongoRepository.findByUsername(doctor.getUsername());
         if(controlUser != null){
             return null;
@@ -100,8 +240,11 @@ public class DoctorService {
 
         it.unipi.healthhub.model.mongo.Service service = new it.unipi.healthhub.model.mongo.Service("Standard Visit", 0);
         newService(doctor, service);
+        sanitizeDoctorMongo(doctor);
         Doctor newDoc = doctorMongoRepository.save(doctor);
         DoctorDAO doctorDAO = new DoctorDAO(newDoc.getId(), newDoc.getName(), newDoc.getSpecializations());
+
+        sanitizeDoctorNeo4j(doctorDAO);
         doctorNeo4jRepository.save(doctorDAO);
         return newDoc;
     }
@@ -111,6 +254,7 @@ public class DoctorService {
             throw new DoctorNotFoundException("Doctor not found with id: " + id);
         }
         doctorData.setId(id);
+        sanitizeDoctorMongo(doctorData);
         return doctorMongoRepository.save(doctorData);
     }
 
@@ -173,6 +317,7 @@ public class DoctorService {
             int newIndex = newService(doctor, service);
 
             // Add service to doctor's list
+            sanitizeDoctorMongo(doctor);
             doctorMongoRepository.save(doctor); // Save updated doctor with the new service
             return newIndex;
         }
@@ -206,6 +351,7 @@ public class DoctorService {
 
             if (index >= 0 && index < services.size()) {
                 services.set(index, service); // Update the service
+                sanitizeDoctorMongo(doctor);
                 doctorMongoRepository.save(doctor); // Save the updated doctor with the updated service
                 return true;
             }
@@ -347,6 +493,7 @@ public class DoctorService {
     public CalendarTemplate addTemplate(String doctorId, CalendarTemplate template) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
+            sanitizeTemplate(template);
             CalendarTemplate newTemplate = templateRepository.save(template); // Save template
             Doctor doctor = doctorOpt.get();
 
@@ -367,10 +514,11 @@ public class DoctorService {
         if (doctorOpt.isPresent()) {
             Optional<CalendarTemplate> existingTemplateOpt = templateRepository.findById(updatedTemplate.getId());
             if (existingTemplateOpt.isPresent()) {
+                sanitizeTemplate(updatedTemplate);
                 CalendarTemplate existingTemplate = existingTemplateOpt.get();
                 existingTemplate.setName(updatedTemplate.getName());
                 existingTemplate.setSlots(updatedTemplate.getSlots());
-                existingTemplate.setActive(updatedTemplate.isActive());
+                existingTemplate.setDefault(updatedTemplate.isDefault());
 
                 return templateRepository.save(existingTemplate);
             }
@@ -418,7 +566,7 @@ public class DoctorService {
                     Optional<CalendarTemplate> templateOpt = templateRepository.findById(id);
                     if (templateOpt.isPresent()) {
                         CalendarTemplate template = templateOpt.get();
-                        template.setActive(id.equals(templateId));
+                        template.setDefault(id.equals(templateId));
                         templateRepository.save(template);
                     }
                 }
@@ -549,6 +697,7 @@ public class DoctorService {
             modelReview.setPatientId(userId);
 
             doctor.getReviews().add(modelReview); // Add review to doctor's list
+            sanitizeDoctorMongo(doctor);
             doctorMongoRepository.save(doctor); // Save updated doctor with the new review
 
             userNeo4jRepository.review(userId, doctorId);
@@ -593,6 +742,7 @@ public class DoctorService {
         if (doctorOpt.isPresent()) {
             Doctor doctor = doctorOpt.get();
             doctor.setAddress(address); // Update address
+            sanitizeDoctorMongo(doctor);
             doctorMongoRepository.save(doctor); // Save updated doctor with the updated address
             return address;
         }
@@ -606,12 +756,15 @@ public class DoctorService {
             Doctor doctor = doctorOpt.get();
             doctor.setName(doctorDetails.getFullName());
             doctor.setOrderRegistrationNumber(doctorDetails.getOrderRegistrationNumber());
+            doctor.setEmail(doctorDetails.getEmail());
             doctor.setFiscalCode(doctorDetails.getFiscalCode());
             doctor.setDob(doctorDetails.getBirthDate());
             doctor.setGender(doctorDetails.getGender());
 
-            doctorNeo4jRepository.updateName(doctorId, doctorDetails.getFullName());
 
+            doctorNeo4jRepository.updateName(doctorId, sanitizeForNeo4j(doctorDetails.getFullName()));
+
+            sanitizeDoctorMongo(doctor);
             doctorMongoRepository.save(doctor); // Save updated doctor with the updated user details
             return doctorDetails;
         }
@@ -629,6 +782,8 @@ public class DoctorService {
 
             int newIndex = doctor.getPhoneNumbers().size();
             doctor.getPhoneNumbers().add(number);
+
+            sanitizeDoctorMongo(doctor);
             doctorMongoRepository.save(doctor);
             return newIndex;
         }
@@ -671,6 +826,7 @@ public class DoctorService {
             List<String> specializations = doctor.getSpecializations();
             if (!specializations.contains(specialization)) {
                 specializations.add(specialization);
+                sanitizeDoctorMongo(doctor);
                 doctorMongoRepository.save(doctor);
                 doctorNeo4jRepository.addSpecialization(doctorId, specialization);
                 return specializations.size() - 1;

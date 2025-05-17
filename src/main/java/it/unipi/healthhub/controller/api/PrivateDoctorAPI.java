@@ -5,6 +5,7 @@ import it.unipi.healthhub.model.mongo.*;
 import it.unipi.healthhub.dto.*;
 import it.unipi.healthhub.service.AppointmentService;
 import it.unipi.healthhub.service.DoctorService;
+import it.unipi.healthhub.util.HashUtil;
 import it.unipi.healthhub.util.ScheduleConverter;
 import it.unipi.healthhub.util.TemplateConverter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -306,7 +307,7 @@ public class PrivateDoctorAPI {
                 Map<String, List<Slot>> modelSlots = template.getSlots();
                 Map<String, List<TemplateDTO.SlotDTO>> dtoSlots = TemplateConverter.convertToDtoSlots(modelSlots);
 
-                TemplateDTO templateDto = new TemplateDTO(template.getId(), template.getName(), dtoSlots, template.isActive());
+                TemplateDTO templateDto = new TemplateDTO(template.getId(), template.getName(), dtoSlots, template.isDefault());
                 response.add(templateDto);
             }
             return ResponseEntity.ok(response);
@@ -417,6 +418,8 @@ public class PrivateDoctorAPI {
     public ResponseEntity<Void> changePassword(HttpServletRequest request, @RequestBody PasswordChangeDTO passwords) {
         HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
+        passwords.setCurrentPassword(HashUtil.hashPassword(passwords.getCurrentPassword()));
+        passwords.setNewPassword(HashUtil.hashPassword(passwords.getNewPassword()));
 
         boolean ok = doctorService.changePassword(doctorId, passwords.getCurrentPassword(), passwords.getNewPassword());
         if (ok) {

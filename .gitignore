@@ -42,3 +42,4 @@ src/main/java/it/unipi/healthhub/HealthhubApplication.java
 # Python virtual environments
 **/venv/
 **/.venv/
+**/.DS_Store
