@@ -6,20 +6,54 @@
     <title>Search for Doctors - HealthHub</title>
     <link rel="stylesheet" th:href="@{/css/search.css}">
     <script>
+        let currentController = null;
+        let debounceTimeout = null;
+
         async function searchDoctors(query) {
-            const response = await fetch(`/api/search/doctors?query=${query}`);
-            const doctors = await response.json();
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = '';
-            doctors.forEach(doctor => {
-                const doctorElement = document.createElement('div');
-                doctorElement.innerHTML = `
+            if (!query.trim()) {
+                document.getElementById('results').innerHTML = '';
+                return;
+            }
+
+            // Annulla la richiesta precedente se esiste
+            if (currentController) {
+                currentController.abort();
+            }
+            currentController = new AbortController();
+
+            try {
+                const response = await fetch(`/api/search/doctors?query=${encodeURIComponent(query)}`, {
+                    signal: currentController.signal
+                });
+                const doctors = await response.json();
+
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = '';
+                doctors.forEach(doctor => {
+                    const doctorElement = document.createElement('div');
+                    doctorElement.innerHTML = `
                     <h4><a href="/doctors/${doctor.id}">${doctor.name}</a></h4>
                     <p>Specializations: ${doctor.specializations}</p>
                     <p>Location: ${formatAddress(doctor.address)}</p>
                 `;
-                resultsDiv.appendChild(doctorElement);
-            });
+                    resultsDiv.appendChild(doctorElement);
+                });
+            } catch (err) {
+                if (err.name === 'AbortError') {
+                    // Richiesta annullata, non fare nulla
+                    console.log('Richiesta precedente annullata');
+                } else {
+                    console.error('Errore durante la ricerca:', err);
+                }
+            }
+        }
+
+        // Funzione debounce per limitare le chiamate alla funzione searchDoctors
+        function debounceSearch(query) {
+            if (debounceTimeout) clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(() => {
+                searchDoctors(query);
+            }, 300); // aspetta 300ms di inattività prima di chiamare searchDoctors
         }
 
         function formatAddress(addr) {
@@ -28,11 +62,11 @@
             return `${addr.street}, ${addr.city}, ${addr.province}, ${addr.postalCode}, ${addr.country}`;
         }
 
-        document.addEventListener('DOMContentLoaded', (event) => {
+        document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('query');
             searchInput.addEventListener('input', () => {
                 const query = searchInput.value;
-                searchDoctors(query);
+                debounceSearch(query);
             });
         });
     </script>

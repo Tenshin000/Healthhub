@@ -7,6 +7,7 @@ import it.unipi.healthhub.model.mongo.User;
 import it.unipi.healthhub.service.DoctorService;
 import it.unipi.healthhub.service.UserService;
 import it.unipi.healthhub.util.ControllerUtil;
+import it.unipi.healthhub.util.HashUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,11 +41,12 @@ public class AuthController {
     public String login(HttpServletRequest request, Model model) {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
+        String hashPassword = HashUtil.hashPassword(password);
 
         HttpSession session = request.getSession();
 
         // Check if the user is a patient
-        User user = userService.loginUser(username, password);
+        User user = userService.loginUser(username, hashPassword);
         if (user != null) {
             // Set session attributes for the patient
             session.setAttribute("username", user.getUsername());
@@ -54,7 +56,7 @@ public class AuthController {
         }
 
         // Check if the user is a doctor
-        Doctor doctor = doctorService.loginDoctor(username, password);
+        Doctor doctor = doctorService.loginDoctor(username, hashPassword);
         if (doctor != null) {
             // Set session attributes for the doctor
             session.setAttribute("username", doctor.getUsername());
@@ -89,6 +91,8 @@ public class AuthController {
     public String registerUser(HttpServletRequest request, @ModelAttribute User user, Model model) {
         User controlUser = null;
         try {
+            String password = HashUtil.hashPassword(user.getPassword());
+            user.setPassword(password);
             user.setAddress(createAddress(request));
             String phone = request.getParameter("phone");
             user.setPersonalNumber(phone);
@@ -148,13 +152,15 @@ public class AuthController {
             }
 
             doctor.setAddress(createAddress(request));
+
+            String password = HashUtil.hashPassword(doctor.getPassword());
+            doctor.setPassword(password);
+
             controlDoctor = doctorService.createDoctor(doctor);
             if (controlDoctor == null)
                 throw new UserAlreadyExistsException();
-            System.out.println("We");
             return "redirect:/login";
         } catch (UserAlreadyExistsException e) {
-            System.out.println("GG");
             // If registration fails, return an error message to the view
             model.addAttribute("logged", false);
             model.addAttribute("errorMessage", "Doctor registration failed: " + e.getMessage());
@@ -243,6 +249,8 @@ public class AuthController {
             return ResponseEntity.ok(false);
         }
 
+        String hashPassword = HashUtil.hashPassword(password);
+
         // Retrieve user or doctor
         boolean isDoctor = false;
         Optional<User> userOpt = userService.getUserById(id);
@@ -266,10 +274,10 @@ public class AuthController {
 
         // Save new password
         if (isDoctor) {
-            doctor.setPassword(password);
+            doctor.setPassword(hashPassword);
             doctorService.updateDoctor(id, doctor);
         } else {
-            user.setPassword(password);
+            user.setPassword(hashPassword);
             userService.updateUser(id, user);
         }
 
