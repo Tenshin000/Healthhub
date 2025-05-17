@@ -12,7 +12,7 @@ public class TemplateDTO {
 
     // Constructor
     public TemplateDTO() {
-        // Costruttore vuoto necessario per la deserializzazione JSON
+        // Empty constructor needed for JSON deserialization
     }
     public TemplateDTO(String id, String name, Map<String, List<SlotDTO>> slots) {
         this.id = id;

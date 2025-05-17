@@ -197,14 +197,12 @@ public class UserService {
     }
 
     public PatientContactsDTO getUserContacts(String patientId) {
-        return userMongoRepository.findById(patientId)
-                .map(user -> user.getAddress() != null
-                        ? new PatientContactsDTO(user.getEmail(), user.getPersonalNumber(),
-                        user.getAddress().getStreet(), user.getAddress().getCity(),
-                        user.getAddress().getProvince(), user.getAddress().getPostalCode(),
-                        user.getAddress().getCountry())
-                        : new PatientContactsDTO(user.getEmail(), user.getPersonalNumber()))
-                .orElse(null);
+        Optional<User> userOpt = userMongoRepository.findById(patientId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            return new PatientContactsDTO(user.getEmail(), user.getPersonalNumber());
+        }
+        return null;
     }
 
     @Transactional
@@ -214,16 +212,9 @@ public class UserService {
             User user = userOpt.get();
             user.setEmail(userContacts.getEmail());
             user.setPersonalNumber(userContacts.getPhoneNumber());
-            user.setAddress(new Address(userContacts.getStreet(), userContacts.getCity(),
-                    userContacts.getProvince(), userContacts.getPostalCode(), userContacts.getCountry()));
-
             sanitizeUserMongo(user);
-            userMongoRepository.save(user);
-
-            return new PatientContactsDTO(user.getEmail(), user.getPersonalNumber(),
-                    user.getAddress().getStreet(), user.getAddress().getCity(),
-                    user.getAddress().getProvince(), user.getAddress().getPostalCode(),
-                    user.getAddress().getCountry());
+            userMongoRepository.save(user); // Save updated doctor with the updated user details
+            return new PatientContactsDTO(user.getName(), user.getEmail(), user.getFiscalCode(), user.getDob(), user.getGender(), user.getPersonalNumber());
         }
         return null;
     }

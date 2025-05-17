@@ -1,13 +1,17 @@
 package it.unipi.healthhub.dto;
 
+import java.time.LocalDate;
+
+/**
+ * DTO class representing patient's contact and personal information.
+ */
 public class PatientContactsDTO {
+    private String name;
     private String email;
+    private String fiscalCode;
+    private LocalDate birthDate;
+    private String gender;
     private String phoneNumber;
-    private String street;
-    private String city;
-    private String province;
-    private String postalCode;
-    private String country;
 
     public PatientContactsDTO(){}
 
@@ -16,14 +20,21 @@ public class PatientContactsDTO {
         this.phoneNumber = phoneNumber;
     }
 
-    public PatientContactsDTO(String email, String phoneNumber, String street, String city, String province, String postalCode, String country){
+    public PatientContactsDTO(String name, String email, String fiscalCode, LocalDate birthDate, String gender, String phoneNumber) {
+        this.name = name;
         this.email = email;
+        this.fiscalCode = fiscalCode;
+        this.birthDate = birthDate;
+        this.gender = gender;
         this.phoneNumber = phoneNumber;
-        this.street = street;
-        this.city = city;
-        this.province = province;
-        this.postalCode = postalCode;
-        this.country = country;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getEmail() {
@@ -34,6 +45,30 @@ public class PatientContactsDTO {
         this.email = email;
     }
 
+    public String getFiscalCode() {
+        return fiscalCode;
+    }
+
+    public void setFiscalCode(String fiscalCode) {
+        this.fiscalCode = fiscalCode;
+    }
+
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
     public String getPhoneNumber() {
         return phoneNumber;
     }
@@ -41,19 +76,4 @@ public class PatientContactsDTO {
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
-
-    public String getStreet() { return street; }
-    public void setStreet(String street) { this.street = street; }
-
-    public String getCity() { return city; }
-    public void setCity(String city) { this.city = city; }
-
-    public String getProvince() { return province; }
-    public void setProvince(String province) { this.province = province; }
-
-    public String getPostalCode() { return postalCode; }
-    public void setPostalCode(String postalCode) { this.postalCode = postalCode; }
-
-    public String getCountry() { return country; }
-    public void setCountry(String country) { this.country = country; }
 }

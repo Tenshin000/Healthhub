@@ -174,7 +174,7 @@ public class CustomAppointmentMongoRepositoryImpl implements CustomAppointmentMo
                 countNewPatients
         );
 
-        // Execute the aggregation pipeline
+        // 5. Execute the aggregation pipeline
         AggregationResults<org.bson.Document> results =
                 mongoTemplate.aggregate(aggregation, Appointment.class, org.bson.Document.class);
 

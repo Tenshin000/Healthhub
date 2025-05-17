@@ -291,6 +291,24 @@ public class DoctorService {
         return null;
     }
 
+    public it.unipi.healthhub.model.mongo.Service getService(String doctorId, int index) {
+        Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
+        if(doctorOpt.isPresent()){
+            Doctor doctor = doctorOpt.get();
+            it.unipi.healthhub.model.mongo.Service service = null;
+            try{
+                service = doctor.getServices().get(index);
+            }
+            catch(IndexOutOfBoundsException ioobe){
+                return null;
+            }
+
+            return service;
+        }
+        return null;
+    }
+
+
     public Integer addService(String doctorId, it.unipi.healthhub.model.mongo.Service service) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {

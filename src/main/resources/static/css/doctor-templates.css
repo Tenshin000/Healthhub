@@ -191,7 +191,7 @@ textarea:disabled {
 #sunday {
     display: flex;
     align-items: center;
-    gap: 0.5em; /* distanza tra label e p */
+    gap: 0.5em; /* distance between label and p */
 }
 
 #sunday label,

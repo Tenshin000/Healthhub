@@ -186,7 +186,7 @@ public class AuthController {
         boolean isDoctor = false;
 
         if (user == null) {
-            // if not a patient, try doctor
+            // If not a patient, try doctor
             Doctor doctor = doctorService.findByEmail(email);
             if (doctor != null) {
                 user = doctor;
@@ -195,12 +195,12 @@ public class AuthController {
         }
 
         if (user == null) {
-            // no account found
+            // No account found
             model.addAttribute("error", "No account found for that email address.");
             return ResponseEntity.ok(false);
         }
 
-        // build reset link: e.g. https://your-domain/forgot-password/{id}
+        // Build reset link: e.g. https://your-domain/forgot-password/{id}
         String appUrl = request.getScheme() + "://"
                 + request.getServerName()
                 + (request.getServerPort() != 80 ? ":" + request.getServerPort() : "")
@@ -209,7 +209,7 @@ public class AuthController {
 
         boolean mailSent = false;
 
-        // send the email
+        // Send the email
         if(isDoctor){
             mailSent = doctorService.sendPasswordReset(user.getEmail(), resetLink);
         }

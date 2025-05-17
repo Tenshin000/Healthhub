@@ -1,13 +1,13 @@
 package it.unipi.healthhub.model.mongo;
 
 public class Address {
-
     private String street;
     private String city;
     private String province;
     private String postalCode;
     private String country;
 
+    // Constructor
     public Address(String street, String city, String province, String postalCode, String country){
         this.street = street;
         this.city = city;

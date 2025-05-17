@@ -206,8 +206,6 @@ public class PrivateDoctorAPI {
         }
     }
 
-
-
     @PutMapping("/services/{index}")
     public ResponseEntity<String> updateVisitType(@PathVariable Integer index, @RequestBody ServiceDTO serviceDto, HttpServletRequest request) {
         HttpSession session = request.getSession(false);
@@ -233,7 +231,7 @@ public class PrivateDoctorAPI {
         if (removed) {
             return ResponseEntity.ok("Service removed successfully");
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok("Service not found");
         }
     }
 

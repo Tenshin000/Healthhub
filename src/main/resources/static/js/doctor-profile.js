@@ -1,5 +1,3 @@
-// script.js
-
 // Event listener for saving address
 const saveAddressButton = document.querySelector('button[data-field="address"]');
 saveAddressButton.addEventListener('click', () => {
@@ -379,6 +377,7 @@ function removeServiceHandler(event) {
     })
         .then(response => {
             if (!response.ok) {
+                console.log('Failed to delete service');
                 throw new Error('Failed to delete service');
             }
             return fetchUpdatedServices();

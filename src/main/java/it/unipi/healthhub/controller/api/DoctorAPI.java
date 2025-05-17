@@ -2,7 +2,6 @@ package it.unipi.healthhub.controller.api;
 
 import it.unipi.healthhub.model.mongo.*;
 import it.unipi.healthhub.dto.*;
-import it.unipi.healthhub.service.AppointmentService;
 import it.unipi.healthhub.service.DoctorService;
 
 import it.unipi.healthhub.util.DateUtil;
@@ -33,10 +32,9 @@ public class DoctorAPI {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private AppointmentService appointmentService;
+
 /*
-    // Metodo per la ricerca dei medici
+    // Method for finding doctors
     @GetMapping("/search")
     public ResponseEntity<List<Doctor>> search(@RequestParam(name = "query", required = false) String query) {
         List<Doctor> doctors = doctorService.searchDoctorsMongo(query);
