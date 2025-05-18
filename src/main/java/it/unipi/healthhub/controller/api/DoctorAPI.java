@@ -137,9 +137,8 @@ public class DoctorAPI {
         boolean hasEndorsed = false;
         if (session != null) {
             String patientId = (String) session.getAttribute("patientId");
-            if (patientId != null) {
+            if(patientId == null)
                 hasEndorsed = userService.hasEndorsed(patientId, doctorId);
-            }
         }
 
         if (endorsements != null) {
@@ -158,10 +157,14 @@ public class DoctorAPI {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         String patientId = (String) session.getAttribute("patientId");
-        doctorService.endorse(doctorId, patientId);
-        Integer endorsementCount = doctorService.getEndorsements(doctorId);
-        EndorsementDTO endorsementDto = new EndorsementDTO(endorsementCount, true);
-        return ResponseEntity.ok(endorsementDto);
+        if(patientId != null){
+            doctorService.endorse(doctorId, patientId);
+            Integer endorsementCount = doctorService.getEndorsements(doctorId);
+            EndorsementDTO endorsementDto = new EndorsementDTO(endorsementCount, true);
+            return ResponseEntity.ok(endorsementDto);
+        }
+        else
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @PostMapping("/{doctorId}/unendorse")
@@ -172,10 +175,14 @@ public class DoctorAPI {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         String patientId = (String) session.getAttribute("patientId");
-        doctorService.unendorse(doctorId, patientId);
-        Integer endorsementCount = doctorService.getEndorsements(doctorId);
-        EndorsementDTO endorsementDto = new EndorsementDTO(endorsementCount, false);
-        return ResponseEntity.ok(endorsementDto);
+        if(patientId != null){
+            doctorService.unendorse(doctorId, patientId);
+            Integer endorsementCount = doctorService.getEndorsements(doctorId);
+            EndorsementDTO endorsementDto = new EndorsementDTO(endorsementCount, false);
+            return ResponseEntity.ok(endorsementDto);
+        }
+        else
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     // Endpoints for reviews

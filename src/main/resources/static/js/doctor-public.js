@@ -54,6 +54,9 @@ document.addEventListener('DOMContentLoaded', function(){
             if(response.status == 401){
                 alert("Login to endorse this doctor!");
             }
+            else if (response.status == 403){
+                alert("A doctor cannot endorse.");
+            }
             else if(!response.ok){
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
