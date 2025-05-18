@@ -137,7 +137,7 @@ public class DoctorAPI {
         boolean hasEndorsed = false;
         if (session != null) {
             String patientId = (String) session.getAttribute("patientId");
-            if(patientId == null)
+            if(patientId != null)
                 hasEndorsed = userService.hasEndorsed(patientId, doctorId);
         }
 
