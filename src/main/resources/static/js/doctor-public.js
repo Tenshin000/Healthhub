@@ -51,10 +51,10 @@ document.addEventListener('DOMContentLoaded', function(){
                 body: JSON.stringify({ endorsed: hasEndorsed })
             });
 
-            if(response.status == 401){
+            if(response.status === 401){
                 alert("Login to endorse this doctor!");
             }
-            else if (response.status == 403){
+            else if (response.status === 403){
                 alert("A doctor cannot endorse.");
             }
             else if(!response.ok){
@@ -125,8 +125,10 @@ document.addEventListener('DOMContentLoaded', function(){
                     reviewList.prepend(newCard);
                     // fetchReviews(doctorId);  // Reload the reviews after adding a new one
                 }
-                else if (response.status === 403)
+                else if (response.status === 401)
                     alert('You cannot leave a review because you have never been visited by this doctor.');
+                else if (response.status === 403)
+                    alert('You cannot leave a review because you are a doctor.');
                 else
                     console.error('Error sending review');
             } catch (error) {
@@ -233,6 +235,11 @@ document.addEventListener('DOMContentLoaded', function(){
             .then(response => {
                 if (response.status === 401) {
                     alert("You must be logged in to book an appointment.");
+                    // throw to skip the next `.then()` and go to `.catch()`, if needed
+                    throw new Error('Unauthorized');
+                }
+                else if (response.status === 403) {
+                    alert("You must be a patient to book an appointment.");
                     // throw to skip the next `.then()` and go to `.catch()`, if needed
                     throw new Error('Unauthorized');
                 }

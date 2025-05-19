@@ -93,9 +93,10 @@ public class DoctorAPI {
             HttpServletRequest request) {
 
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("patientId") == null) {
+        if (session == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // HTTP 401 Unauthorized
-        }
+        else if(session.getAttribute("patientId") == null)
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // HTTP 403 Forbbiden
 
         String patientId = (String) session.getAttribute("patientId");
 
@@ -202,7 +203,15 @@ public class DoctorAPI {
         HttpSession session = request.getSession(false);
         LocalDate currentDate = LocalDate.now();
         review.setDate(currentDate);
+
+        if(session == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
         String patientId = (String) session.getAttribute("patientId");
+
+        if(patientId == null)
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+
         Optional<User> userOpt = userService.getUserById(patientId);
         if(userOpt.isPresent()){
             review.setName(userOpt.get().getName());
@@ -216,7 +225,7 @@ public class DoctorAPI {
                     return ResponseEntity.ok(newReview);
                 }
                 else{
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
                 }
             }
             else{
