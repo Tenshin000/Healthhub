@@ -93,7 +93,6 @@ public class AuthController {
         try {
             String password = HashUtil.hashPassword(user.getPassword());
             user.setPassword(password);
-            user.setAddress(createAddress(request));
             String phone = request.getParameter("phone");
             user.setPersonalNumber(phone);
             controlUser = userService.createUser(user);

@@ -120,8 +120,6 @@ public class DoctorService {
         sanitizeFieldMongo(user::setGender, user::getGender);
         sanitizeFieldMongo(user::setEmail, user::getEmail);
         sanitizeFieldMongo(user::setPersonalNumber, user::getPersonalNumber);
-
-        sanitizeAddress(user.getAddress());
     }
 
     // Sanitize Doctor (including User fields)
