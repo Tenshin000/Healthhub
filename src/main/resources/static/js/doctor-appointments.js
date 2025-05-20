@@ -54,6 +54,12 @@ function renderAppointments(appointments) {
     dayTitle.textContent = 'Appointments for ' + formatDate($('#datepicker').datepicker('getDate'));
     appointmentsContainer.appendChild(dayTitle);
 
+    appointments.sort((a, b) => {
+        const timeA = a.date.split('T')[1].slice(0, 5);
+        const timeB = b.date.split('T')[1].slice(0, 5);
+        return timeA.localeCompare(timeB);
+    });
+
     appointments.forEach(appointment => {
         console.log('DEBUG appointment.patient →', appointment.patient);
         const appointmentElement = createAppointmentElement(appointment);
