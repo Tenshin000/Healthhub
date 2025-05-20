@@ -23,7 +23,7 @@ public class DoctorMongoRepositoryTest {
     @Test
     void testFindSchedulesWithinNext4Weeks(){
         String doctorId = "682c9ea875b57f839e6fb927";
-        List<Date> foundedSchedules = doctorRepository.findSchedulesWithinNext4Weeks(doctorId);
-        System.out.println("Founded schedules in next 4 weeks for doctor " + doctorId + ": " + foundedSchedules.size());
+        List<Date> foundSchedules = doctorRepository.findSchedulesWithinNext4Weeks(doctorId);
+        System.out.println("Found schedules in next 4 weeks for doctor " + doctorId + ": " + foundSchedules.size());
     }
 }
