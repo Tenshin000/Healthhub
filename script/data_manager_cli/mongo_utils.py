@@ -25,6 +25,8 @@ def import_data_to_mongo(host):
             data = json.load(file)
         db["templates"].insert_many(data if isinstance(data, list) else [data])
 
+        print("✅ Templates importati")
+
     # Users
     if "users" not in db.list_collection_names():
         db["users"].drop()
@@ -59,7 +61,7 @@ def import_data_to_mongo(host):
         templates = [tem["_id"] for tem in db["templates"].find()]
 
         for t, doc in enumerate(data):
-            doc["calendarTemplate"] = templates[t]
+            doc["calendarTemplates"] = [templates[t]]
             for rev in doc["reviews"]:
                 rev["patientId"] = users[rev["patientId"]]["_id"]
 

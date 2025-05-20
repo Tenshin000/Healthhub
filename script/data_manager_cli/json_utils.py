@@ -229,10 +229,10 @@ def generate_default_templates(doctors):
                 { 'start': '17:30', 'end': '18:00' }
             ]
         },
-        'active': True,
+        'isDefault': True,
     }
 
-    templates = [default_template for doc in doctors]
+    templates = [default_template for _ in tqdm(doctors, desc="Generating templates")]
     return templates
 
 def generate_user_likes(doctors, appointments):
