@@ -1,6 +1,5 @@
 package it.unipi.healthhub.repository.mongo.doctor;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.client.result.UpdateResult;
 import it.unipi.healthhub.model.mongo.Doctor;
