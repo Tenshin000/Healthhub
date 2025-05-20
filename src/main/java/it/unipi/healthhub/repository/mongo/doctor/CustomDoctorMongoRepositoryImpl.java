@@ -1,22 +1,27 @@
 package it.unipi.healthhub.repository.mongo.doctor;
 
 import com.mongodb.DBObject;
+import com.mongodb.client.result.UpdateResult;
 import it.unipi.healthhub.model.mongo.Doctor;
 import it.unipi.healthhub.projection.DoctorMongoProjection;
 import it.unipi.healthhub.util.DateUtil;
 import org.bson.Document;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 
@@ -173,4 +178,105 @@ public class CustomDoctorMongoRepositoryImpl implements CustomDoctorMongoReposit
 
         return results.getMappedResults();
     }
+
+    @Override
+    public void cleanOldSchedules(Date currentDate) {
+        // Crea una query che prende tutti i dottori
+        Query query = new Query(); // vuota: tutti i documenti
+
+        // Crea l'update che rimuove dall'array "schedules" tutti gli elementi con week < currentDate
+        Update update = new Update().pull("schedules", new Document("week", new Document("$lte", currentDate)));
+
+        // Applica l'update a tutti i documenti
+        mongoTemplate.updateMulti(query, update, Doctor.class);
+    }
+
+    @Override
+    public List<Doctor> findDoctorsMissingSchedulesInNext4Weeks() {
+        LocalDate today = LocalDate.now();
+        LocalDate fromDate = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate toDate = fromDate.plusWeeks(4);
+
+        // Filtro i schedules nel range di 4 settimane
+        AggregationExpression filterSchedules = ArrayOperators.Filter.filter("schedules")
+                .as("schedule")
+                .by(BooleanOperators.And.and(
+                        ComparisonOperators.Gte.valueOf("$$schedule.week").greaterThanEqualToValue(fromDate),
+                        ComparisonOperators.Lte.valueOf("$$schedule.week").lessThanEqualToValue(toDate)
+                ));
+
+        // Correzione per gestire il campo schedules mancante o null
+        Aggregation aggregation = Aggregation.newAggregation(
+                // Aggiungi un campo per gestire schedules null o assente
+                Aggregation.addFields()
+                        .addFieldWithValue("schedules",
+                                new Document("$ifNull", Arrays.asList("$schedules", Collections.emptyList()))
+                        )
+                        .build(),
+                // Proietta le schedule filtrate
+                Aggregation.project()
+                        .and(filterSchedules).as("schedules")
+                        .andExpression("_id").as("doctorId"),
+                // Conta il numero di schedule
+                Aggregation.addFields().addFieldWithValue("scheduleCount", new Document("$size", "$schedules")).build(),
+                // Filtra i dottori con meno di 4 schedule
+                Aggregation.match(Criteria.where("scheduleCount").lt(4)),
+                // Proietta solo l'id del dottore
+                Aggregation.project().and("doctorId").as("_id")
+        );
+
+        AggregationResults<Doctor> results = mongoTemplate.aggregate(aggregation, "doctors", Doctor.class);
+        return results.getMappedResults();
+    }
+
+
+    @Override
+    public List<Date> findSchedulesWithinNext4Weeks(String doctorId) {
+        LocalDate today = LocalDate.now();
+        LocalDate fromDate = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate toDate = fromDate.plusWeeks(4);
+
+        // Crea l'aggregazione per gestire schedules e filtrarle nel range di 4 settimane
+        AggregationExpression filterSchedules = ArrayOperators.Filter.filter("schedules")
+                .as("schedule")
+                .by(BooleanOperators.And.and(
+                        ComparisonOperators.Gte.valueOf("$$schedule.week").greaterThanEqualToValue(fromDate),
+                        ComparisonOperators.Lte.valueOf("$$schedule.week").lessThanEqualToValue(toDate)
+                ));
+
+        // Correzione per gestire il campo schedules mancante o null
+        Aggregation aggregation = Aggregation.newAggregation(
+                // Filtra il dottore specificato
+                Aggregation.match(Criteria.where("_id").is(doctorId)),
+                // Aggiungi un campo per gestire schedules null o assente
+                Aggregation.addFields()
+                        .addFieldWithValue("schedules",
+                                new Document("$ifNull", Arrays.asList("$schedules", Collections.emptyList()))
+                        )
+                        .build(),
+                // Proietta le schedule filtrate
+                Aggregation.project()
+                        .and(filterSchedules).as("schedules"),
+                // Proietta solo le date dalle schedule
+                Aggregation.unwind("schedules"),
+                Aggregation.project()
+                        .and("schedules.week").as("date"),
+                Aggregation.group().push("date").as("dates")
+        );
+
+        AggregationResults<Document> results = mongoTemplate.aggregate(aggregation, "doctors", Document.class);
+
+        // stampa i documenti
+        for (Document doc : results.getMappedResults()) {
+            System.out.println("Document: " + doc.toJson());
+        }
+        // Restituisci i risultati con la lista delle date
+        return results.getMappedResults().stream()
+                .flatMap(doc -> ((List<Date>) doc.get("dates")).stream())
+                .collect(Collectors.toList());
+    }
+
+
+
+
 }

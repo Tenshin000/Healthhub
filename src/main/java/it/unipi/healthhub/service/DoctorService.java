@@ -13,21 +13,23 @@ import it.unipi.healthhub.repository.mongo.TemplateMongoRepository;
 import it.unipi.healthhub.repository.mongo.UserMongoRepository;
 import it.unipi.healthhub.repository.neo4j.DoctorNeo4jRepository;
 import it.unipi.healthhub.repository.neo4j.UserNeo4jRepository;
+import it.unipi.healthhub.util.DateUtil;
 import it.unipi.healthhub.service.AppointmentService;
 import it.unipi.healthhub.util.FakeMailSender;
+import it.unipi.healthhub.util.ScheduleConverter;
+import it.unipi.healthhub.util.TemplateConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.temporal.WeekFields;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
+
 
 @Service
 public class DoctorService {
@@ -574,6 +576,24 @@ public class DoctorService {
         return false;
     }
 
+    public CalendarTemplate getDefaultTemplate(String doctorId) {
+        Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
+        if (doctorOpt.isPresent()) {
+            Doctor doctor = doctorOpt.get();
+            List<String> templateIds = doctor.getCalendarTemplates();
+            for (String id : templateIds) {
+                Optional<CalendarTemplate> templateOpt = templateRepository.findById(id);
+                if (templateOpt.isPresent()) {
+                    CalendarTemplate template = templateOpt.get();
+                    if (template.isDefault()) {
+                        return template;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     public Pair<Schedule, Integer> getSchedule(String doctorId, Integer year, Integer week) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         if(doctorOpt.isPresent()){
@@ -907,5 +927,64 @@ public class DoctorService {
     public Integer getAnalyticsNewPatientsByMonth(String doctorId, int year, int month){
         // Returns the count of patients who were visited for the first time in the month and year indicated
         return appointmentRepository.findNewPatientsVisitedByDoctorInCurrentMonth(doctorId, year, month);
+    }
+
+    public void cleanOldSchedules(LocalDate date) {
+        Date currentDate = DateUtil.convertToDate(date);
+        doctorMongoRepository.cleanOldSchedules(currentDate);
+    }
+
+    public void cleanOldSchedules() {
+        LocalDate currentDate = LocalDate.now();
+        cleanOldSchedules(currentDate);
+    }
+
+    public void setupNewSchedules() {
+        List<Doctor> doctors = doctorMongoRepository.findDoctorsMissingSchedulesInNext4Weeks();
+        LocalDate start = LocalDate.now();
+        List<LocalDate> allMondays = DateUtil.getNext4Mondays(start);
+
+        long startTime = System.nanoTime(); // Tempo iniziale
+        long lastLogTime = startTime;
+        int found = doctors.size();
+        System.out.println("Found " + found + " doctors with missing schedules.");
+        int processed = 0;
+        for (Doctor doctor : doctors) {
+            setupDoctorSchedules(doctor, allMondays);
+            processed++;
+            if (processed % 100 == 0 || processed == found) {
+                long now = System.nanoTime();
+                long totalElapsedMs = (now - startTime) / 1_000_000;
+                long intervalElapsedMs = (now - lastLogTime) / 1_000_000;
+                int percent = (int) ((processed / (double) found) * 100);
+                System.out.println("Processed " + processed + " doctors. [" + percent + "%] - Elapsed: " + totalElapsedMs + " ms (+" + intervalElapsedMs + " ms)");
+                lastLogTime = now;
+            }
+        }
+
+        long endTime = System.nanoTime();
+        long durationMs = (endTime - startTime) / 1_000_000;
+        System.out.println("setupNewSchedules completed in " + durationMs + " ms.");
+    }
+
+    private void setupDoctorSchedules(Doctor doctor, List<LocalDate> allMondays) {
+        CalendarTemplate defaultTemplate = getDefaultTemplate(doctor.getId());
+        if (defaultTemplate == null) {
+            throw new IllegalStateException("Default template not found for doctor with ID: " + doctor.getId());
+        }
+        List<Date> foundSchedules = doctorMongoRepository.findSchedulesWithinNext4Weeks(doctor.getId());
+
+        Set<LocalDate> foundDates = foundSchedules.stream()
+                .map(DateUtil::convertToLocalDate)
+                .collect(Collectors.toSet());
+
+        List<LocalDate> missingMondays = allMondays.stream()
+                .filter(d -> !foundDates.contains(d))
+                .toList();
+
+        for (LocalDate monday : missingMondays) {
+            Schedule schedule = ScheduleConverter.buildScheduleForMonday(monday, defaultTemplate);
+            addSchedule(doctor.getId(), schedule);
+        }
     }
 }

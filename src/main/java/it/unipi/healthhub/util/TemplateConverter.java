@@ -1,5 +1,6 @@
 package it.unipi.healthhub.util;
 
+import it.unipi.healthhub.model.mongo.PrenotableSlot;
 import it.unipi.healthhub.model.mongo.Slot;
 import it.unipi.healthhub.dto.TemplateDTO;
 
@@ -24,6 +25,16 @@ public class TemplateConverter {
                         Map.Entry::getKey,
                         entry -> entry.getValue().stream()
                                 .map(modelSlot -> new TemplateDTO.SlotDTO(modelSlot.getStart(), modelSlot.getEnd()))
+                                .collect(Collectors.toList())
+                ));
+    }
+
+    public static Map<String, List<PrenotableSlot>> convertToModelPrenotableSlots(Map<String, List<Slot>> modelSlots) {
+        return modelSlots.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().stream()
+                                .map(modelSlot -> new PrenotableSlot(modelSlot.getStart(), modelSlot.getEnd(), false))
                                 .collect(Collectors.toList())
                 ));
     }
