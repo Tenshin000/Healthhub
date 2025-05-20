@@ -5,11 +5,10 @@ public class ServiceDTO {
     private Double price;
     private Integer index;
 
-    // Costruttore vuoto necessario per la deserializzazione JSON
-    public ServiceDTO() {
-    }
+    // Empty constructor needed for JSON deserialization
+    public ServiceDTO() {}
 
-    // Costruttore con parametri
+    // Constructor with parameters
     public ServiceDTO(String service, Double price, Integer index) {
         this.service = service;
         this.price = price;

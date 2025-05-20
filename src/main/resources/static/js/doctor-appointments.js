@@ -1,6 +1,10 @@
 let distributionChart = null;
 
 $(document).ready(() => {
+    const modalOverlay = document.getElementById('user-modal-overlay');
+    const modalCloseBtn = modalOverlay.querySelector('.modal-close');
+    const modalContent  = modalOverlay.querySelector('.modal-content');
+
     // Initialization of the datepicker with jQuery UI
     $("#datepicker").datepicker({
         firstDay: 1,
@@ -51,6 +55,7 @@ function renderAppointments(appointments) {
     appointmentsContainer.appendChild(dayTitle);
 
     appointments.forEach(appointment => {
+        console.log('DEBUG appointment.patient →', appointment.patient);
         const appointmentElement = createAppointmentElement(appointment);
         appointmentsContainer.appendChild(appointmentElement);
     });
@@ -89,6 +94,11 @@ function createAppointmentElement(appointment) {
 
     const viewButton = document.createElement('button');
     viewButton.textContent = 'View';
+    viewButton.setAttribute('data-email', appointment.patient.email);
+    viewButton.addEventListener('click', () => {
+        const userEmail = viewButton.dataset.email;
+        showUserDetails(userEmail);
+    });
 
     const deleteButton = document.createElement('button');
     deleteButton.onclick = () => deleteAppointment(appointment.id);
@@ -198,3 +208,106 @@ function renderAppointmentsAnalytics(appointmentDistribution) {
         distributionChart = new Chart(ctx, appDistrChartData);
     }
 }
+
+function createAppointmentElement(appointment) {
+    const div = document.createElement('div');
+    div.className = 'appointment';
+
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'appointment-header';
+
+    const detailsDiv = document.createElement('div');
+
+    const h3 = document.createElement('h3');
+    h3.textContent = appointment.patient.name;
+
+    const emailEl = document.createElement('p');
+    const emailId = `email-${appointment.id}`;
+    emailEl.id = emailId;
+    emailEl.textContent = appointment.patient.email;
+    emailEl.className = 'hidden';
+
+    const pType = document.createElement('p');
+    pType.textContent = appointment.visitType;
+
+    const pTime = document.createElement('p');
+    pTime.textContent = appointment.date.split('T')[1].slice(0, 5);
+
+    detailsDiv.appendChild(h3);
+    detailsDiv.appendChild(emailEl);
+    detailsDiv.appendChild(pType);
+
+    headerDiv.appendChild(detailsDiv);
+    headerDiv.appendChild(pTime);
+
+    const notesP = document.createElement('p');
+    notesP.className = 'appointment-notes';
+    notesP.textContent = `Notes: ${appointment.patientNotes}`;
+
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'appointment-actions';
+
+    const viewButton = document.createElement('button');
+    viewButton.dataset.email = appointment.patient.email || '';
+    viewButton.textContent = 'View';
+    viewButton.onclick = () => {
+        const userEmail = viewButton.dataset.email;
+        console.log('DEBUG: viewBtn.dataset.email =', userEmail);
+        showUserDetails(userEmail);
+    };
+
+    const deleteButton = document.createElement('button');
+    deleteButton.onclick = () => deleteAppointment(appointment.id);
+    deleteButton.textContent = 'Delete';
+
+    actionsDiv.appendChild(viewButton);
+    actionsDiv.appendChild(deleteButton);
+
+    div.appendChild(headerDiv);
+    div.appendChild(notesP);
+    div.appendChild(actionsDiv);
+
+    return div;
+}
+
+
+// Function for fetch + rendering the modal
+async function showUserDetails(email) {
+    try {
+        console.log(email);
+        const response = await fetch(
+            `/api/user/details/view?email=${encodeURIComponent(email)}`
+        );
+        if (!response.ok)
+            throw new Error(response.statusText);
+
+        const userDetails = await response.json();
+
+        // Popola il modal
+        const body = document.querySelector('#user-modal-overlay .modal-body');
+        body.innerHTML = `
+            <h3>${userDetails.name}</h3>
+            <p><strong>Fiscal Code:</strong> ${userDetails.fiscalCode}</p>
+            <p><strong>Birthdate:</strong> ${userDetails.birthDate || 'N/D'}</p>
+            <p><strong>Gender:</strong> ${userDetails.gender}</p>
+            <p><strong>Email:</strong> ${userDetails.email}</p>
+            <p><strong>Personal Phone:</strong> ${userDetails.phoneNumber || 'N/A'}</p>
+        `;
+
+        // Show overlay
+        document.getElementById('user-modal-overlay').classList.remove('hidden');
+    } catch (err) {
+        console.error('Errore nel fetch dei dettagli utente:', err);
+        alert('Impossibile caricare i dettagli utente.');
+    }
+}
+
+// Close modal
+document.addEventListener('DOMContentLoaded', () => {
+    const overlay = document.getElementById('user-modal-overlay');
+    const closeBtn = overlay.querySelector('.modal-close');
+
+    closeBtn.onclick = () => {
+        overlay.classList.add('hidden');
+    };
+});

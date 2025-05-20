@@ -1,3 +1,4 @@
+
 package it.unipi.healthhub.dto;
 
 import java.time.LocalDate;
@@ -8,8 +9,7 @@ public class UserDetailsDTO {
     private LocalDate birthDate;
     private String gender;
 
-    // Constructors, getters and setters
-
+    // Constructors
     public UserDetailsDTO() {
     }
 
@@ -20,7 +20,7 @@ public class UserDetailsDTO {
         this.gender = gender;
     }
 
-    // Getter e Setter
+    // Getters and Setters
     public String getFullName() {
         return fullName;
     }
@@ -48,4 +48,3 @@ public class UserDetailsDTO {
         this.gender = gender;
     }
 }
-

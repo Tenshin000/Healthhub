@@ -113,7 +113,7 @@ header {
 }
 
 .template-item.default-template {
-    border: 2px solid #0056b3; /* Bordo per il template predefinito */
+    border: 2px solid #0056b3; /* Border for default template */
 }
 
 .template-item:hover {

@@ -7,7 +7,7 @@ body {
     background-color: #f4f4f4;
 }
 
-/*HEADER*/
+/*BEGIN HEADER*/
 
 
 header {
@@ -50,7 +50,7 @@ header {
     text-decoration: underline;
 }
 
-/*FINE HEADER*/
+/*END HEADER*/
 
 main {
     display: flex;

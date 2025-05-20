@@ -3,10 +3,13 @@ package it.unipi.healthhub.controller.api;
 import it.unipi.healthhub.dto.PasswordChangeDTO;
 import it.unipi.healthhub.dto.PatientContactsDTO;
 import it.unipi.healthhub.dto.UserDetailsDTO;
+import it.unipi.healthhub.model.mongo.User;
 import it.unipi.healthhub.service.UserService;
+import it.unipi.healthhub.util.HashUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,6 +35,36 @@ public class PrivateUserAPI {
         HttpSession session = request.getSession(false);
         String patientId = (String) session.getAttribute("patientId");
         return ResponseEntity.ok(userService.updateUserDetails(patientId, userDetails));
+    }
+
+    @GetMapping("/details/view")
+    public ResponseEntity<PatientContactsDTO> getView(@RequestParam String email) {
+        if(email == null || email.isBlank()) {
+            return ResponseEntity
+                    .badRequest()
+                    .build();
+        }
+
+        // Retrieve user from service
+        User user = userService.findByEmail(email);
+        if(user == null){
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .build();
+        }
+
+        // Map User entity to PatientContactsDTO
+        PatientContactsDTO dto = new PatientContactsDTO();
+        dto.setName(user.getName());
+        dto.setFiscalCode(user.getFiscalCode());
+        dto.setBirthDate(user.getDob());
+        dto.setGender(user.getGender());
+        dto.setPhoneNumber(user.getPersonalNumber());
+        dto.setEmail(user.getEmail());
+
+        // Returns 200 OK with DTO
+        return ResponseEntity
+                .ok(dto);
     }
 
     @GetMapping("/contacts")
@@ -82,6 +115,8 @@ public class PrivateUserAPI {
     public ResponseEntity<Void> changePassword(HttpServletRequest request, @RequestBody PasswordChangeDTO passwords){
         HttpSession session = request.getSession(false);
         String patientId = (String) session.getAttribute("patientId");
+        passwords.setCurrentPassword(HashUtil.hashPassword(passwords.getCurrentPassword()));
+        passwords.setNewPassword(HashUtil.hashPassword(passwords.getNewPassword()));
 
         boolean ok = userService.changePassword(patientId, passwords.getCurrentPassword(), passwords.getNewPassword());
         if(ok){

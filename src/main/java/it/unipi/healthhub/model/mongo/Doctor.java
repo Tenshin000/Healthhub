@@ -16,6 +16,7 @@ public class Doctor extends User {
     private List<String> calendarTemplates;
     private List<String> specializations;
     private List<String> phoneNumbers;
+    private Address address;
 
     public Doctor() {
         super();
@@ -82,6 +83,13 @@ public class Doctor extends User {
     }
     public void setPhoneNumbers(List<String> phoneNumbers) {
         this.phoneNumbers = phoneNumbers;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+    public void setAddress(Address address) {
+        this.address = address;
     }
 
     public String getId(){

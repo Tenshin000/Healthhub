@@ -35,6 +35,4 @@ public class Review {
     public void setPatientId(String patientId) {
         this.patientId = patientId;
     }
-
-
 }

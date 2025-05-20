@@ -7,18 +7,18 @@ public class ReviewDTO {
     private String text;
     private LocalDate date;
 
-    // Costruttore vuoto richiesto da alcuni framework di serializzazione
+    // Empty constructor required by some serialization frameworks
     public ReviewDTO() {
     }
 
-    // Costruttore per inizializzare dalla classe Review
+    // Constructor to initialize from the Review class
     public ReviewDTO(String name, String text, LocalDate date) {
         this.name = name;
         this.text = text;
         this.date = date;
     }
 
-    // Metodi getter e setter
+    // Getters and setters
     public String getName() {
         return name;
     }

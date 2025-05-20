@@ -1,5 +1,3 @@
-// script.js
-
 // Event listener for saving address
 const saveAddressButton = document.querySelector('button[data-field="address"]');
 saveAddressButton.addEventListener('click', () => {
@@ -43,6 +41,7 @@ savePersonalInfoButton.addEventListener('click', () => {
     const fullName = document.getElementById('full-name').value.trim();
     const orderRegistrationNumber = document.getElementById('orderRegistrationNumber').value.trim();
     const fiscalCode = document.getElementById('fiscalCode').value.trim();
+    const email = document.getElementById('email').value.trim();
     const birthDate = document.getElementById('birthdate').value.trim();
     const gender = document.getElementById('gender').value;
 
@@ -50,6 +49,7 @@ savePersonalInfoButton.addEventListener('click', () => {
         fullName: fullName,
         orderRegistrationNumber: orderRegistrationNumber,
         fiscalCode: fiscalCode,
+        email: email,
         birthDate: birthDate,
         gender: gender
     };
@@ -377,6 +377,7 @@ function removeServiceHandler(event) {
     })
         .then(response => {
             if (!response.ok) {
+                console.log('Failed to delete service');
                 throw new Error('Failed to delete service');
             }
             return fetchUpdatedServices();

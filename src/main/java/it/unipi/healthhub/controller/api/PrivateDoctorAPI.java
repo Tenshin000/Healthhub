@@ -5,6 +5,7 @@ import it.unipi.healthhub.model.mongo.*;
 import it.unipi.healthhub.dto.*;
 import it.unipi.healthhub.service.AppointmentService;
 import it.unipi.healthhub.service.DoctorService;
+import it.unipi.healthhub.util.HashUtil;
 import it.unipi.healthhub.util.ScheduleConverter;
 import it.unipi.healthhub.util.TemplateConverter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -205,8 +206,6 @@ public class PrivateDoctorAPI {
         }
     }
 
-
-
     @PutMapping("/services/{index}")
     public ResponseEntity<String> updateVisitType(@PathVariable Integer index, @RequestBody ServiceDTO serviceDto, HttpServletRequest request) {
         HttpSession session = request.getSession(false);
@@ -232,7 +231,7 @@ public class PrivateDoctorAPI {
         if (removed) {
             return ResponseEntity.ok("Service removed successfully");
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok("Service not found");
         }
     }
 
@@ -419,6 +418,8 @@ public class PrivateDoctorAPI {
     public ResponseEntity<Void> changePassword(HttpServletRequest request, @RequestBody PasswordChangeDTO passwords) {
         HttpSession session = request.getSession(false);
         String doctorId = (String) session.getAttribute("doctorId");
+        passwords.setCurrentPassword(HashUtil.hashPassword(passwords.getCurrentPassword()));
+        passwords.setNewPassword(HashUtil.hashPassword(passwords.getNewPassword()));
 
         boolean ok = doctorService.changePassword(doctorId, passwords.getCurrentPassword(), passwords.getNewPassword());
         if (ok) {

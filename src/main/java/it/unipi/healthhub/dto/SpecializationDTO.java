@@ -5,7 +5,7 @@ public class SpecializationDTO {
     private Integer index;
 
     public SpecializationDTO() {
-        // Costruttore vuoto necessario per la deserializzazione JSON
+        // Empty constructor needed for JSON deserialization
     }
 
     public SpecializationDTO(String specialization, Integer index) {

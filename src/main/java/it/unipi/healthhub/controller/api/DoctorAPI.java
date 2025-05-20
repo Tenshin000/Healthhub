@@ -2,7 +2,6 @@ package it.unipi.healthhub.controller.api;
 
 import it.unipi.healthhub.model.mongo.*;
 import it.unipi.healthhub.dto.*;
-import it.unipi.healthhub.service.AppointmentService;
 import it.unipi.healthhub.service.DoctorService;
 
 import it.unipi.healthhub.util.DateUtil;
@@ -33,10 +32,9 @@ public class DoctorAPI {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private AppointmentService appointmentService;
+
 /*
-    // Metodo per la ricerca dei medici
+    // Method for finding doctors
     @GetMapping("/search")
     public ResponseEntity<List<Doctor>> search(@RequestParam(name = "query", required = false) String query) {
         List<Doctor> doctors = doctorService.searchDoctorsMongo(query);
@@ -95,9 +93,10 @@ public class DoctorAPI {
             HttpServletRequest request) {
 
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("patientId") == null) {
+        if (session == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // HTTP 401 Unauthorized
-        }
+        else if(session.getAttribute("patientId") == null)
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // HTTP 403 Forbbiden
 
         String patientId = (String) session.getAttribute("patientId");
 
@@ -139,9 +138,8 @@ public class DoctorAPI {
         boolean hasEndorsed = false;
         if (session != null) {
             String patientId = (String) session.getAttribute("patientId");
-            if (patientId != null) {
+            if(patientId != null)
                 hasEndorsed = userService.hasEndorsed(patientId, doctorId);
-            }
         }
 
         if (endorsements != null) {
@@ -160,10 +158,14 @@ public class DoctorAPI {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         String patientId = (String) session.getAttribute("patientId");
-        doctorService.endorse(doctorId, patientId);
-        Integer endorsementCount = doctorService.getEndorsements(doctorId);
-        EndorsementDTO endorsementDto = new EndorsementDTO(endorsementCount, true);
-        return ResponseEntity.ok(endorsementDto);
+        if(patientId != null){
+            doctorService.endorse(doctorId, patientId);
+            Integer endorsementCount = doctorService.getEndorsements(doctorId);
+            EndorsementDTO endorsementDto = new EndorsementDTO(endorsementCount, true);
+            return ResponseEntity.ok(endorsementDto);
+        }
+        else
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @PostMapping("/{doctorId}/unendorse")
@@ -174,10 +176,14 @@ public class DoctorAPI {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         String patientId = (String) session.getAttribute("patientId");
-        doctorService.unendorse(doctorId, patientId);
-        Integer endorsementCount = doctorService.getEndorsements(doctorId);
-        EndorsementDTO endorsementDto = new EndorsementDTO(endorsementCount, false);
-        return ResponseEntity.ok(endorsementDto);
+        if(patientId != null){
+            doctorService.unendorse(doctorId, patientId);
+            Integer endorsementCount = doctorService.getEndorsements(doctorId);
+            EndorsementDTO endorsementDto = new EndorsementDTO(endorsementCount, false);
+            return ResponseEntity.ok(endorsementDto);
+        }
+        else
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     // Endpoints for reviews
@@ -197,7 +203,15 @@ public class DoctorAPI {
         HttpSession session = request.getSession(false);
         LocalDate currentDate = LocalDate.now();
         review.setDate(currentDate);
+
+        if(session == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
         String patientId = (String) session.getAttribute("patientId");
+
+        if(patientId == null)
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+
         Optional<User> userOpt = userService.getUserById(patientId);
         if(userOpt.isPresent()){
             review.setName(userOpt.get().getName());
@@ -211,7 +225,7 @@ public class DoctorAPI {
                     return ResponseEntity.ok(newReview);
                 }
                 else{
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
                 }
             }
             else{

@@ -33,7 +33,7 @@ def generate_user(username):
     return {
         "fiscalCode": fiscal_code,
         "name": name,
-        "password": PASSWORD,
+        "password": PASSWORD_HASH,
         "dob": dob.strftime('%Y-%m-%d'),
         "gender": gender,
         "personalNumber": phone_numbers,
@@ -102,7 +102,7 @@ def refactor_doctor(doctor, usermap):
         "name": doctor["name"],
         "email": email,
         "username": doctor["name"].lower().replace(" ", "_"),
-        "password": PASSWORD,
+        "password": PASSWORD_HASH,
         "address": doctor["address"],
         "phoneNumbers": doctor["phone_numbers"],
         "specializations": doctor["specializations"],
