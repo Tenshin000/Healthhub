@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.List;
 import java.util.Map;
 
-@Document(collection = "template")
+@Document(collection = "templates")
 public class CalendarTemplate {
     @Id
     private String id;

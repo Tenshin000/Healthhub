@@ -765,12 +765,29 @@ public class DoctorService {
     public void setupNewSchedules() {
         List<Doctor> doctors = doctorMongoRepository.findDoctorsMissingSchedulesInNext4Weeks();
         LocalDate start = LocalDate.now();
-        LocalDate end = start.plusWeeks(4);
-        List<LocalDate> allMondays = DateUtil.getAllMondays(start, end);
+        List<LocalDate> allMondays = DateUtil.getNext4Mondays(start);
 
+        long startTime = System.nanoTime(); // Tempo iniziale
+        long lastLogTime = startTime;
+        int found = doctors.size();
+        System.out.println("Found " + found + " doctors with missing schedules.");
+        int processed = 0;
         for (Doctor doctor : doctors) {
             setupDoctorSchedules(doctor, allMondays);
+            processed++;
+            if (processed % 100 == 0 || processed == found) {
+                long now = System.nanoTime();
+                long totalElapsedMs = (now - startTime) / 1_000_000;
+                long intervalElapsedMs = (now - lastLogTime) / 1_000_000;
+                int percent = (int) ((processed / (double) found) * 100);
+                System.out.println("Processed " + processed + " doctors. [" + percent + "%] - Elapsed: " + totalElapsedMs + " ms (+" + intervalElapsedMs + " ms)");
+                lastLogTime = now;
+            }
         }
+
+        long endTime = System.nanoTime();
+        long durationMs = (endTime - startTime) / 1_000_000;
+        System.out.println("setupNewSchedules completed in " + durationMs + " ms.");
     }
 
     private void setupDoctorSchedules(Doctor doctor, List<LocalDate> allMondays) {
