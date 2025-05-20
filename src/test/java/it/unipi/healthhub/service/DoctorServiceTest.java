@@ -89,9 +89,6 @@ public class DoctorServiceTest {
         List<LocalDate> allMondays = DateUtil.getNext4Mondays(LocalDate.now());
         List<Date> foundSchedules = doctorRepository.findSchedulesWithinNext4Weeks("682c9ea875b57f839e6fb927");
 
-        foundSchedules.remove(2);
-        foundSchedules.remove(2);
-
         Set<LocalDate> foundDates = foundSchedules.stream()
                 .map(DateUtil::convertToLocalDate)
                 .collect(Collectors.toSet());
@@ -113,5 +110,13 @@ public class DoctorServiceTest {
     @Test
     void testSetupNewSchedules(){
         doctorService.setupNewSchedules();
+    }
+
+    @Test
+    void testCleanOldSchedules(){
+        // Get next 4 Mondays, then acceess the 2nd
+        List<LocalDate> allMondays = DateUtil.getNext4Mondays(LocalDate.now());
+        LocalDate targetMonday = allMondays.get(3);
+        doctorService.cleanOldSchedules(targetMonday);
     }
 }

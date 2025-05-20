@@ -43,4 +43,8 @@ public class DateUtil {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
     }
+
+    public static Date convertToDate(LocalDate localDate) {
+        return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    }
 }

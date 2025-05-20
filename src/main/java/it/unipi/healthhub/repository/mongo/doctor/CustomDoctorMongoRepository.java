@@ -12,7 +12,7 @@ public interface CustomDoctorMongoRepository {
     void bookScheduleSlot(String doctorId, Integer year, Integer week, String keyDay, String slotStart);
     void freeScheduleSlot(String doctorId, Integer year, Integer week, String keyDay, String slotStart);
     public List<DoctorMongoProjection> searchDoctors(String text);
-    void cleanOldSchedules();
+    void cleanOldSchedules(Date currentDate);
     List<Doctor> findDoctorsMissingSchedulesInNext4Weeks();
     List<Date> findSchedulesWithinNext4Weeks(String doctorId);
 }

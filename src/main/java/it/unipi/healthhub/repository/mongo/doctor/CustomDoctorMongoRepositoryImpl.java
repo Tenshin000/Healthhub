@@ -181,15 +181,12 @@ public class CustomDoctorMongoRepositoryImpl implements CustomDoctorMongoReposit
     }
 
     @Override
-    public void cleanOldSchedules() {
-        // Ottieni la data corrente e la tronchi all'inizio della giornata
-        Date currentDate = new Date();
-
+    public void cleanOldSchedules(Date currentDate) {
         // Crea una query che prende tutti i dottori
         Query query = new Query(); // vuota: tutti i documenti
 
         // Crea l'update che rimuove dall'array "schedules" tutti gli elementi con week < currentDate
-        Update update = new Update().pull("schedules", new Document("week", new Document("$lt", currentDate)));
+        Update update = new Update().pull("schedules", new Document("week", new Document("$lte", currentDate)));
 
         // Applica l'update a tutti i documenti
         mongoTemplate.updateMulti(query, update, Doctor.class);

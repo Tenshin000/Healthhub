@@ -758,8 +758,14 @@ public class DoctorService {
         return appointmentRepository.findNewPatientsVisitedByDoctorInCurrentMonth(doctorId, year, month);
     }
 
-    public void cleanOldSchedules(){
-        doctorMongoRepository.cleanOldSchedules();
+    public void cleanOldSchedules(LocalDate date) {
+        Date currentDate = DateUtil.convertToDate(date);
+        doctorMongoRepository.cleanOldSchedules(currentDate);
+    }
+
+    public void cleanOldSchedules() {
+        LocalDate currentDate = LocalDate.now();
+        cleanOldSchedules(currentDate);
     }
 
     public void setupNewSchedules() {
