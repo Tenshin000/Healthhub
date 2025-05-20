@@ -969,6 +969,9 @@ public class DoctorService {
 
     private void setupDoctorSchedules(Doctor doctor, List<LocalDate> allMondays) {
         CalendarTemplate defaultTemplate = getDefaultTemplate(doctor.getId());
+        if (defaultTemplate == null) {
+            throw new IllegalStateException("Default template not found for doctor with ID: " + doctor.getId());
+        }
         List<Date> foundSchedules = doctorMongoRepository.findSchedulesWithinNext4Weeks(doctor.getId());
 
         Set<LocalDate> foundDates = foundSchedules.stream()
