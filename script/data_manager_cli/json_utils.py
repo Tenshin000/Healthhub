@@ -193,6 +193,48 @@ def generate_appointments(doctors, users):
                 appointments.append(generate_appointment(doctor, user, review["date"], service[0], service[1], ""))
     return appointments
 
+
+def generate_default_templates(doctors):
+    default_template = {
+        'name': 'Standard',
+        'slots': {
+            'monday': [
+                { 'start': '08:30', 'end': '09:00' },
+                { 'start': '09:00', 'end': '09:30' },
+                { 'start': '09:30', 'end': '10:00' },
+                { 'start': '10:00', 'end': '10:30' },
+                { 'start': '10:30', 'end': '11:00' },
+                { 'start': '11:00', 'end': '11:30' },
+                { 'start': '11:30', 'end': '12:00' },
+                { 'start': '12:00', 'end': '12:30' }
+            ],
+            'wednesday': [
+                { 'start': '14:30', 'end': '15:00' },
+                { 'start': '15:00', 'end': '15:30' },
+                { 'start': '15:30', 'end': '16:00' },
+                { 'start': '16:00', 'end': '16:30' },
+                { 'start': '16:30', 'end': '17:00' },
+                { 'start': '17:00', 'end': '17:30' },
+                { 'start': '17:30', 'end': '18:00' },
+                { 'start': '18:00', 'end': '18:30' }
+            ],
+            'friday': [
+                { 'start': '10:00', 'end': '10:30' },
+                { 'start': '10:30', 'end': '11:00' },
+                { 'start': '11:00', 'end': '11:30' },
+                { 'start': '11:30', 'end': '12:00' },
+                { 'start': '16:00', 'end': '16:30' },
+                { 'start': '16:30', 'end': '17:00' },
+                { 'start': '17:00', 'end': '17:30' },
+                { 'start': '17:30', 'end': '18:00' }
+            ]
+        },
+        'isDefault': True,
+    }
+
+    templates = [default_template for _ in tqdm(doctors, desc="Generating templates")]
+    return templates
+
 def generate_user_likes(doctors, appointments):
     user_review_counts = defaultdict(int)
     doctor_province = {}
@@ -252,11 +294,13 @@ def generate_all_json(datasource):
         data = json.load(f)
     users = generate_users(data)
     doctors = generate_doctors(data, users)
+    templates = generate_default_templates(doctors)
     appointments = generate_appointments(doctors, users)
     user_likes = generate_user_likes(doctors, appointments)
     update_endorseCount(doctors, user_likes)
     
     save(users, os.path.join(JSON_DIR, "users.json"))
     save(doctors, os.path.join(JSON_DIR, "doctors.json"))
+    save(templates, os.path.join(JSON_DIR, "templates.json"))
     save(appointments, os.path.join(JSON_DIR, "appointments.json"))
     save(user_likes, os.path.join(JSON_DIR, "user_likes.json"))
