@@ -284,7 +284,7 @@ public class CustomDoctorMongoRepositoryImpl implements CustomDoctorMongoReposit
 
         // Crea un update per modificare il nome del paziente nella review
         Update update = new Update()
-                .set("reviews.$[review].patientName", patientName)
+                .set("reviews.$[review].name", patientName)
                 .filterArray(Criteria.where("review.patientId").is(patientId));
 
         // Esegui l'update

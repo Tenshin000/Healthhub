@@ -1,15 +1,11 @@
 package it.unipi.healthhub.repository.neo4j;
 
 import it.unipi.healthhub.repository.neo4j.user.CustomUserNeo4jRepository;
-import it.unipi.healthhub.model.neo4j.DoctorDAO;
 import it.unipi.healthhub.model.neo4j.UserDAO;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.List;
 
 @Repository
 public interface UserNeo4jRepository extends Neo4jRepository<UserDAO, String>, CustomUserNeo4jRepository{
@@ -34,9 +30,5 @@ public interface UserNeo4jRepository extends Neo4jRepository<UserDAO, String>, C
     @Query("MATCH (u:User {id: $userId}) " +
             "SET u.name = $name " +
             "RETURN u")
-    UserDAO updateName(@Param("userId") String patientId, @Param("name") String fullName);
-
-    @Query("MATCH (u:User {id: $userId}) " +
-            "RETURN u")
-    UserDAO findUserById(@Param("userId") String userId);
+    void updateName(@Param("userId") String patientId, @Param("name") String fullName);
 }

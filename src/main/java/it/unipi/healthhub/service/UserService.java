@@ -16,6 +16,7 @@ import it.unipi.healthhub.repository.mongo.DoctorMongoRepository;
 import it.unipi.healthhub.repository.mongo.UserMongoRepository;
 import it.unipi.healthhub.repository.neo4j.UserNeo4jRepository;
 import it.unipi.healthhub.util.FakeMailSender;
+import org.neo4j.cypherdsl.core.Use;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -203,7 +204,6 @@ public class UserService {
         Optional<UserDAO> userOpt = userNeo4jRepository.findById(patientId);
         if (userOpt.isPresent()) {
             UserDAO user = userOpt.get();
-
             user.getReviewedDoctors()
                     .forEach(doctor -> doctorMongoRepository.updateReviewName(doctor.getId(), patientId, patientName));
         }

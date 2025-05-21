@@ -18,6 +18,7 @@ public class EventListener implements ApplicationListener<UserNameUpdateEvent> {
     public void onApplicationEvent(UserNameUpdateEvent event) {
         String userId = event.getUserId();
         String newName = event.getNewName();
+        System.out.println("Event received event at " + System.currentTimeMillis() + ": " + event);
         userService.updateNameEverywhere(userId, newName);
     }
 
