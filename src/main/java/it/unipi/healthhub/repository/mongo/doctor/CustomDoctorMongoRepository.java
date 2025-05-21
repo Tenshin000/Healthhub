@@ -15,4 +15,5 @@ public interface CustomDoctorMongoRepository {
     void cleanOldSchedules(Date currentDate);
     List<Doctor> findDoctorsMissingSchedulesInNext4Weeks();
     List<Date> findSchedulesWithinNext4Weeks(String doctorId);
+    void updateReviewName(String id, String patientId, String patientName);
 }

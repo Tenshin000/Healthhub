@@ -16,5 +16,6 @@ public interface CustomAppointmentMongoRepository {
     List<Appointment> findByPatientIdBeforeDate(String patientId, LocalDate date);
     Integer findNewPatientsVisitedByDoctorInCurrentMonth(String doctorId, Integer year, Integer month);
     List<Appointment> findByDoctorIdAndWeek(String doctorId, Integer week, Integer year);
-    public boolean hasPastAppointment(String doctorId, String patientId);
+    boolean hasPastAppointment(String doctorId, String patientId);
+    void updatePatientName(String id, String patientName);
 }
