@@ -277,6 +277,17 @@ public class CustomDoctorMongoRepositoryImpl implements CustomDoctorMongoReposit
     }
 
 
+    @Override
+    public void updateReviewName(String id, String patientId, String patientName) {
+        // Crea una query per trovare il dottore con l'id specificato
+        Query query = new Query(Criteria.where("_id").is(id));
 
+        // Crea un update per modificare il nome del paziente nella review
+        Update update = new Update()
+                .set("reviews.$[review].patientName", patientName)
+                .filterArray(Criteria.where("review.patientId").is(patientId));
 
+        // Esegui l'update
+        UpdateResult result = mongoTemplate.updateMulti(query, update, Doctor.class);
+    }
 }

@@ -35,4 +35,8 @@ public interface UserNeo4jRepository extends Neo4jRepository<UserDAO, String>, C
             "SET u.name = $name " +
             "RETURN u")
     UserDAO updateName(@Param("userId") String patientId, @Param("name") String fullName);
+
+    @Query("MATCH (u:User {id: $userId}) " +
+            "RETURN u")
+    UserDAO findUserById(@Param("userId") String userId);
 }

@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 
 import java.text.DateFormatSymbols;
 import java.time.LocalDate;
@@ -220,5 +221,12 @@ public class CustomAppointmentMongoRepositoryImpl implements CustomAppointmentMo
         );
         // Is there at least one document that satisfies?
         return mongoTemplate.exists(q, Appointment.class);
+    }
+
+    @Override
+    public void updatePatientName(String appointmentId, String newName) {
+        Query query = new Query(Criteria.where("_id").is(appointmentId));
+        Update update = new Update().set("patient.name", newName);
+        mongoTemplate.updateFirst(query, update, Appointment.class);
     }
 }
