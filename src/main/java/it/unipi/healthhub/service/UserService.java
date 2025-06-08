@@ -3,6 +3,7 @@ package it.unipi.healthhub.service;
 import it.unipi.healthhub.dto.AppointmentDTO;
 import it.unipi.healthhub.dto.PatientContactsDTO;
 import it.unipi.healthhub.dto.UserDetailsDTO;
+import it.unipi.healthhub.events.UserNameUpdateEvent;
 import it.unipi.healthhub.exception.UserNotFoundException;
 import it.unipi.healthhub.model.mongo.Address;
 import it.unipi.healthhub.model.mongo.Appointment;
@@ -15,7 +16,9 @@ import it.unipi.healthhub.repository.mongo.DoctorMongoRepository;
 import it.unipi.healthhub.repository.mongo.UserMongoRepository;
 import it.unipi.healthhub.repository.neo4j.UserNeo4jRepository;
 import it.unipi.healthhub.util.FakeMailSender;
+import org.neo4j.cypherdsl.core.Use;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +45,8 @@ public class UserService {
     private AppointmentService appointmentService;
     @Autowired
     private FakeMailSender fakeMailSender;
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
 
     // --- Utilities for sanitization ---
 
@@ -185,9 +190,29 @@ public class UserService {
 
             sanitizeUserMongo(user);
             userMongoRepository.save(user);
+
+            applicationEventPublisher.publishEvent(
+                    new UserNameUpdateEvent(this, patientId, userDetails.getFullName())
+            );
+
             return userDetails;
         }
         return null;
+    }
+
+    public void updateNameEverywhere(String patientId, String patientName) {
+        Optional<UserDAO> userOpt = userNeo4jRepository.findById(patientId);
+        if (userOpt.isPresent()) {
+            UserDAO user = userOpt.get();
+            user.getReviewedDoctors()
+                    .forEach(doctor -> doctorMongoRepository.updateReviewName(doctor.getId(), patientId, patientName));
+        }
+
+        List<Appointment> pastAppointments = appointmentMongoRepository.findByPatientIdBeforeDate(patientId, LocalDate.now());
+        List<Appointment> upcomingAppointments = appointmentMongoRepository.findByPatientIdFromDate(patientId, LocalDate.now());
+
+        pastAppointments.forEach(appointment -> appointmentMongoRepository.updatePatientName(appointment.getId(), patientName));
+        upcomingAppointments.forEach(appointment -> appointmentMongoRepository.updatePatientName(appointment.getId(), patientName));
     }
 
     public UserDetailsDTO getUserDetails(String patientId) {
