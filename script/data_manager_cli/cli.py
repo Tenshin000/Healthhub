@@ -10,6 +10,8 @@ def main():
     parser.add_argument("--generate-json", type=str, metavar="INPUT_JSON", help="Genera i file JSON dal un file specificato")
     parser.add_argument("--host", type=str, nargs="?", const="localhost", default="localhost",
                         help="IP del server remoto (default: localhost)")
+    parser.add_argument("--mongo-uri", type=str, default="localhost:27017/",
+                        help="URI del database MongoDB (default: localhost:27017/)")
     parser.add_argument("--user", type=str, default="paolo", help="Nome utente remoto (default: 'paolo')")
     parser.add_argument("--import-mongo", action="store_true", help="Importa i dati in MongoDB")
     parser.add_argument("--export-csv", action="store_true", help="Esporta i CSV da MongoDB")
@@ -40,19 +42,19 @@ def main():
 
     if args.drop_mongo:
         print(f"[{step}/{total_steps}] ➡ Eliminazione MongoDB...")
-        drop_mongo(args.host)
+        drop_mongo(args.host, args.mongo_uri)
         print(f"[{step}/{total_steps}] ✓ MongoDB eliminato.")
         step += 1
 
     if args.import_mongo:
         print(f"[{step}/{total_steps}] ➡ Importazione in MongoDB...")
-        import_data_to_mongo(args.host)
+        import_data_to_mongo(args.host, args.mongo_uri)
         print(f"[{step}/{total_steps}] ✓ Importazione completata.")
         step += 1
 
     if args.export_csv:
         print(f"[{step}/{total_steps}] ➡ Esportazione CSV...")
-        export_csv(args.host)
+        export_csv(args.host, args.mongo_uri)
         print(f"[{step}/{total_steps}] ✓ CSV esportati.")
         step += 1
 

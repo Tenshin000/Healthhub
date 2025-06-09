@@ -4,8 +4,8 @@ import os
 from pymongo import MongoClient
 from config import JSON_DIR, CSV_DIR, get_config
 
-def export_csv(host):
-    config = get_config(host)
+def export_csv(host, mongo_uri):
+    config = get_config(host, mongo_uri=mongo_uri)
     client = MongoClient(config["MONGO_URI"])
     db = client[config["DB_NAME"]]
 
