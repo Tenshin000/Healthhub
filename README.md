@@ -100,6 +100,9 @@ The project includes a data import tool located in the `script` directory. This 
 
 ### Additional Options
 
+- `--mongo-uri <uri>`  
+  Specifies the MongoDB connection URI (default: `localhost:27017`).
+
 - `--host <ip>`  
   Specifies the IP address of the remote server (default: `localhost`).
 
@@ -123,7 +126,11 @@ pip install -r requirements.txt
 
 - Generate JSON files and import into MongoDB:
   ```bash
-  python cli.py --generate-json data.txt --import-mongo
+  python cli.py --generate-json data.txt
+  ```
+- Import JSON files into MongoDB:
+  ```bash
+  python cli.py --import-mongo --mongo-uri "localhost:27018,localhost:27019,localhost:27020"
   ```
 
 - Export from MongoDB and transfer to Neo4j server:
