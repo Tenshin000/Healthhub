@@ -12,7 +12,7 @@ function formatAddress(addr) {
 }
 
 function renderAppointments(appointments) {
-    appointments.sort((a, b) => new Date(b.date) - new Date(a.date));
+    appointments.sort((a, b) => new Date(a.date) - new Date(b.date));
 
     const appointmentsList = document.getElementById('upcoming-appointments');
     appointmentsList.innerHTML = '';  // Clear the appointment list

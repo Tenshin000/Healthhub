@@ -176,7 +176,7 @@ let appDistrChartData = {
         labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
         datasets: [{
             label: 'Appointments',
-            data: [12, 19, 3, 5, 2, 0], // Placeholder iniziale per sabato
+            data: [12, 19, 3, 5, 2, 0], // Initial placeholder for Saturday
             backgroundColor: ['rgba(54, 162, 235, 0.2)'],
             borderColor: ['rgba(54, 162, 235, 1)'],
             borderWidth: 1

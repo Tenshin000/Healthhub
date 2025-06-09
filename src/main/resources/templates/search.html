@@ -15,7 +15,7 @@
                 return;
             }
 
-            // Annulla la richiesta precedente se esiste
+            // Cancel the previous request if it exists
             if (currentController) {
                 currentController.abort();
             }
@@ -40,20 +40,20 @@
                 });
             } catch (err) {
                 if (err.name === 'AbortError') {
-                    // Richiesta annullata, non fare nulla
-                    console.log('Richiesta precedente annullata');
+                    // Request cancelled, do nothing
+                    console.log('Letter added or deleted. Or new search.');
                 } else {
-                    console.error('Errore durante la ricerca:', err);
+                    console.error('Error during search:', err);
                 }
             }
         }
 
-        // Funzione debounce per limitare le chiamate alla funzione searchDoctors
+        // Debounce function to limit calls to the searchDoctors function
         function debounceSearch(query) {
             if (debounceTimeout) clearTimeout(debounceTimeout);
             debounceTimeout = setTimeout(() => {
                 searchDoctors(query);
-            }, 300); // aspetta 300ms di inattività prima di chiamare searchDoctors
+            }, 300); // wait 300ms of inactivity before calling searchDoctors
         }
 
         function formatAddress(addr) {
