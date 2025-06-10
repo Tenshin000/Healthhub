@@ -27,8 +27,29 @@ public class FakeMailSender implements MailSenderService {
                 "Your appointment with Dr. " + appointment.getDoctor().getName() +
                 " set for the " + appointment.getDate() +
                 " has been deleted. We apologize for the inconvenience. \n" +
-                "Please book again on our website or contact your doctor. " +
+                "Please book again on our website. " +
                 "Alternatively you can contact the doctor at this email address: " +
+                appointment.getDoctor().getEmail() + "\n" +
+                "We wish you a good day.";
+
+        return fakeSendEmail(appointment.getPatient().getEmail(), subject, text);
+    }
+
+    @Override
+    public boolean sendDeletedPastAppointmentMailByDoctor(Appointment appointment){
+        String subject = "Healthhub - Deleted Appointment";
+
+        String salutation = switch (appointment.getPatient().getGender().toLowerCase()){
+            case "male" -> "Mr.";
+            case "female" -> "Mrs.";
+            default -> "Mx.";
+        };
+
+        String text = "Hi " + salutation + " " + appointment.getPatient().getName() + ". \n" +
+                "Your appointment with Dr. " + appointment.getDoctor().getName() +
+                " set for the " + appointment.getDate() +
+                " has been deleted. This is probably because the visit did not take place. \n" +
+                "If there is an error contact your doctor at this email address:" +
                 appointment.getDoctor().getEmail() + "\n" +
                 "We wish you a good day.";
 

@@ -12,6 +12,7 @@ public class PatientContactsDTO {
     private LocalDate birthDate;
     private String gender;
     private String phoneNumber;
+    private int numberOfVisits;
 
     public PatientContactsDTO(){}
 
@@ -27,6 +28,16 @@ public class PatientContactsDTO {
         this.birthDate = birthDate;
         this.gender = gender;
         this.phoneNumber = phoneNumber;
+    }
+
+    public PatientContactsDTO(String name, String email, String fiscalCode, LocalDate birthDate, String gender, String phoneNumber, int numberOfVisits) {
+        this.name = name;
+        this.email = email;
+        this.fiscalCode = fiscalCode;
+        this.birthDate = birthDate;
+        this.gender = gender;
+        this.phoneNumber = phoneNumber;
+        this.numberOfVisits = numberOfVisits;
     }
 
     public String getName() {
@@ -75,5 +86,13 @@ public class PatientContactsDTO {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public int getNumberOfVisits() {
+        return numberOfVisits;
+    }
+
+    public void setNumberOfVisits(int numberOfVisits){
+        this.numberOfVisits = numberOfVisits;
     }
 }
