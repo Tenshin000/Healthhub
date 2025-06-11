@@ -158,6 +158,14 @@ def generate_doctors(data, users):
 def generate_appointment_date(review_date_str):
     review_date = datetime.fromisoformat(review_date_str)
     appointment_date = review_date - timedelta(days=random.randint(1, 10))
+    
+    # Genera ora casuale tra 7 e 19 (nel fuso orario della data quindi -2 ore)
+    random_hour = random.randint(5, 17)
+    random_minute = random.randint(0, 59)
+    
+    # Imposta ora e minuti casuali nell'appointment_date
+    appointment_date = appointment_date.replace(hour=random_hour, minute=random_minute, second=0, microsecond=0)
+    
     return appointment_date.strftime('%Y-%m-%dT%H:%M:%SZ')
 
 def generate_appointment(doctor, patient, review_date, visit_type, price, notes):
