@@ -280,6 +280,13 @@ public class UserService {
         return false;
     }
 
+    public int getNumberOfVisitsByDoctor(String doctorId, String patientId) {
+        if(patientId == null || doctorId == null || patientId.isEmpty() || doctorId.isEmpty())
+            return 0;
+
+        return appointmentMongoRepository.getVisitsCountByDoctorAndPatient(doctorId, patientId);
+    }
+
     // --- Neo4j Relations & Recommendations ---
 
     public boolean hasEndorsed(String patientId, String doctorId) {

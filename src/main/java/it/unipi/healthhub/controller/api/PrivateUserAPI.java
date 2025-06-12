@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/api/user")
 public class PrivateUserAPI {
@@ -38,20 +40,23 @@ public class PrivateUserAPI {
     }
 
     @GetMapping("/details/view")
-    public ResponseEntity<PatientContactsDTO> getView(@RequestParam String email) {
-        if(email == null || email.isBlank()) {
+    public ResponseEntity<PatientContactsDTO> getView(@RequestParam String id, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+
+        if(id == null || id.isBlank()) {
             return ResponseEntity
                     .badRequest()
                     .build();
         }
 
         // Retrieve user from service
-        User user = userService.findByEmail(email);
-        if(user == null){
+        Optional<User> OptUser = userService.getUserById(id);
+        if(OptUser.isEmpty()){
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .build();
         }
+        User user = OptUser.get();
 
         // Map User entity to PatientContactsDTO
         PatientContactsDTO dto = new PatientContactsDTO();
@@ -61,6 +66,17 @@ public class PrivateUserAPI {
         dto.setGender(user.getGender());
         dto.setPhoneNumber(user.getPersonalNumber());
         dto.setEmail(user.getEmail());
+
+        String doctorId = null;
+        if (session != null) {
+            Object attr = session.getAttribute("doctorId");
+            if (attr instanceof String) {
+                doctorId = (String) attr;
+            }
+        }
+
+        if(doctorId != null && !doctorId.isBlank())
+            dto.setNumberOfVisits(userService.getNumberOfVisitsByDoctor(doctorId, id));
 
         // Returns 200 OK with DTO
         return ResponseEntity

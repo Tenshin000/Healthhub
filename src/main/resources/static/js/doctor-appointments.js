@@ -54,8 +54,13 @@ function renderAppointments(appointments) {
     dayTitle.textContent = 'Appointments for ' + formatDate($('#datepicker').datepicker('getDate'));
     appointmentsContainer.appendChild(dayTitle);
 
+    appointments.sort((a, b) => {
+        const timeA = a.date.split('T')[1].slice(0, 5);
+        const timeB = b.date.split('T')[1].slice(0, 5);
+        return timeA.localeCompare(timeB);
+    });
+
     appointments.forEach(appointment => {
-        console.log('DEBUG appointment.patient →', appointment.patient);
         const appointmentElement = createAppointmentElement(appointment);
         appointmentsContainer.appendChild(appointmentElement);
     });
@@ -94,10 +99,8 @@ function createAppointmentElement(appointment) {
 
     const viewButton = document.createElement('button');
     viewButton.textContent = 'View';
-    viewButton.setAttribute('data-email', appointment.patient.email);
     viewButton.addEventListener('click', () => {
-        const userEmail = viewButton.dataset.email;
-        showUserDetails(userEmail);
+        showUserDetails(appointment.patient.id);
     });
 
     const deleteButton = document.createElement('button');
@@ -170,7 +173,7 @@ let appDistrChartData = {
         labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
         datasets: [{
             label: 'Appointments',
-            data: [12, 19, 3, 5, 2, 0], // Placeholder iniziale per sabato
+            data: [12, 19, 3, 5, 2, 0], // Initial placeholder for Saturday
             backgroundColor: ['rgba(54, 162, 235, 0.2)'],
             borderColor: ['rgba(54, 162, 235, 1)'],
             borderWidth: 1
@@ -202,88 +205,24 @@ function renderAppointmentsAnalytics(appointmentDistribution) {
             orderedData.push(appointmentDistribution[dayKey] || 0);
         }
 
-        console.log(orderedData);
         appDistrChartData.data.datasets[0].data = orderedData;
         appDistrChartData.data.labels = days;
         distributionChart = new Chart(ctx, appDistrChartData);
     }
 }
 
-function createAppointmentElement(appointment) {
-    const div = document.createElement('div');
-    div.className = 'appointment';
-
-    const headerDiv = document.createElement('div');
-    headerDiv.className = 'appointment-header';
-
-    const detailsDiv = document.createElement('div');
-
-    const h3 = document.createElement('h3');
-    h3.textContent = appointment.patient.name;
-
-    const emailEl = document.createElement('p');
-    const emailId = `email-${appointment.id}`;
-    emailEl.id = emailId;
-    emailEl.textContent = appointment.patient.email;
-    emailEl.className = 'hidden';
-
-    const pType = document.createElement('p');
-    pType.textContent = appointment.visitType;
-
-    const pTime = document.createElement('p');
-    pTime.textContent = appointment.date.split('T')[1].slice(0, 5);
-
-    detailsDiv.appendChild(h3);
-    detailsDiv.appendChild(emailEl);
-    detailsDiv.appendChild(pType);
-
-    headerDiv.appendChild(detailsDiv);
-    headerDiv.appendChild(pTime);
-
-    const notesP = document.createElement('p');
-    notesP.className = 'appointment-notes';
-    notesP.textContent = `Notes: ${appointment.patientNotes}`;
-
-    const actionsDiv = document.createElement('div');
-    actionsDiv.className = 'appointment-actions';
-
-    const viewButton = document.createElement('button');
-    viewButton.dataset.email = appointment.patient.email || '';
-    viewButton.textContent = 'View';
-    viewButton.onclick = () => {
-        const userEmail = viewButton.dataset.email;
-        console.log('DEBUG: viewBtn.dataset.email =', userEmail);
-        showUserDetails(userEmail);
-    };
-
-    const deleteButton = document.createElement('button');
-    deleteButton.onclick = () => deleteAppointment(appointment.id);
-    deleteButton.textContent = 'Delete';
-
-    actionsDiv.appendChild(viewButton);
-    actionsDiv.appendChild(deleteButton);
-
-    div.appendChild(headerDiv);
-    div.appendChild(notesP);
-    div.appendChild(actionsDiv);
-
-    return div;
-}
-
-
 // Function for fetch + rendering the modal
-async function showUserDetails(email) {
+async function showUserDetails(id) {
     try {
-        console.log(email);
         const response = await fetch(
-            `/api/user/details/view?email=${encodeURIComponent(email)}`
+            `/api/user/details/view?id=${encodeURIComponent(id)}`
         );
         if (!response.ok)
             throw new Error(response.statusText);
 
         const userDetails = await response.json();
 
-        // Popola il modal
+        // Populate the modal
         const body = document.querySelector('#user-modal-overlay .modal-body');
         body.innerHTML = `
             <h3>${userDetails.name}</h3>
@@ -292,13 +231,15 @@ async function showUserDetails(email) {
             <p><strong>Gender:</strong> ${userDetails.gender}</p>
             <p><strong>Email:</strong> ${userDetails.email}</p>
             <p><strong>Personal Phone:</strong> ${userDetails.phoneNumber || 'N/A'}</p>
+            <p><strong>Visit count:</strong> ${userDetails.numberOfVisits != null ? userDetails.numberOfVisits : 'N/A'}</p>
+
         `;
 
         // Show overlay
         document.getElementById('user-modal-overlay').classList.remove('hidden');
     } catch (err) {
-        console.error('Errore nel fetch dei dettagli utente:', err);
-        alert('Impossibile caricare i dettagli utente.');
+        console.error('Error fetching user details:', err);
+        alert('Unable to load user details.');
     }
 }
 

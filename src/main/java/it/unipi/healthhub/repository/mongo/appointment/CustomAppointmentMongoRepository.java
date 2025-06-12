@@ -18,4 +18,5 @@ public interface CustomAppointmentMongoRepository {
     List<Appointment> findByDoctorIdAndWeek(String doctorId, Integer week, Integer year);
     boolean hasPastAppointment(String doctorId, String patientId);
     void updatePatientName(String id, String patientName);
+    int getVisitsCountByDoctorAndPatient(String doctorId, String patientId);
 }

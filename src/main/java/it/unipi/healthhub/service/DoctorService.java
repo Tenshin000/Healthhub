@@ -452,18 +452,29 @@ public class DoctorService {
     private boolean deleteAppointment(Appointment appointment){
         LocalDateTime dateTimeSlot = appointment.getDate();
 
+        // Extract appointment date components
         Integer year = dateTimeSlot.getYear();
         Integer week = dateTimeSlot.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
         String keyDay = dateTimeSlot.getDayOfWeek().toString().toLowerCase();
         String slotStart = dateTimeSlot.toLocalTime().toString();
 
+        // Get current year and week
+        LocalDateTime now = LocalDateTime.now();
+        Integer currentYear = now.getYear();
+        Integer currentWeek = now.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
+
         // The function tries to update the slot's taken parameter in the schedule
-        // If the slot is occupied return false
         boolean taken = doctorMongoRepository.checkScheduleSlot(appointment.getDoctor().getId(), year, week, keyDay, slotStart);
         if(taken){
             appointmentService.deleteAppointment(appointment.getId());
             doctorMongoRepository.freeScheduleSlot(appointment.getDoctor().getId(), year, week, keyDay, slotStart);
             fakeMailSender.sendDeletedAppointmentMailByDoctor(appointment);
+            return true;
+        }
+
+        if((year < currentYear) || (year.equals(currentYear) && week < currentWeek)){
+            appointmentService.deleteAppointment(appointment.getId());
+            fakeMailSender.sendDeletedPastAppointmentMailByDoctor(appointment);
             return true;
         }
 

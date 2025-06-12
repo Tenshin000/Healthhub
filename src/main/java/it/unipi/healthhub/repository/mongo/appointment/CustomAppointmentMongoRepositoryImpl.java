@@ -96,7 +96,7 @@ public class CustomAppointmentMongoRepositoryImpl implements CustomAppointmentMo
     @Override
     public Map<String, Integer> getVisitsCountByDayForDoctorWeek(String doctorId, Integer week, Integer year) {
         LocalDateTime startOfWeek = DateUtil.getFirstDayOfWeek(week, year).atStartOfDay();
-        LocalDateTime endOfWeek = DateUtil.getFirstDayOfWeek(week+1, year).atStartOfDay();
+        LocalDateTime endOfWeek = startOfWeek.plusDays(7);
 
         MatchOperation matchOperation = Aggregation.match(Criteria.where("doctor.id").is(doctorId)
                 .and("date")
@@ -228,5 +228,21 @@ public class CustomAppointmentMongoRepositoryImpl implements CustomAppointmentMo
         Query query = new Query(Criteria.where("_id").is(appointmentId));
         Update update = new Update().set("patient.name", newName);
         mongoTemplate.updateFirst(query, update, Appointment.class);
+    }
+
+    /**
+     * Counts how many times a given doctor has visited a given patient.
+     * @param doctorId the doctor's id
+     * @param patientId the patient's id
+     * @return the number of appointments where both appear
+     */
+    @Override
+    public int getVisitsCountByDoctorAndPatient(String doctorId, String patientId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("doctor.id").is(doctorId)
+                .and("patient.id").is(patientId)
+                .and("date").lt(LocalDate.now()) 
+        );
+        return (int) mongoTemplate.count(query, Appointment.class);
     }
 }

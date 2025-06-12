@@ -169,6 +169,10 @@ function deleteTemplate(index) {
 
 function newTemplate() {
     const templateName = document.getElementById('new-template-name').value;
+
+    if(templateName == null || templateName === "")
+        return;
+
     const templateData = {
         name: templateName,
         slots: {}
