@@ -126,21 +126,26 @@ pip install -r requirements.txt
 
 - Generate JSON files and import into MongoDB:
   ```bash
-  python cli.py --generate-json data.txt
+  python cli.py --generate-json scraped.json
   ```
 - Import JSON files into MongoDB:
   ```bash
   python cli.py --import-mongo --mongo-uri "localhost:27018,localhost:27019,localhost:27020"
   ```
 
-- Export from MongoDB and transfer to Neo4j server:
+- Export from data from MongoDB and generate CSV files:
   ```bash
-  python cli.py --export-csv --transfer-csv --host 192.168.2.6
+  python cli.py --export-csv --mongo-uri "localhost:27018,localhost:27019,localhost:27020"
+  ```
+
+- Transfer CSV files to the Neo4j server:
+  ```bash
+  python cli.py --transfer-csv --host 192.168.2.6 --user root
   ```
 
 - Import CSV into Neo4j:
   ```bash
-  python cli.py --import-neo4j --host 192.168.2.6
+  python cli.py --neo4j-uri 192.168.2.6:7687 --import-neo4j
   ```
 
 - Clean up both databases:
