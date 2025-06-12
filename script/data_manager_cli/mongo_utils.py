@@ -3,8 +3,8 @@ import os
 from pymongo import MongoClient
 from config import JSON_DIR, get_config
 
-def drop_mongo(host, mongo_uri):
-    config = get_config(host, mongo_uri=mongo_uri)
+def drop_mongo(config):
+    
     client = MongoClient(config["MONGO_URI"])
     db = client[config["DB_NAME"]]
     # Ottieni i nomi di tutte le collezioni
@@ -14,8 +14,7 @@ def drop_mongo(host, mongo_uri):
     for name in collection_names:
         db[name].drop()
 
-def import_data_to_mongo(host, mongo_uri):
-    config = get_config(host, mongo_uri=mongo_uri)
+def import_data_to_mongo(config):
     client = MongoClient(config["MONGO_URI"])
     db = client[config["DB_NAME"]]
 
