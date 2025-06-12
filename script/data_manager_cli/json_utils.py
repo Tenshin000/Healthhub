@@ -159,7 +159,7 @@ def generate_appointment_date(review_date_str):
     review_date = datetime.fromisoformat(review_date_str)
     appointment_date = review_date - timedelta(days=random.randint(1, 10))
     
-    # Genera ora casuale tra 7 e 19 (nel fuso orario della data quindi -2 ore)
+    # Genera ora casuale tra 7 e 20 (nel fuso orario della data quindi -2 ore)
     random_hour = random.randint(5, 17)
     random_minute = random.randint(0, 59)
     
