@@ -11,7 +11,7 @@ def main():
     parser = argparse.ArgumentParser(description="HealthHub Data CLI")
     parser.add_argument("--generate-json", type=str, metavar="INPUT_JSON", help="Genera i file JSON dal un file specificato")
 
-    parser.add_argument("--host", type=str, nargs="?", const="localhost", default="localhost",
+    parser.add_argument("--host", type=str, default="localhost",
                         help="IP del server remoto (default: localhost)")
     
     parser.add_argument("--neo4j-uri", type=str, default="localhost:7687",
@@ -26,7 +26,7 @@ def main():
 
     parser.add_argument("--export-csv", action="store_true", help="Esporta i CSV da MongoDB")
 
-    parser.add_argument("--transfer-csv", type=str, default="/var/lib/neo4j/import/",
+    parser.add_argument("--transfer-csv", type=str, nargs="?", const="/var/lib/neo4j/import/",
                         help="Percorso per trasferire i file CSV (default: /var/lib/neo4j/import/)")
     
     parser.add_argument("--import-neo4j", action="store_true", help="Importa i CSV in Neo4j")

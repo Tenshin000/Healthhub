@@ -38,7 +38,7 @@ def import_to_neo4j(config):
         print("✅ Query eseguita")
 
 def drop_neo4j(config):
-    driver = GraphDatabase.driver(config["NEO4J_URI"])
+    driver = GraphDatabase.driver(config["NEO4J_URI"], auth=config["NEO4J_AUTH"])
     with driver.session() as session:
         while True:
             # Esegui la query per eliminare i nodi in batch
@@ -52,6 +52,7 @@ def drop_neo4j(config):
             # Cancella un batch di nodi
             session.run(f"""
             CALL {{
+              WITH *
               MATCH (n)
               WITH n LIMIT 30000
               DETACH DELETE n
