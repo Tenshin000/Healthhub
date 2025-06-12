@@ -1,14 +1,14 @@
 from neo4j import GraphDatabase
 from config import get_config
 
-def run_query(query, host):
-    config = get_config(host)
-    driver = GraphDatabase.driver(config["NEO4J_URI"])
+def run_query(query, config):
+
+    driver = GraphDatabase.driver(config["NEO4J_URI"], auth=config["NEO4J_AUTH"])
     with driver.session() as session:
         session.run(query)
     driver.close()
 
-def import_to_neo4j(host):
+def import_to_neo4j(config):
     queries = [
         "CREATE INDEX user_id_index IF NOT EXISTS FOR (u:User) ON (u.id);",
         "CREATE INDEX doctor_id_index IF NOT EXISTS FOR (d:Doctor) ON (d.id);",
@@ -34,11 +34,10 @@ def import_to_neo4j(host):
         """
     ]
     for q in queries:
-        run_query(q, host)
+        run_query(q, config)
         print("✅ Query eseguita")
 
-def drop_neo4j(host):
-    config = get_config(host)
+def drop_neo4j(config):
     driver = GraphDatabase.driver(config["NEO4J_URI"])
     with driver.session() as session:
         while True:
