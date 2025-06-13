@@ -37,10 +37,10 @@ public class UserController {
     public String favorites(Model model, HttpServletRequest request) {
         ControllerUtil.setSessionModel(model, request);
         String userId = (String) request.getSession().getAttribute("patientId");
-        List<Doctor> endorsedDoctors = userService.getEndorsedDoctors(userId);
-        model.addAttribute("endorsedDoctors", endorsedDoctors);
-        List<Doctor> reviewedDoctors = userService.getReviewedDoctors(userId);
-        model.addAttribute("reviewedDoctors", reviewedDoctors);
+        //List<Doctor> endorsedDoctors = userService.getEndorsedDoctors(userId);
+        //model.addAttribute("endorsedDoctors", endorsedDoctors);
+        //List<Doctor> reviewedDoctors = userService.getReviewedDoctors(userId);
+        //model.addAttribute("reviewedDoctors", reviewedDoctors);
         return "user-favorites";
     }
 }

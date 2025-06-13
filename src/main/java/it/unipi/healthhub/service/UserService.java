@@ -1,6 +1,7 @@
 package it.unipi.healthhub.service;
 
 import it.unipi.healthhub.dto.AppointmentDTO;
+import it.unipi.healthhub.dto.DoctorDTO;
 import it.unipi.healthhub.dto.PatientContactsDTO;
 import it.unipi.healthhub.dto.UserDetailsDTO;
 import it.unipi.healthhub.events.UserNameUpdateEvent;
@@ -295,18 +296,18 @@ public class UserService {
     }
 
     @Transactional
-    public List<Doctor> getEndorsedDoctors(String patientId) {
+    public List<DoctorDTO> getEndorsedDoctors(String patientId) {
         UserDAO userDAO = userNeo4jRepository.findById(patientId).orElseThrow(UserNotFoundException::new);
-        List<Doctor> endorsedDoctors = new ArrayList<>();
-        userDAO.getEndorsedDoctors().forEach(doc -> doctorMongoRepository.findById(doc.getId()).ifPresent(endorsedDoctors::add));
+        List<DoctorDTO> endorsedDoctors = new ArrayList<>();
+        userDAO.getEndorsedDoctors().forEach(doc -> endorsedDoctors.add(new DoctorDTO(doc)));
         return endorsedDoctors;
     }
 
     @Transactional
-    public List<Doctor> getReviewedDoctors(String userId) {
+    public List<DoctorDTO> getReviewedDoctors(String userId) {
         UserDAO userDAO = userNeo4jRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-        List<Doctor> reviewedDoctors = new ArrayList<>();
-        userDAO.getReviewedDoctors().forEach(doc -> doctorMongoRepository.findById(doc.getId()).ifPresent(reviewedDoctors::add));
+        List<DoctorDTO> reviewedDoctors = new ArrayList<>();
+        userDAO.getReviewedDoctors().forEach(doc -> reviewedDoctors.add(new DoctorDTO(doc)));
         return reviewedDoctors;
     }
 

@@ -2,6 +2,7 @@ package it.unipi.healthhub.dto;
 
 import it.unipi.healthhub.model.mongo.Address;
 import it.unipi.healthhub.model.mongo.Doctor;
+import it.unipi.healthhub.model.neo4j.DoctorDAO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,13 @@ public class DoctorDTO {
         this.name = doctor.getName();
         this.specializations = doctor.getSpecializations();
         this.address = doctor.getAddress();
+    }
+
+    public DoctorDTO(DoctorDAO doctorDAO) {
+        this.id = doctorDAO.getId();
+        this.name = doctorDAO.getName();
+        this.specializations = doctorDAO.getSpecializations();
+        this.address = null; // Address is not part of DoctorDAO, so we set it to null
     }
 
     public String getId() {
