@@ -1,65 +1,59 @@
 // Populate the "recommended-doctors" section
-async function fetchRecommendedDoctors(limit = 3){
-    try{
-        const response = await fetch(`/api/user/recommendations?limit=${limit}`);
-        if(!response.ok){
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+function fetchRecommendedDoctors(limit = 3) {
+    fetch(`/api/user/recommendations?limit=${limit}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(doctors => {
+            const section = document.querySelector('.recommended-doctors');
+            section.innerHTML = '';
+            renderRecommendedDoctors(section, doctors);
+        })
+        .catch(error => {
+            console.error('Error loading recommended doctors:', error);
+        });
+}
 
-        // Parse the JSON response (DoctorDAO array)
-        const doctors = await response.json();
+function renderRecommendedDoctors(section, doctors) {
+    const cardsContainer = document.createElement('div');
+    cardsContainer.classList.add('doctor-cards');
 
-        // Select the section and empty it
-        const section = document.querySelector('.recommended-doctors');
-        section.innerHTML = '';
+    const h2 = document.createElement('h2');
+    h2.textContent = doctors && doctors.length > 0 ? "Recommended Doctors" : "No Doctor Recommended";
+    section.appendChild(h2);
 
-        // Create the doctor cards container
-        const cardsContainer = document.createElement('div');
-        cardsContainer.classList.add('doctor-cards');
-
-        if(doctors != null){
-            const h2 = document.createElement('h2');
-            h2.textContent = "Recommended Doctors";
-            section.appendChild(h2);
-
-            // For each doctor, create an <a> with internal structure
-            doctors.forEach(doc => {
-                const cardLink = document.createElement('a');
-                cardLink.href = `/doctors/${doc.id}`;
-                cardLink.classList.add('doctor-card');
-
-                const infoDiv = document.createElement('div');
-
-                const nameEl = document.createElement('h3');
-                nameEl.textContent = `Dr. ${doc.name}`;
-                infoDiv.appendChild(nameEl);
-
-                // Show the first specialization, or all separated by commas
-                const specEl = document.createElement('p');
-                if(Array.isArray(doc.specializations) && doc.specializations.length > 0){
-                    specEl.textContent = doc.specializations.join(', ');
-                }
-                else{
-                    specEl.textContent = 'Specializations not available';
-                }
-                infoDiv.appendChild(specEl);
-
-                cardLink.appendChild(infoDiv);
-                cardsContainer.appendChild(cardLink);
-            });
-        }
-        else{
-            const h2 = document.createElement('h2');
-            h2.textContent = "No Doctor Recommended";
-            section.appendChild(h2);
-        }
-
-        // Adds the container to the section
-        section.appendChild(cardsContainer);
+    if (doctors && doctors.length > 0) {
+        doctors.forEach(doc => {
+            const card = createDoctorCard(doc);
+            cardsContainer.appendChild(card);
+        });
     }
-    catch(error){
-        console.error('Error loading recommended doctors:', error);
-    }
+
+    section.appendChild(cardsContainer);
+}
+
+function createDoctorCard(doc) {
+    const cardLink = document.createElement('a');
+    cardLink.href = `/doctors/${doc.id}`;
+    cardLink.classList.add('doctor-card');
+
+    const infoDiv = document.createElement('div');
+
+    const nameEl = document.createElement('h3');
+    nameEl.textContent = `Dr. ${doc.name}`;
+    infoDiv.appendChild(nameEl);
+
+    const specEl = document.createElement('p');
+    specEl.textContent = Array.isArray(doc.specializations) && doc.specializations.length > 0
+        ? doc.specializations.join(', ')
+        : 'Specializations not available';
+    infoDiv.appendChild(specEl);
+
+    cardLink.appendChild(infoDiv);
+    return cardLink;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
