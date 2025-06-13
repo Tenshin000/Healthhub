@@ -17,6 +17,20 @@ function fetchRecommendedDoctors(limit = 3) {
         });
 }
 
+function fetchEndorsedDoctors() {
+    fetch('/api/user/doctors/endorsed')  // API endpoint URL
+        .then(response => response.json())
+        .then(data => renderDoctorsList('endorsed-doctors-list',data))
+        .catch(error => console.error('Error fetching doctors:', error));
+}
+
+function fetchReviewedDoctors(){
+    fetch('/api/user/doctors/reviewed')  // API endpoint URL
+        .then(response => response.json())
+        .then(data => renderDoctorsList('reviewed-doctors-list',data))
+        .catch(error => console.error('Error fetching appointments:', error));
+}
+
 function renderRecommendedDoctors(section, doctors) {
     const cardsContainer = document.createElement('div');
     cardsContainer.classList.add('doctor-cards');
@@ -33,6 +47,36 @@ function renderRecommendedDoctors(section, doctors) {
     }
 
     section.appendChild(cardsContainer);
+}
+
+function renderDoctorsList(ulId, endorsedDoctors) {
+    const ul = document.getElementById(ulId);
+    if (!ul) return;
+
+    ul.innerHTML = ''; // Pulisce la lista, se necessario
+
+    endorsedDoctors.forEach(doctor => {
+        const li = document.createElement('li');
+        li.className = 'doctor-item';
+
+        const a = document.createElement('a');
+        a.href = `/doctors/${doctor.id}`;
+
+        const div = document.createElement('div');
+
+        const h3 = document.createElement('h3');
+        h3.textContent = `Dr. ${doctor.name}`;
+
+        const p = document.createElement('p');
+        const hasSpecializations = Array.isArray(doctor.specializations) && doctor.specializations.length > 0;
+        p.textContent = hasSpecializations ? doctor.specializations[0] : 'No specializations';
+
+        div.appendChild(h3);
+        div.appendChild(p);
+        a.appendChild(div);
+        li.appendChild(a);
+        ul.appendChild(li);
+    });
 }
 
 function createDoctorCard(doc) {
@@ -57,5 +101,7 @@ function createDoctorCard(doc) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    fetchEndorsedDoctors();
+    fetchReviewedDoctors();
     fetchRecommendedDoctors(3);
 });

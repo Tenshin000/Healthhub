@@ -127,6 +127,20 @@ public class PrivateUserAPI {
         return ResponseEntity.ok(userService.getRecommendedDoctors(patientId, limit));
     }
 
+    @GetMapping("/doctors/reviewed")
+    public ResponseEntity<?> getReviewedDoctors(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        String patientId = (String) session.getAttribute("patientId");
+        return ResponseEntity.ok(userService.getReviewedDoctors(patientId));
+    }
+
+    @GetMapping("/doctors/endorsed")
+    public ResponseEntity<?> getEndorsedDoctors(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        String patientId = (String) session.getAttribute("patientId");
+        return ResponseEntity.ok(userService.getEndorsedDoctors(patientId));
+    }
+
     @PutMapping("/password")
     public ResponseEntity<Void> changePassword(HttpServletRequest request, @RequestBody PasswordChangeDTO passwords){
         HttpSession session = request.getSession(false);
