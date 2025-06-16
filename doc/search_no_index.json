@@ -1,0 +1,319 @@
+{
+  explainVersion: '1',
+  stages: [
+    {
+      '$cursor': {
+        queryPlanner: {
+          namespace: 'healthhub.doctors',
+          parsedQuery: {
+            '$or': [
+              {
+                'address.city': { '$regex': 'ortopedia', '$options': 'i' }
+              },
+              {
+                'address.province': { '$regex': 'ortopedia', '$options': 'i' }
+              },
+              { name: { '$regex': 'ortopedia', '$options': 'i' } },
+              {
+                specializations: { '$regex': 'ortopedia', '$options': 'i' }
+              }
+            ]
+          },
+          indexFilterSet: false,
+          planCacheShapeHash: '6AB936C8',
+          planCacheKey: 'C0A16A78',
+          optimizationTimeMillis: 0,
+          maxIndexedOrSolutionsReached: false,
+          maxIndexedAndSolutionsReached: false,
+          maxScansToExplodeReached: false,
+          prunedSimilarIndexes: false,
+          winningPlan: {
+            isCached: false,
+            stage: 'SUBPLAN',
+            inputStage: {
+              stage: 'COLLSCAN',
+              filter: {
+                '$or': [
+                  {
+                    'address.city': { '$regex': 'ortopedia', '$options': 'i' }
+                  },
+                  {
+                    'address.province': { '$regex': 'ortopedia', '$options': 'i' }
+                  },
+                  { name: { '$regex': 'ortopedia', '$options': 'i' } },
+                  {
+                    specializations: { '$regex': 'ortopedia', '$options': 'i' }
+                  }
+                ]
+              },
+              direction: 'forward'
+            }
+          },
+          rejectedPlans: []
+        },
+        executionStats: {
+          executionSuccess: true,
+          nReturned: 1738,
+          executionTimeMillis: 328,
+          totalKeysExamined: 0,
+          totalDocsExamined: 87632,
+          executionStages: {
+            isCached: false,
+            stage: 'SUBPLAN',
+            nReturned: 1738,
+            executionTimeMillisEstimate: 281,
+            works: 87633,
+            advanced: 1738,
+            needTime: 85894,
+            needYield: 0,
+            saveState: 21,
+            restoreState: 21,
+            isEOF: 1,
+            inputStage: {
+              stage: 'COLLSCAN',
+              filter: {
+                '$or': [
+                  {
+                    'address.city': { '$regex': 'ortopedia', '$options': 'i' }
+                  },
+                  {
+                    'address.province': { '$regex': 'ortopedia', '$options': 'i' }
+                  },
+                  { name: { '$regex': 'ortopedia', '$options': 'i' } },
+                  {
+                    specializations: { '$regex': 'ortopedia', '$options': 'i' }
+                  }
+                ]
+              },
+              nReturned: 1738,
+              executionTimeMillisEstimate: 281,
+              works: 87633,
+              advanced: 1738,
+              needTime: 85894,
+              needYield: 0,
+              saveState: 21,
+              restoreState: 21,
+              isEOF: 1,
+              direction: 'forward',
+              docsExamined: 87632
+            }
+          }
+        }
+      },
+      nReturned: Long('1738'),
+      executionTimeMillisEstimate: Long('320')
+    },
+    {
+      '$addFields': {
+        score: {
+          '$min': [
+            {
+              '$cond': [
+                {
+                  '$regexMatch': {
+                    input: '$name',
+                    regex: { '$const': 'ortopedia' },
+                    options: { '$const': 'i' }
+                  }
+                },
+                { '$const': 0 },
+                { '$const': 5 }
+              ]
+            },
+            {
+              '$cond': [
+                {
+                  '$gt': [
+                    {
+                      '$size': [
+                        {
+                          '$filter': {
+                            input: '$specializations',
+                            as: 's',
+                            cond: {
+                              '$regexMatch': {
+                                input: '$$s',
+                                regex: { '$const': 'ortopedia' },
+                                options: { '$const': 'i' }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    { '$const': 0 }
+                  ]
+                },
+                { '$const': 1 },
+                { '$const': 5 }
+              ]
+            },
+            {
+              '$cond': [
+                {
+                  '$regexMatch': {
+                    input: '$address.city',
+                    regex: { '$const': 'ortopedia' },
+                    options: { '$const': 'i' }
+                  }
+                },
+                { '$const': 2 },
+                { '$const': 5 }
+              ]
+            },
+            {
+              '$cond': [
+                {
+                  '$regexMatch': {
+                    input: '$address.province',
+                    regex: { '$const': 'ortopedia' },
+                    options: { '$const': 'i' }
+                  }
+                },
+                { '$const': 3 },
+                { '$const': 5 }
+              ]
+            }
+          ]
+        }
+      },
+      nReturned: Long('1738'),
+      executionTimeMillisEstimate: Long('320')
+    },
+    {
+      '$sort': { sortKey: { score: 1 }, limit: Long('250') },
+      totalDataSizeSortedBytesEstimate: Long('3094873'),
+      usedDisk: false,
+      spills: Long('0'),
+      spilledDataStorageSize: Long('0'),
+      nReturned: Long('250'),
+      executionTimeMillisEstimate: Long('320')
+    }
+  ],
+  queryShapeHash: '2082A71CE88CD9028AEA5DDE21AA839EA7816D0A90C9942F3F28B7521B636614',
+  serverInfo: {
+    host: 'Large-Scale-2025',
+    port: 27020,
+    version: '8.0.4',
+    gitVersion: 'bc35ab4305d9920d9d0491c1c9ef9b72383d31f9'
+  },
+  serverParameters: {
+    internalQueryFacetBufferSizeBytes: 104857600,
+    internalQueryFacetMaxOutputDocSizeBytes: 104857600,
+    internalLookupStageIntermediateDocumentMaxSizeBytes: 104857600,
+    internalDocumentSourceGroupMaxMemoryBytes: 104857600,
+    internalQueryMaxBlockingSortMemoryUsageBytes: 104857600,
+    internalQueryProhibitBlockingMergeOnMongoS: 0,
+    internalQueryMaxAddToSetBytes: 104857600,
+    internalDocumentSourceSetWindowFieldsMaxMemoryBytes: 104857600,
+    internalQueryFrameworkControl: 'trySbeRestricted',
+    internalQueryPlannerIgnoreIndexWithCollationForRegex: 1
+  },
+  command: {
+    aggregate: 'doctors',
+    pipeline: [
+      {
+        '$match': {
+          '$or': [
+            { name: { '$regex': 'ortopedia', '$options': 'i' } },
+            {
+              specializations: { '$regex': 'ortopedia', '$options': 'i' }
+            },
+            {
+              'address.city': { '$regex': 'ortopedia', '$options': 'i' }
+            },
+            {
+              'address.province': { '$regex': 'ortopedia', '$options': 'i' }
+            }
+          ]
+        }
+      },
+      {
+        '$addFields': {
+          score: {
+            '$min': [
+              {
+                '$cond': [
+                  {
+                    '$regexMatch': {
+                      input: '$name',
+                      regex: 'ortopedia',
+                      options: 'i'
+                    }
+                  },
+                  0,
+                  5
+                ]
+              },
+              {
+                '$cond': [
+                  {
+                    '$gt': [
+                      {
+                        '$size': {
+                          '$filter': {
+                            input: '$specializations',
+                            as: 's',
+                            cond: {
+                              '$regexMatch': {
+                                input: '$$s',
+                                regex: 'ortopedia',
+                                options: 'i'
+                              }
+                            }
+                          }
+                        }
+                      },
+                      0
+                    ]
+                  },
+                  1,
+                  5
+                ]
+              },
+              {
+                '$cond': [
+                  {
+                    '$regexMatch': {
+                      input: '$address.city',
+                      regex: 'ortopedia',
+                      options: 'i'
+                    }
+                  },
+                  2,
+                  5
+                ]
+              },
+              {
+                '$cond': [
+                  {
+                    '$regexMatch': {
+                      input: '$address.province',
+                      regex: 'ortopedia',
+                      options: 'i'
+                    }
+                  },
+                  3,
+                  5
+                ]
+              }
+            ]
+          }
+        }
+      },
+      { '$sort': { score: 1 } },
+      { '$limit': 250 }
+    ],
+    cursor: {},
+    '$db': 'healthhub'
+  },
+  ok: 1,
+  '$clusterTime': {
+    clusterTime: Timestamp({ t: 1750089059, i: 1 }),
+    signature: {
+      hash: Binary.createFromBase64('AAAAAAAAAAAAAAAAAAAAAAAAAAA=', 0),
+      keyId: Long('0')
+    }
+  },
+  operationTime: Timestamp({ t: 1750089059, i: 1 })
+}

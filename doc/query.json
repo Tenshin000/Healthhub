@@ -1,0 +1,84 @@
+db.doctors.aggregate([
+  {
+    $match: {
+      $or: [
+        { name: { $regex: "ortopedia", $options: "i" } },
+        { specializations: { $regex: "ortopedia", $options: "i" } },
+        { "address.city": { $regex: "ortopedia", $options: "i" } },
+        { "address.province": { $regex: "ortopedia", $options: "i" } }
+      ]
+    }
+  },
+  {
+    $addFields: {
+      score: {
+        $min: [
+          {
+            $cond: [
+              { $regexMatch: { input: "$name", regex: "ortopedia", options: "i" } },
+              0,
+              5
+            ]
+          },
+          {
+            $cond: [
+              {
+                $gt: [
+                  {
+                    $size: {
+                      $filter: {
+                        input: "$specializations",
+                        as: "s",
+                        cond: { $regexMatch: { input: "$$s", regex: "ortopedia", options: "i" } }
+                      }
+                    }
+                  },
+                  0
+                ]
+              },
+              1,
+              5
+            ]
+          },
+          {
+            $cond: [
+              { $regexMatch: { input: "$address.city", regex: "ortopedia", options: "i" } },
+              2,
+              5
+            ]
+          },
+          {
+            $cond: [
+              { $regexMatch: { input: "$address.province", regex: "ortopedia", options: "i" } },
+              3,
+              5
+            ]
+          }
+        ]
+      }
+    }
+  },
+  { $sort: { score: 1 } },
+  { $limit: 250 }
+]).explain("executionStats")
+
+db.doctors.aggregate([
+  {
+    $match: {
+      $text: { $search: "ortopedia" }
+    }
+  },
+  {
+    $addFields: {
+      score: { $meta: "textScore" }
+    }
+  },
+  {
+    $sort: {
+      score: -1
+    }
+  },
+  {
+    $limit: 250
+  }
+]).explain("executionStats")

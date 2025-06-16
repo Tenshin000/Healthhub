@@ -1,0 +1,168 @@
+
+=== Termine di ricerca: 'ortopedia' ===
+
+>>> Aggregazione con regex personalizzata:
+=== EXPLAIN ANALYSIS ===
+Execution time       : 344 ms
+Documents examined   : 87632
+Index keys examined  : 0
+Documents returned   : 1738
+Winning plan stage   : SUBPLAN
+Execution stage      : SUBPLAN
+Docs examined (input): 87632
+
+>>> Aggregazione con text search:
+=== EXPLAIN ANALYSIS ===
+Execution time       : 25 ms
+Documents examined   : 1738
+Index keys examined  : 1738
+Documents returned   : 1738
+Winning plan stage   : TEXT_MATCH
+Execution stage      : TEXT_MATCH
+Docs examined (input): 1738
+
+==================================================
+
+=== Termine di ricerca: 'cardiologia milano' ===
+
+>>> Aggregazione con regex personalizzata:
+=== EXPLAIN ANALYSIS ===
+Execution time       : 215 ms
+Documents examined   : 87632
+Index keys examined  : 0
+Documents returned   : 0
+Winning plan stage   : SUBPLAN
+Execution stage      : SUBPLAN
+Docs examined (input): 87632
+
+>>> Aggregazione con text search:
+=== EXPLAIN ANALYSIS ===
+Execution time       : 74 ms
+Documents examined   : 9648
+Index keys examined  : 9652
+Documents returned   : 9648
+Winning plan stage   : TEXT_MATCH
+Execution stage      : TEXT_MATCH
+Docs examined (input): 9648
+
+==================================================
+
+=== Termine di ricerca: 'gianmarco torrisi' ===
+
+>>> Aggregazione con regex personalizzata:
+=== EXPLAIN ANALYSIS ===
+Execution time       : 207 ms
+Documents examined   : 87632
+Index keys examined  : 0
+Documents returned   : 1
+Winning plan stage   : SUBPLAN
+Execution stage      : SUBPLAN
+Docs examined (input): 87632
+
+>>> Aggregazione con text search:
+=== EXPLAIN ANALYSIS ===
+Execution time       : 2 ms
+Documents examined   : 58
+Index keys examined  : 59
+Documents returned   : 58
+Winning plan stage   : TEXT_MATCH
+Execution stage      : TEXT_MATCH
+Docs examined (input): 58
+
+==================================================
+
+=== Termine di ricerca: 'torino' ===
+
+>>> Aggregazione con regex personalizzata:
+=== EXPLAIN ANALYSIS ===
+Execution time       : 254 ms
+Documents examined   : 87632
+Index keys examined  : 0
+Documents returned   : 6298
+Winning plan stage   : SUBPLAN
+Execution stage      : SUBPLAN
+Docs examined (input): 87632
+
+>>> Aggregazione con text search:
+=== EXPLAIN ANALYSIS ===
+Execution time       : 37 ms
+Documents examined   : 5325
+Index keys examined  : 5325
+Documents returned   : 5325
+Winning plan stage   : TEXT_MATCH
+Execution stage      : TEXT_MATCH
+Docs examined (input): 5325
+
+==================================================
+
+=== Termine di ricerca: 'medico di base' ===
+
+>>> Aggregazione con regex personalizzata:
+=== EXPLAIN ANALYSIS ===
+Execution time       : 477 ms
+Documents examined   : 87632
+Index keys examined  : 0
+Documents returned   : 58962
+Winning plan stage   : SUBPLAN
+Execution stage      : SUBPLAN
+Docs examined (input): 87632
+
+>>> Aggregazione con text search:
+=== EXPLAIN ANALYSIS ===
+Execution time       : 458 ms
+Documents examined   : 60346
+Index keys examined  : 178271
+Documents returned   : 60346
+Winning plan stage   : TEXT_MATCH
+Execution stage      : TEXT_MATCH
+Docs examined (input): 60346
+
+==================================================
+
+=== Termine di ricerca: 'pistoia' ===
+
+>>> Aggregazione con regex personalizzata:
+=== EXPLAIN ANALYSIS ===
+Execution time       : 213 ms
+Documents examined   : 87632
+Index keys examined  : 0
+Documents returned   : 115
+Winning plan stage   : SUBPLAN
+Execution stage      : SUBPLAN
+Docs examined (input): 87632
+
+>>> Aggregazione con text search:
+=== EXPLAIN ANALYSIS ===
+Execution time       : 3 ms
+Documents examined   : 115
+Index keys examined  : 115
+Documents returned   : 115
+Winning plan stage   : TEXT_MATCH
+Execution stage      : TEXT_MATCH
+Docs examined (input): 115
+
+==================================================
+
+=== Termine di ricerca: 'psicologia roma' ===
+
+>>> Aggregazione con regex personalizzata:
+=== EXPLAIN ANALYSIS ===
+Execution time       : 209 ms
+Documents examined   : 87632
+Index keys examined  : 0
+Documents returned   : 0
+Winning plan stage   : SUBPLAN
+Execution stage      : SUBPLAN
+Docs examined (input): 87632
+
+>>> Aggregazione con text search:
+=== EXPLAIN ANALYSIS ===
+Execution time       : 159 ms
+Documents examined   : 21337
+Index keys examined  : 22356
+Documents returned   : 21337
+Winning plan stage   : TEXT_MATCH
+Execution stage      : TEXT_MATCH
+Docs examined (input): 21337
+
+==================================================

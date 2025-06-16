@@ -116,6 +116,35 @@ public class CustomDoctorMongoRepositoryImpl implements CustomDoctorMongoReposit
      */
     @Override
     public List<DoctorMongoProjection> searchDoctors(String text) {
+        // Match documents using full-text search
+        AggregationOperation match = match(Criteria.where("$text").is(new Document("$search", text)));
+
+        // Add MongoDB's built-in text relevance score
+        AggregationOperation project = context -> new Document("$project",
+                new Document("doctor", "$$ROOT")
+                        .append("score", new Document("$meta", "textScore"))
+        );
+
+        // Sort by relevance score
+        AggregationOperation sort = context -> new Document("$sort",
+                new Document("score", new Document("$meta", "textScore"))
+        );
+
+        // Limit to top 250 results
+        AggregationOperation limit = limit(250);
+
+        // Build the aggregation pipeline
+        Aggregation agg = newAggregation(match, project, sort, limit);
+
+        // Execute aggregation
+        AggregationResults<DoctorMongoProjection> results =
+                mongoTemplate.aggregate(agg, "doctors", DoctorMongoProjection.class);
+
+        return results.getMappedResults();
+    }
+
+
+    public List<DoctorMongoProjection> _searchDoctors(String text) {
         // 1) Filter: at least one of name, specializations, city or province matches the text (case‑insensitive)
         AggregationOperation match = match(new Criteria().orOperator(
                 Criteria.where("name").regex(text, "i"),
