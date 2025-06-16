@@ -1,6 +1,6 @@
 import json
 import os
-from pymongo import MongoClient
+from pymongo import TEXT, MongoClient
 from config import JSON_DIR, get_config
 
 def drop_mongo(config):
@@ -115,6 +115,25 @@ def import_data_to_mongo(config):
 
         print("✅ Doctors importati")
 
+        # Create indexes for doctors
+        db["doctors"].create_index(
+            [
+                ("name", TEXT),
+                ("specializations", TEXT),
+                ("address.city", TEXT),
+                ("address.province", TEXT)
+            ],
+            name="DoctorsTextIndex",
+            weights={
+                "name": 10,
+                "specializations": 5,
+                "address.city": 2,
+                "address.province": 2
+            }
+        )
+
+        print("✅ Doctors Text Index creato")
+
 
     # Appointments
     if "appointments" not in db.list_collection_names():
@@ -147,5 +166,12 @@ def import_data_to_mongo(config):
         )
         
         print("✅ Appointments importati")
+
+        # Create  indexes for appointments
+        db["appointments"].create_index([("patient._id", 1)], name="idx_patient_id")
+        db["appointments"].create_index([("doctor._id", 1)], name="idx_doctor_id")
+
+        print("✅ Appointments indexes creati")
+
 
     client.close()

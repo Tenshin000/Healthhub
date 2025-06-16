@@ -1,7 +1,6 @@
 from pymongo import MongoClient
 from bson import ObjectId
 from datetime import datetime
-import time
 
 # Connessione a MongoDB
 client = MongoClient("mongodb://10.1.1.55:27020,10.1.1.56:27020,10.1.1.57:27020/?replicaSet=lsmdb")
@@ -9,87 +8,102 @@ db = client["healthhub"]
 collection = db["appointments"]
 
 # Parametri
-doctor_id = ObjectId("684adad437804916ca65ef04")  # Sostituisci con un vero ObjectId
 year = 2025
 
-# Pipeline di aggregazione
+#doctor_id = ObjectId("684adad437804916ca65ef04")  # Sostituisci con un vero ObjectId
+# Estrae 10 dottori distinti casuali dalla collezione
 pipeline = [
-    {
-        "$match": {
-            "doctor._id": doctor_id,
-            "date": {
-                "$gte": datetime(year, 1, 1),
-                "$lt": datetime(year + 1, 1, 1)
-            }
-        }
-    },
-    {
-        "$project": {
-            "month": { "$month": "$date" },
-            "price": 1
-        }
-    },
-    {
-        "$group": {
-            "_id": "$month",
-            "total": { "$sum": "$price" }
-        }
-    },
-    {
-        "$project": {
-            "month": "$_id",
-            "total": 1,
-            "_id": 0
-        }
-    }
+    { "$match": { "doctor._id": { "$exists": True } } },
+    { "$group": { "_id": "$doctor._id" } },
+    { "$sample": { "size": 10 } }
 ]
 
-def run_aggregation(label):
+doctor_ids = [doc["_id"] for doc in collection.aggregate(pipeline)]
+
+print("\n==============================")
+print("Selezionati 10 dottori a caso:")
+print("==============================")
+for did in doctor_ids:
+    print(f"- {did}")
+print()
+
+# Costruzione pipeline di aggregazione per un dato doctor_id
+def build_pipeline(doctor_id):
+    return [
+        {
+            "$match": {
+                "doctor._id": doctor_id,
+                "date": {
+                    "$gte": datetime(year, 1, 1),
+                    "$lt": datetime(year + 1, 1, 1)
+                }
+            }
+        },
+        {
+            "$project": {
+                "month": { "$month": "$date" },
+                "price": 1
+            }
+        },
+        {
+            "$group": {
+                "_id": "$month",
+                "total": { "$sum": "$price" }
+            }
+        },
+        {
+            "$project": {
+                "month": "$_id",
+                "total": 1,
+                "_id": 0
+            }
+        }
+    ]
+
+# Esegue explain su una pipeline
+def run_explain(pipeline):
     return db.command("explain", {
         "aggregate": "appointments",
         "pipeline": pipeline,
         "cursor": {}
     })
 
-# Verifica indice
-print("Indici esistenti:")
-for idx in collection.list_indexes():
-    print(idx)
+# Stampa i risultati dello explain
+def print_explain_stats(result, label):
+    stats = result['stages'][0]['$cursor']['executionStats']
+    stage = stats['executionStages']
+    input_stage = stage.get('inputStage', {})
 
-# Esecuzione con indice attivo
-result = run_aggregation("Con indice")
+    print(f"--- {label} ---")
+    print(f"Execution time       : {stats['executionTimeMillis']} ms")
+    print(f"Documents examined   : {stats['totalDocsExamined']}")
+    print(f"Index keys examined  : {stats['totalKeysExamined']}")
+    print(f"Documents returned   : {stats['nReturned']}")
+    print(f"Execution stage      : {stage['stage']}")
+    if 'docsExamined' in input_stage:
+        print(f"Docs examined (input): {input_stage['docsExamined']}")
+    print()
 
-stats = result['stages'][0]['$cursor']['executionStats']
-stage = stats['executionStages']
-input_stage = stage.get('inputStage', {})
+# Loop su ogni dottore
+for i, doctor_id in enumerate(doctor_ids, start=1):
+    print(f"\n==============================")
+    print(f"Analisi per il dottore #{i}: {doctor_id}")
+    print("==============================\n")
 
-print("=== EXPLAIN ANALYSIS ===")
-print(f"Execution time       : {stats['executionTimeMillis']} ms")
-print(f"Documents examined   : {stats['totalDocsExamined']}")
-print(f"Index keys examined  : {stats['totalKeysExamined']}")
-print(f"Documents returned   : {stats['nReturned']}")
-print(f"Execution stage      : {stage['stage']}")
-if 'docsExamined' in input_stage:
-    print(f"Docs examined (input): {input_stage['docsExamined']}")
+    pipeline = build_pipeline(doctor_id)
 
-# Rimozione temporanea indice
-print("Rimuovo indice su doctor._id...")
-collection.drop_index("idx_doctor_id")
+    # Con indice
+    result = run_explain(pipeline)
+    print_explain_stats(result, "Con indice (idx_doctor_id attivo)")
 
-# Esecuzione senza indice
-result = run_aggregation("Senza indice")
+    # Rimuovi indice
+    print("→ Rimuovo indice su 'doctor._id'...\n")
+    collection.drop_index("idx_doctor_id")
 
-stats = result['stages'][0]['$cursor']['executionStats']
-stage = stats['executionStages']
-input_stage = stage.get('inputStage', {})
+    # Senza indice
+    result = run_explain(pipeline)
+    print_explain_stats(result, "Senza indice (idx_doctor_id rimosso)")
 
-print("=== EXPLAIN ANALYSIS ===")
-print(f"Execution time       : {stats['executionTimeMillis']} ms")
-print(f"Documents examined   : {stats['totalDocsExamined']}")
-print(f"Index keys examined  : {stats['totalKeysExamined']}")
-print(f"Documents returned   : {stats['nReturned']}")
-print(f"Execution stage      : {stage['stage']}")
-if 'docsExamined' in input_stage:
-    print(f"Docs examined (input): {input_stage['docsExamined']}")
-
-# Ricreazione indice per non lasciar il DB in uno stato incoerente
+    # Ricrea indice
+    print("→ Ripristino indice su 'doctor._id'...\n")
+    collection.create_index([("doctor._id", 1)], name="idx_doctor_id")

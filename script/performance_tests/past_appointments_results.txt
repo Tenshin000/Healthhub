@@ -1,0 +1,210 @@
+
+==============================
+Analisi per il paziente #1: 684ada4537804916ca6382b2
+==============================
+
+--- Con indice (idx_patient_id attivo) ---
+Execution time       : 14 ms
+Documents examined   : 1
+Index keys examined  : 1
+Documents returned   : 1
+
+→ Rimuovo indice su 'patient._id'...
+
+--- Senza indice (idx_patient_id rimosso) ---
+Execution time       : 1004 ms
+Documents examined   : 699987
+Index keys examined  : 0
+Documents returned   : 1
+
+→ Ripristino indice su 'patient._id'...
+
+
+==============================
+Analisi per il paziente #2: 684ada4637804916ca64ff73
+==============================
+
+--- Con indice (idx_patient_id attivo) ---
+Execution time       : 3 ms
+Documents examined   : 1
+Index keys examined  : 1
+Documents returned   : 1
+
+→ Rimuovo indice su 'patient._id'...
+
+--- Senza indice (idx_patient_id rimosso) ---
+Execution time       : 619 ms
+Documents examined   : 699987
+Index keys examined  : 0
+Documents returned   : 1
+
+→ Ripristino indice su 'patient._id'...
+
+
+==============================
+Analisi per il paziente #3: 684ada4437804916ca623fa5
+==============================
+
+--- Con indice (idx_patient_id attivo) ---
+Execution time       : 8 ms
+Documents examined   : 1
+Index keys examined  : 1
+Documents returned   : 1
+
+→ Rimuovo indice su 'patient._id'...
+
+--- Senza indice (idx_patient_id rimosso) ---
+Execution time       : 548 ms
+Documents examined   : 699987
+Index keys examined  : 0
+Documents returned   : 1
+
+→ Ripristino indice su 'patient._id'...
+
+
+==============================
+Analisi per il paziente #4: 684ada4537804916ca63d209
+==============================
+
+--- Con indice (idx_patient_id attivo) ---
+Execution time       : 7 ms
+Documents examined   : 1
+Index keys examined  : 1
+Documents returned   : 1
+
+→ Rimuovo indice su 'patient._id'...
+
+--- Senza indice (idx_patient_id rimosso) ---
+Execution time       : 549 ms
+Documents examined   : 699987
+Index keys examined  : 0
+Documents returned   : 1
+
+→ Ripristino indice su 'patient._id'...
+
+
+==============================
+Analisi per il paziente #5: 684ada4437804916ca633679
+==============================
+
+--- Con indice (idx_patient_id attivo) ---
+Execution time       : 10 ms
+Documents examined   : 1
+Index keys examined  : 1
+Documents returned   : 1
+
+→ Rimuovo indice su 'patient._id'...
+
+--- Senza indice (idx_patient_id rimosso) ---
+Execution time       : 557 ms
+Documents examined   : 699987
+Index keys examined  : 0
+Documents returned   : 1
+
+→ Ripristino indice su 'patient._id'...
+
+
+==============================
+Analisi per il paziente #6: 684ada4637804916ca650fe7
+==============================
+
+--- Con indice (idx_patient_id attivo) ---
+Execution time       : 6 ms
+Documents examined   : 1
+Index keys examined  : 1
+Documents returned   : 1
+
+→ Rimuovo indice su 'patient._id'...
+
+--- Senza indice (idx_patient_id rimosso) ---
+Execution time       : 544 ms
+Documents examined   : 699987
+Index keys examined  : 0
+Documents returned   : 1
+
+→ Ripristino indice su 'patient._id'...
+
+
+==============================
+Analisi per il paziente #7: 684ada4437804916ca626989
+==============================
+
+--- Con indice (idx_patient_id attivo) ---
+Execution time       : 11 ms
+Documents examined   : 1
+Index keys examined  : 1
+Documents returned   : 1
+
+→ Rimuovo indice su 'patient._id'...
+
+--- Senza indice (idx_patient_id rimosso) ---
+Execution time       : 481 ms
+Documents examined   : 699987
+Index keys examined  : 0
+Documents returned   : 1
+
+→ Ripristino indice su 'patient._id'...
+
+
+==============================
+Analisi per il paziente #8: 684ada4537804916ca648863
+==============================
+
+--- Con indice (idx_patient_id attivo) ---
+Execution time       : 9 ms
+Documents examined   : 1
+Index keys examined  : 1
+Documents returned   : 1
+
+→ Rimuovo indice su 'patient._id'...
+
+--- Senza indice (idx_patient_id rimosso) ---
+Execution time       : 474 ms
+Documents examined   : 699987
+Index keys examined  : 0
+Documents returned   : 1
+
+→ Ripristino indice su 'patient._id'...
+
+
+==============================
+Analisi per il paziente #9: 684ada4637804916ca6529cc
+==============================
+
+--- Con indice (idx_patient_id attivo) ---
+Execution time       : 9 ms
+Documents examined   : 4
+Index keys examined  : 4
+Documents returned   : 4
+
+→ Rimuovo indice su 'patient._id'...
+
+--- Senza indice (idx_patient_id rimosso) ---
+Execution time       : 482 ms
+Documents examined   : 699987
+Index keys examined  : 0
+Documents returned   : 4
+
+→ Ripristino indice su 'patient._id'...
+
+
+==============================
+Analisi per il paziente #10: 684ada4637804916ca653569
+==============================
+
+--- Con indice (idx_patient_id attivo) ---
+Execution time       : 4 ms
+Documents examined   : 3
+Index keys examined  : 3
+Documents returned   : 3
+
+→ Rimuovo indice su 'patient._id'...
+
+--- Senza indice (idx_patient_id rimosso) ---
+Execution time       : 491 ms
+Documents examined   : 699987
+Index keys examined  : 0
+Documents returned   : 3
+
+→ Ripristino indice su 'patient._id'...
+
