@@ -1,7 +1,7 @@
-\section{Dataset and Web Scraping}
+\chapter{Dataset and Web Scraping}
 To populate the dataset for our application, we used a combination of web scraping, synthetic data generation, and logical inference based on real-world patterns of user behavior.
 
-\subsection{Web Scraping}
+\section{Web Scraping}
 The initial data was scraped from a platform containing medical reviews, MioDottore\footnote{\url{https://www.miodottore.it/}}. This platform provides a comprehensive database of medical professionals, including their specializations, locations, and user reviews. The scraping process involved extracting the following information:
 \begin{itemize}
     \item Doctor names and specializations
@@ -11,7 +11,7 @@ The initial data was scraped from a platform containing medical reviews, MioDott
     \item Service offerings (e.g., types of consultations, treatments)
 \end{itemize}
 
-\subsection{Synthetic Data Generation}
+\section{Synthetic Data Generation}
 To enhance the dataset, we generated synthetic data to simulate a more realistic user base and appointment history.
 This involved several steps:
 \begin{itemize}
@@ -20,9 +20,9 @@ This involved several steps:
     \item \textbf{Likes}: To simulate engagement features such as likes on reviews, we analyzed the provinces of the doctors each user had interacted with. We then randomly selected other doctors in the same provinces and associated a number of likes comparable to the number of reviews written by each user.
 \end{itemize}
     
-\subsection{Dataset Characteristics: Velocity and Variety}
+\section{Dataset Characteristics: Velocity and Variety}
 
-\subsubsection{Velocity}
+\subsection{Velocity}
 
 The application context is inherently dynamic, and our dataset reflects this through the following characteristics:
 
@@ -31,7 +31,7 @@ The application context is inherently dynamic, and our dataset reflects this thr
     \item \textbf{Growing doctor base}: Based on trends from medical boards, we estimate around 400 to 500 new doctors would register on the platform annually, contributing to the system’s dynamism and evolving content.
 \end{itemize}
 
-\subsubsection{Variety}
+\subsection{Variety}
 
 The dataset incorporates diverse data types, which contribute to its heterogeneity:
 
@@ -40,7 +40,7 @@ The dataset incorporates diverse data types, which contribute to its heterogenei
     \item \textbf{Diverse entities}: The inclusion of users, doctors, reviews, likes, and appointments enables multi-relational analysis and feature richness.
 \end{itemize}
 
-\subsection{Resulting Dataset}
+\section{Resulting Dataset}
 
 The original scraped dataset, stored in \texttt{scraped.json} (265 MB), contains the raw information collected from the web. This dataset served as the foundation for the data generation process, providing:
 

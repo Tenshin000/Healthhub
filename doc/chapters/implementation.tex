@@ -1,8 +1,8 @@
-\section{Implementation}
-\subsection{Java}
+\chapter{Implementation}
+\section{Java}
 We chose \textbf{Java} as the primary programming language for our application due to its robustness, platform independence, and strong ecosystem. Java offers a well-established set of libraries and frameworks that support rapid development of secure, scalable, and maintainable web applications. Its object-oriented nature encourages clean architecture and modular design, which are essential for complex systems like healthcare platforms. Additionally, Java's widespread use in enterprise environments ensures long-term support and community-driven innovation, making it a reliable choice for production-grade applications.
 
-\subsection{Spring Boot}
+\section{Spring Boot}
 As the core of our application, we adopted the \textbf{Spring Boot} framework, which has significantly streamlined both the development and deployment processes. One of the primary advantages of Spring Boot lies in its built-in support for an embedded \textbf{Tomcat} server, allowing the creation of a fully functional web application without requiring external configuration. This design choice has enhanced our ability to construct responsive and maintainable RESTful APIs. 
 
 In addition, to support our data management needs, we integrated \textbf{Spring Data Neo4j} and \textbf{Spring Data MongoDB}. The former facilitates interaction with the \textbf{Neo4j graph database} through a consistent repository-based abstraction, ideal for managing highly interconnected medical data such as relationships between doctors and patients. The latter offers seamless integration with \textbf{MongoDB}, \textbf{a document-oriented NoSQL database}, while preserving the flexibility and idiomatic programming style of the broader Spring ecosystem. Collectively, these technologies have provided a robust, scalable and modular architecture well-suited to the requirements of our application. 
