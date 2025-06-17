@@ -1,6 +1,7 @@
 package it.unipi.healthhub.repository.mongo.appointment;
 
 import it.unipi.healthhub.model.mongo.Appointment;
+import it.unipi.healthhub.model.mongo.Doctor;
 import it.unipi.healthhub.model.mongo.User;
 
 import java.time.LocalDate;
@@ -9,6 +10,8 @@ import java.util.Map;
 
 public interface CustomAppointmentMongoRepository {
     List<Appointment> findByDoctorIdAndDay(String doctorId, LocalDate day);
+    void updateDoctorInfo(Doctor updatedDoctor);
+    void updatePatientInfo(User updatedUser);
     Map<String, Integer> getVisitsCountByTypeForDoctor(String doctorId);
     Map<String, Double> getEarningsByYearForDoctor(String doctorId, Integer year);
     Map<String, Integer> getVisitsCountByDayForDoctorWeek(String doctorId, Integer week, Integer year);

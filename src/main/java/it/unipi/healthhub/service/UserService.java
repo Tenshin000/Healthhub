@@ -129,7 +129,7 @@ public class UserService {
             return null;
         }
 
-        User savedUser = userMongoRepository.save(user);
+        User savedUser = updateUser(user.getId(), user);
         UserDAO userDAO = new UserDAO(savedUser.getId(), savedUser.getName());
         sanitizeUserNeo4j(userDAO);
         userNeo4jRepository.save(userDAO);
@@ -137,13 +137,30 @@ public class UserService {
     }
 
     @Transactional
-    public User updateUser(String id, User userData) {
-        if (!userMongoRepository.existsById(id)) {
+    public User updateUser(String id, User userData){
+        Optional<User> optOldUser = getUserById(id);
+        if(optOldUser.isPresent()) {
+            User oldUser = optOldUser.get();
+            userData.setId(id);
+            sanitizeUserMongo(userData);
+            User updatedUser = userMongoRepository.save(userData);
+
+            boolean nameChanged = !oldUser.getName().equals(updatedUser.getName());
+            boolean emailChanged = !oldUser.getEmail().equals(updatedUser.getEmail());
+            boolean genderChanged = !oldUser.getGender().equals(updatedUser.getGender());
+
+            if(nameChanged || emailChanged || genderChanged)
+                appointmentService.updatePatientInfo(updatedUser);
+
+            if(nameChanged){
+                UserDAO userDAO = new UserDAO(updatedUser.getId(), updatedUser.getName());
+                userNeo4jRepository.save(userDAO);
+            }
+
+            return updatedUser;
+        } else {
             throw new UserNotFoundException("User not found with id: " + id);
         }
-        userData.setId(id);
-        sanitizeUserMongo(userData);
-        return userMongoRepository.save(userData);
     }
 
     public void deleteUser(String id) {;
@@ -190,7 +207,8 @@ public class UserService {
             userNeo4jRepository.updateName(patientId, userDetails.getFullName());
 
             sanitizeUserMongo(user);
-            userMongoRepository.save(user);
+            
+            updateUser(user.getId(), user);
 
             applicationEventPublisher.publishEvent(
                     new UserNameUpdateEvent(this, patientId, userDetails.getFullName())
@@ -239,7 +257,7 @@ public class UserService {
             user.setEmail(userContacts.getEmail());
             user.setPersonalNumber(userContacts.getPhoneNumber());
             sanitizeUserMongo(user);
-            userMongoRepository.save(user); // Save updated doctor with the updated user details
+            updateUser(user.getId(), user); // Save updated doctor with the updated user details
             return new PatientContactsDTO(user.getName(), user.getEmail(), user.getFiscalCode(), user.getDob(), user.getGender(), user.getPersonalNumber());
         }
         return null;

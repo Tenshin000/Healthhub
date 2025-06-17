@@ -1,11 +1,28 @@
 \chapter{Implementation}
-\section{Java}
-We chose \textbf{Java} as the primary programming language for our application due to its robustness, platform independence, and strong ecosystem. Java offers a well-established set of libraries and frameworks that support rapid development of secure, scalable, and maintainable web applications. Its object-oriented nature encourages clean architecture and modular design, which are essential for complex systems like healthcare platforms. Additionally, Java's widespread use in enterprise environments ensures long-term support and community-driven innovation, making it a reliable choice for production-grade applications.
+\section{Front-End}
+The front-end of our application has been developed as a traditional web-based interface, utilizing a combination of \textbf{JavaScript}, \textbf{HTML} and \textbf{CSS}. This technology stack enables the creation of a responsive and interactive user interface that can be accessed from any modern web browser without the need for additional installations. The application communicates asynchronously with the back-end server through \textbf{AJAX} (Asynchronous JavaScript and XML) requests, allowing data to be fetched and updated dynamically without requiring full page reloads. This results in a smoother user experience and improved performance, particularly when handling operations such as appointment booking, profile management, and real-time data visualization. The separation of concerns between presentation and logic also enhances the maintainability and scalability of the application.
+
+\section{Back-End}
+The back-end is implemented using \textbf{Java} due to its robustness, platform independence, and strong ecosystem. Java offers a well-established set of libraries and frameworks that support rapid development of secure, scalable, and maintainable web applications. Its object-oriented nature encourages clean architecture and modular design, which are essential for complex systems like healthcare platforms. Additionally, Java's widespread use in enterprise environments ensures long-term support and community-driven innovation, making it a reliable choice for production-grade applications.
 
 \section{Spring Boot}
 As the core of our application, we adopted the \textbf{Spring Boot} framework, which has significantly streamlined both the development and deployment processes. One of the primary advantages of Spring Boot lies in its built-in support for an embedded \textbf{Tomcat} server, allowing the creation of a fully functional web application without requiring external configuration. This design choice has enhanced our ability to construct responsive and maintainable RESTful APIs. 
 
 In addition, to support our data management needs, we integrated \textbf{Spring Data Neo4j} and \textbf{Spring Data MongoDB}. The former facilitates interaction with the \textbf{Neo4j graph database} through a consistent repository-based abstraction, ideal for managing highly interconnected medical data such as relationships between doctors and patients. The latter offers seamless integration with \textbf{MongoDB}, \textbf{a document-oriented NoSQL database}, while preserving the flexibility and idiomatic programming style of the broader Spring ecosystem. Collectively, these technologies have provided a robust, scalable and modular architecture well-suited to the requirements of our application. 
+
+\vspace{4mm}
+
+The application follows the layered architecture presented during lectures, organizing the codebase into clearly defined packages to promote modularity and separation of concerns. Specifically: 
+\begin{itemize}
+	\item The \textbf{Config} package contains configuration classes;
+	\item The \textbf{Controller} package handles API endpoint mappings, the \textbf{Model} package defines the entity classes corresponding to the database schema. The Controller also contains the \textbf{APIs} with which the front-end communicates;
+	\item The \textbf{Repository} package provides data access functionality through Spring Data JPA interfaces;
+	\item The \textbf{Resources} directory includes external configuration files such as \texttt{application.properties};
+	\item The \textbf{Service} layer encapsulates the core business logic;
+\end{itemize}
+
+
+
 
 
 

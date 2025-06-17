@@ -2,6 +2,7 @@ package it.unipi.healthhub.repository.mongo.appointment;
 
 import com.mongodb.DBObject;
 import it.unipi.healthhub.model.mongo.Appointment;
+import it.unipi.healthhub.model.mongo.Doctor;
 import it.unipi.healthhub.model.mongo.User;
 import it.unipi.healthhub.util.DateUtil;
 import org.springframework.data.domain.Sort;
@@ -35,6 +36,42 @@ public class CustomAppointmentMongoRepositoryImpl implements CustomAppointmentMo
                 .lt(day.plusDays(1).atStartOfDay())
         );
         return mongoTemplate.find(query, Appointment.class);
+    }
+
+    @Override
+    public void updateDoctorInfo(Doctor updatedDoctor){
+        Appointment.DoctorInfo updatedDoctorInfo = new Appointment.DoctorInfo(
+                updatedDoctor.getId(),
+                updatedDoctor.getName(),
+                updatedDoctor.getAddress(),
+                updatedDoctor.getEmail()
+        );
+
+        Query query = new Query(Criteria.where("doctor.id").is(updatedDoctor.getId()));
+        Update update = new Update()
+                .set("doctor.name", updatedDoctorInfo.getName())
+                .set("doctor.email", updatedDoctorInfo.getEmail())
+                .set("doctor.address", updatedDoctorInfo.getAddress());
+
+        mongoTemplate.updateMulti(query, update, Appointment.class);
+    }
+
+    @Override
+    public void updatePatientInfo(User updatedUser) {
+        Appointment.PatientInfo updatedPatientInfo = new Appointment.PatientInfo(
+                updatedUser.getId(),
+                updatedUser.getName(),
+                updatedUser.getEmail(),
+                updatedUser.getGender()
+        );
+
+        Query query = new Query(Criteria.where("patient.id").is(updatedUser.getId()));
+        Update update = new Update()
+                .set("patient.name", updatedPatientInfo.getName())
+                .set("patient.email", updatedPatientInfo.getEmail())
+                .set("patient.gender", updatedPatientInfo.getGender());
+
+        mongoTemplate.updateMulti(query, update, Appointment.class);
     }
 
     @Override
