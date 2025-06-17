@@ -1,0 +1,91 @@
+\section{Design}
+\subsection{Actors}
+The application involves three primary categories of actors, each with distinct roles and permissions:
+\begin{itemize}
+	\item \textit{Non-Authenticated User (Guest User):} refers to an anonymous individual who accesses the application without logging in. This actor is allowed to register, authenticate using existing credentials, or explore the platform by searching for doctors and viewing their public profiles.
+	
+	\item \textit{Patient (User):} represents the end-user of the service. Once authenticated, the patient can book appointments with doctors, confirm or cancel them, and subsequently provide feedback through reviews.
+	
+	\item \textit{Doctor:} a professional figure who offers medical appointments. The doctor can manage their availability schedule, making it accessible to patients, and consult an analytics dashboard displaying aggregated data such as earnings, reviews, and the number of visits performed.
+\end{itemize}
+
+\subsection{Functional Requirements}
+The following section outlines the functional requirements.
+
+\subsubsection{Guest Users}
+\textbf{Guest users} are allowed to:
+\begin{itemize}
+	\item Register for an account within the application;
+	\item Log in using their credentials;
+	\item Initiate the password recovery process in case of forgotten credentials;
+	\item Search for doctors and access their public profiles.
+\end{itemize}
+
+\subsubsection{Patients}
+Authenticated users identified as \textbf{patients} are granted the following capabilities:
+\begin{itemize}
+	\item Manage and update their personal profiles;
+	\item Search for doctors and access their public profiles;
+	\item Book appointments and optionally include a note for the doctor;
+	\item Endorse a doctor as a form of support or recommendation;
+	\item Submit reviews regarding their medical experience;
+	\item View their appointments, including past, current, and upcoming ones;
+	\item Search for doctors through the recommendation feature provided by the system.
+\end{itemize}
+
+\subsubsection{Doctors}
+Authenticated users identified as \textbf{doctors} are provided with the following functionalities:
+\begin{itemize}
+	\item Manage and update their personal and professional profiles;
+	\item Search for other doctors and access their public profiles;
+	\item Define and configure the types of visits offered, along with the associated pricing;
+	\item Oversee appointments by identifying scheduled patients and appointments for the current day;
+	\item Configure and manage appointment availability through customizable scheduling templates;
+	\item Monitor and respond to patient reviews;
+	\item Access analytics, including visual representations of revenue, newly acquired patients, recent reviews, and a summary of completed visits.
+\end{itemize}
+
+\subsection{Non-Functional Requirements}
+The following non-functional requirements address the quality attributes of the system, ensuring its performance, reliability, security, scalability, and maintainability.
+
+\subsubsection{Performance and Scalability}
+\begin{itemize}
+	\item The system shall maintain \textbf{acceptable response times} for common operations such as viewing medical records and scheduling appointments; 
+	\item The system shall efficiently \textbf{handle increased workload} during peak usage periods without degradation of service.
+\end{itemize}
+
+\subsubsection{Availability and Reliability}
+\begin{itemize}
+	\item The application shall be \textbf{available} to all users \textbf{24/7}, minimizing downtime through redundancy and failover mechanisms;
+	\item The system shall implement \textbf{backup and recovery procedures} to preserve data integrity and support rapid restoration after failures.
+	\item The system shall tolerate occasional data staleness in non-critical views, ensuring high availability even under degraded conditions.
+\end{itemize}
+
+\subsubsection{Security and Privacy}
+\begin{itemize}
+	\item The system shall enforce \textbf{secure, authenticated access for all users}, employing strong password policies and session management;
+	\item All sensitive data shall be encrypted both in transit and at rest;
+	\item The system provides defenses against injections. 
+\end{itemize}
+
+\subsubsection{Usability}
+\begin{itemize}
+	\item The user interface shall be intuitive and \textbf{user‑friendly}, enabling users to perform tasks with minimal learning curve.
+	\item The application shall exhibit \textbf{low latency} in user interactions to maintain a responsive experience.
+\end{itemize}
+
+\subsubsection{Portability and Flexibility}
+\begin{itemize}
+	\item The application shall be \textbf{deployable on multiple operating systems} (e.g., Windows, macOS, Linux) without requiring behavioral changes.
+	\item The system’s architecture shall support the addition of new attributes or modules (e.g., new appointment types) with minimal code modification.
+\end{itemize}
+
+\subsubsection{Maintainability}
+\begin{itemize}
+	\item The codebase shall follow \textbf{Object-Oriented design} principles, promoting modularity and ease of comprehension.
+	\item The system shall \textbf{minimize single points of failure} through component decoupling and redundancy.
+	\item The application shall include comprehensive documentation and code comments to facilitate future enhancements and debugging.
+\end{itemize}
+
+\section{UML Class Diagram}
+...
