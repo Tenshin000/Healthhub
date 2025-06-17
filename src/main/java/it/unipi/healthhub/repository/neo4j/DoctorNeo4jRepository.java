@@ -35,7 +35,7 @@ public interface DoctorNeo4jRepository extends Neo4jRepository<DoctorDAO, String
             "WHERE toLower(d.name) CONTAINS toLower($search) " +
             " OR any(spec IN d.specializations WHERE toLower(spec) CONTAINS toLower($search)) " +
             "WITH d, min(length(path)) AS steps " +
-            "RETURN d as doctor, steps as score " +
+            "RETURN d as doctor, (5-steps) as score " +
             "ORDER BY steps " +
             "LIMIT 250")
     List<DoctorNeo4jProjection> findConnectedDoctorsBySteps(@Param("uid") String patientId, @Param("search") String search);
