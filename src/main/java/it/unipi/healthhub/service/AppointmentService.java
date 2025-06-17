@@ -8,6 +8,7 @@ import it.unipi.healthhub.model.mongo.User;
 import it.unipi.healthhub.repository.mongo.AppointmentMongoRepository;
 import it.unipi.healthhub.util.FakeMailSender;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -66,7 +67,6 @@ public class AppointmentService {
         }
     }
 
-
     public List<Appointment> getAllAppointment(){
         return appointmentRepository.findAll();
     }
@@ -89,6 +89,16 @@ public class AppointmentService {
             return appointmentRepository.save(appointmentToUpdate);
         }
         return null;
+    }
+
+    @Async
+    public void updateDoctorInfo(Doctor updatedDoctor){
+        appointmentRepository.updateDoctorInfo(updatedDoctor);
+    }
+
+    @Async
+    public void updatePatientInfo(User updatedUser) {
+        appointmentRepository.updatePatientInfo(updatedUser);
     }
 
     public void deleteAppointment(String id){

@@ -241,7 +241,7 @@ public class DoctorService {
         it.unipi.healthhub.model.mongo.Service service = new it.unipi.healthhub.model.mongo.Service("Standard Visit", 0);
         newService(doctor, service);
         sanitizeDoctorMongo(doctor);
-        Doctor newDoc = doctorMongoRepository.save(doctor);
+        Doctor newDoc = updateDoctor(doctor.getId(), doctor);
         DoctorDAO doctorDAO = new DoctorDAO(newDoc.getId(), newDoc.getName(), newDoc.getSpecializations());
 
         sanitizeDoctorNeo4j(doctorDAO);
@@ -249,13 +249,34 @@ public class DoctorService {
         return newDoc;
     }
 
+    @Transactional
     public Doctor updateDoctor(String id, Doctor doctorData){
-        if (!doctorMongoRepository.existsById(id)) {
-            throw new DoctorNotFoundException("Doctor not found with id: " + id);
+        Optional<Doctor> optOldDoctor = getDoctorById(id);
+        if(optOldDoctor.isPresent()){
+            Doctor oldDoctor = optOldDoctor.get();
+            doctorData.setId(id);
+            sanitizeDoctorMongo(doctorData);
+            Doctor updatedDoctor = doctorMongoRepository.save(doctorData);
+
+            boolean nameChanged = !oldDoctor.getName().equals(updatedDoctor.getName());
+            boolean emailChanged = !oldDoctor.getEmail().equals(updatedDoctor.getEmail());
+            boolean addressChanged = !Objects.equals(oldDoctor.getAddress(), updatedDoctor.getAddress());
+            boolean specializationsChanged =
+                    !new HashSet<>(Optional.ofNullable(oldDoctor.getSpecializations()).orElse(List.of()))
+                            .equals(new HashSet<>(Optional.ofNullable(updatedDoctor.getSpecializations()).orElse(List.of())));
+
+            if(nameChanged || emailChanged || addressChanged)
+                appointmentService.updateDoctorInfo(updatedDoctor);
+
+            if(nameChanged || specializationsChanged){
+                DoctorDAO doctorDAO = new DoctorDAO(updatedDoctor.getId(), updatedDoctor.getName(), updatedDoctor.getSpecializations());
+                doctorNeo4jRepository.save(doctorDAO);
+            }
+            
+            return updatedDoctor;
         }
-        doctorData.setId(id);
-        sanitizeDoctorMongo(doctorData);
-        return doctorMongoRepository.save(doctorData);
+        else
+            throw new DoctorNotFoundException("Doctor not found with id: " + id);
     }
 
     @Transactional
@@ -308,7 +329,7 @@ public class DoctorService {
         return null;
     }
 
-
+    
     public Integer addService(String doctorId, it.unipi.healthhub.model.mongo.Service service) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
@@ -318,7 +339,7 @@ public class DoctorService {
 
             // Add service to doctor's list
             sanitizeDoctorMongo(doctor);
-            doctorMongoRepository.save(doctor); // Save updated doctor with the new service
+            updateDoctor(doctor.getId(), doctor); // Save updated doctor with the new service
             return newIndex;
         }
         return null;
@@ -352,7 +373,7 @@ public class DoctorService {
             if (index >= 0 && index < services.size()) {
                 services.set(index, service); // Update the service
                 sanitizeDoctorMongo(doctor);
-                doctorMongoRepository.save(doctor); // Save the updated doctor with the updated service
+                updateDoctor(doctor.getId(), doctor); // Save the updated doctor with the updated service
                 return true;
             }
         }
@@ -367,7 +388,7 @@ public class DoctorService {
 
             if (index >= 0 && index < services.size()) {
                 services.remove(index.intValue()); // Remove service
-                doctorMongoRepository.save(doctor); // Save updated doctor without the removed service
+                updateDoctor(doctor.getId(), doctor); // Save updated doctor without the removed service
                 return true; // Indicates that the removal was successful
             }
         }
@@ -513,7 +534,7 @@ public class DoctorService {
             }
 
             doctor.getCalendarTemplates().add(newTemplate.getId());
-            doctorMongoRepository.save(doctor); // Save updated doctor with the new appointment
+            updateDoctor(doctor.getId(), doctor); // Save updated doctor with the new appointment
             return newTemplate;
         }
         return null;
@@ -560,7 +581,7 @@ public class DoctorService {
             List<String> templateIds = doctor.getCalendarTemplates();
             templateRepository.deleteById(templateId); // Delete template
             templateIds.remove(templateId); // Remove template
-            doctorMongoRepository.save(doctor); // Save updated doctor without the removed template
+            updateDoctor(doctor.getId(), doctor); // Save updated doctor without the removed template
             return true;
         }
         return false;
@@ -656,7 +677,7 @@ public class DoctorService {
                 throw new ScheduleAlreadyExistsException("A schedule for this week already exists.");
 
             doctor.getSchedules().add(calendar);
-            doctorMongoRepository.save(doctor); // Save updated doctor with the new appointment
+            updateDoctor(doctor.getId(), doctor); // Save updated doctor with the new appointment
             return calendar;
         }
         return null;
@@ -668,7 +689,7 @@ public class DoctorService {
             Doctor doctor = doctorOpt.get();
             List<Schedule> calendars = doctor.getSchedules();
             calendars.set(scheduleIndex, calendar); // Update calendar
-            doctorMongoRepository.save(doctor); // Save updated doctor with the updated calendar
+            updateDoctor(doctor.getId(), doctor); // Save updated doctor with the updated calendar
             return calendar;
         }
         return null;
@@ -691,7 +712,7 @@ public class DoctorService {
                         deleteAppointment(appointment);
 
                     calendars.remove(i); // Remove calendar
-                    doctorMongoRepository.save(doctor); // Save updated doctor without the removed calendar
+                    updateDoctor(doctor.getId(), doctor); // Save updated doctor without the removed calendar
                     return true;
                 }
             }
@@ -727,7 +748,7 @@ public class DoctorService {
 
             doctor.getReviews().add(modelReview); // Add review to doctor's list
             sanitizeDoctorMongo(doctor);
-            doctorMongoRepository.save(doctor); // Save updated doctor with the new review
+            updateDoctor(doctor.getId(), doctor); // Save updated doctor with the new review
 
             userNeo4jRepository.review(userId, doctorId);
 
@@ -747,7 +768,7 @@ public class DoctorService {
             userNeo4jRepository.unreview(review.getPatientId(), doctorId);
 
             reviews.remove(reviewIndex.intValue()); // Remove review
-            doctorMongoRepository.save(doctor); // Save updated doctor without the removed review
+            updateDoctor(doctor.getId(), doctor); // Save updated doctor without the removed review
             return true;
         }
         return false;
@@ -772,7 +793,7 @@ public class DoctorService {
             Doctor doctor = doctorOpt.get();
             doctor.setAddress(address); // Update address
             sanitizeDoctorMongo(doctor);
-            doctorMongoRepository.save(doctor); // Save updated doctor with the updated address
+            updateDoctor(doctor.getId(), doctor); // Save updated doctor with the updated address
             return address;
         }
         return null;
@@ -790,11 +811,10 @@ public class DoctorService {
             doctor.setDob(doctorDetails.getBirthDate());
             doctor.setGender(doctorDetails.getGender());
 
-
             doctorNeo4jRepository.updateName(doctorId, sanitizeForNeo4j(doctorDetails.getFullName()));
 
             sanitizeDoctorMongo(doctor);
-            doctorMongoRepository.save(doctor); // Save updated doctor with the updated user details
+            updateDoctor(doctor.getId(), doctor); // Save updated doctor with the updated user details
             return doctorDetails;
         }
         return null;
@@ -813,7 +833,7 @@ public class DoctorService {
             doctor.getPhoneNumbers().add(number);
 
             sanitizeDoctorMongo(doctor);
-            doctorMongoRepository.save(doctor);
+            updateDoctor(doctor.getId(), doctor);
             return newIndex;
         }
         return null;
@@ -835,7 +855,7 @@ public class DoctorService {
             List<String> phoneNumbers = doctor.getPhoneNumbers();
             if (index >= 0 && index < phoneNumbers.size()) {
                 phoneNumbers.remove(index.intValue());
-                doctorMongoRepository.save(doctor);
+                updateDoctor(doctor.getId(), doctor);
                 return true;
             }
         }
@@ -856,7 +876,7 @@ public class DoctorService {
             if (!specializations.contains(specialization)) {
                 specializations.add(specialization);
                 sanitizeDoctorMongo(doctor);
-                doctorMongoRepository.save(doctor);
+                updateDoctor(doctor.getId(), doctor);
                 doctorNeo4jRepository.addSpecialization(doctorId, specialization);
                 return specializations.size() - 1;
             }
@@ -874,7 +894,7 @@ public class DoctorService {
             if (index >= 0 && index < specializations.size()) {
                 doctorNeo4jRepository.removeSpecialization(doctorId, specializations.get(index));
                 specializations.remove(index.intValue());
-                doctorMongoRepository.save(doctor);
+                updateDoctor(doctor.getId(), doctor);
                 return true;
             }
         }
@@ -910,7 +930,7 @@ public class DoctorService {
 
         Doctor doc = doctorMongoRepository.findById(doctorId).orElseThrow(DoctorNotFoundException::new);
         doc.setEndorsementCount(doc.getEndorsementCount() + 1);
-        doctorMongoRepository.save(doc);
+        updateDoctor(doc.getId(), doc);
     }
 
     @Transactional
@@ -919,7 +939,7 @@ public class DoctorService {
 
         Doctor doc = doctorMongoRepository.findById(doctorId).orElseThrow(DoctorNotFoundException::new);
         doc.setEndorsementCount(doc.getEndorsementCount() - 1);
-        doctorMongoRepository.save(doc);
+        updateDoctor(doc.getId(), doc);
     }
 
     public Map<String, Integer> getVisitsAnalytics(String doctorId) {

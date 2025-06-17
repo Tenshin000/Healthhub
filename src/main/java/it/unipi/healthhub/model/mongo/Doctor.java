@@ -45,10 +45,10 @@ public class Doctor extends User {
         this.endorsementCount = endorsementCount;
     }
 
-    public int getReviewCountCount() {
+    public int getReviewCount() {
         return reviewCount;
     }
-    public void setReviewCountCount(int reviewCount) { this.reviewCount = reviewCount; }
+    public void setReviewCount(int reviewCount) { this.reviewCount = reviewCount; }
 
     public List<Review> getReviews() {
         return reviews;
