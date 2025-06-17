@@ -2,4 +2,72 @@
 To populate the dataset for our application, we used a combination of web scraping, synthetic data generation, and logical inference based on real-world patterns of user behavior.
 
 \subsection{Web Scraping}
-The initial data was scraped from a platform containing medical reviews
+The initial data was scraped from a platform containing medical reviews, MioDottore\footnote{\url{https://www.miodottore.it/}}. This platform provides a comprehensive database of medical professionals, including their specializations, locations, and user reviews. The scraping process involved extracting the following information:
+\begin{itemize}
+    \item Doctor names and specializations
+    \item Locations (cities and regions)
+    \item User reviews and ratings
+    \item Contact information (where available)
+    \item Service offerings (e.g., types of consultations, treatments)
+\end{itemize}
+
+\subsection{Synthetic Data Generation}
+To enhance the dataset, we generated synthetic data to simulate a more realistic user base and appointment history.
+This involved several steps:
+\begin{itemize}
+    \item \textbf{Unique Users}: We extracted all unique usernames from the scraped reviews. For each user, we generated a detailed profile including demographic and geographical information.
+    \item \textbf{Appointments}: For every review, we created a corresponding medical appointment. These were dated in the weeks preceding the review, to simulate a realistic flow where users leave feedback shortly after being treated.
+    \item \textbf{Likes}: To simulate engagement features such as likes on reviews, we analyzed the provinces of the doctors each user had interacted with. We then randomly selected other doctors in the same provinces and associated a number of likes comparable to the number of reviews written by each user.
+\end{itemize}
+    
+\subsection{Dataset Characteristics: Velocity and Variety}
+
+\subsubsection{Velocity}
+
+The application context is inherently dynamic, and our dataset reflects this through the following characteristics:
+
+\begin{itemize}
+    \item \textbf{High review frequency}: The dataset reflects an average of at least 100 new reviews per day, simulating the continuous flow of patient feedback that a live system would experience.
+    \item \textbf{Growing doctor base}: Based on trends from medical boards, we estimate around 400 to 500 new doctors would register on the platform annually, contributing to the system’s dynamism and evolving content.
+\end{itemize}
+
+\subsubsection{Variety}
+
+The dataset incorporates diverse data types, which contribute to its heterogeneity:
+
+\begin{itemize}
+    \item \textbf{Multi-format records}: Structured user and doctor profiles, unstructured textual reviews, and timestamped interaction logs (likes, appointments) are all represented.
+    \item \textbf{Diverse entities}: The inclusion of users, doctors, reviews, likes, and appointments enables multi-relational analysis and feature richness.
+\end{itemize}
+
+\subsection{Resulting Dataset}
+
+The original scraped dataset, stored in \texttt{scraped.json} (265 MB), contains the raw information collected from the web. This dataset served as the foundation for the data generation process, providing:
+
+\begin{itemize}
+\item 699,987 reviews
+\item 214,682 unique reviewers
+\item 87,632 doctors
+\end{itemize}
+
+Building upon this, the final dataset is stored in JSON format, totaling approximately 960 MB, and includes both real and synthetic data entries. Its main components are:
+
+\begin{itemize}
+\item \textbf{Doctors} (\texttt{doctors.json}, 289 MB)
+Contains 87,632 healthcare professionals, each with profile data and linked to 699,987 reviews. Reviews include timestamps and patient feedback.
+
+\item \textbf{Users} (\texttt{users.json}, 66 MB)  
+Comprises 214,682 unique users extracted from the original dataset and extended with synthetic profiles.
+
+\item \textbf{Appointments} (\texttt{appointments.json}, 422 MB)  
+Each review is connected to a synthetic appointment, scheduled in the weeks preceding the review date. Appointments simulate realistic scheduling and clinic visit patterns.
+
+\item \textbf{Templates} (\texttt{templates.json}, 162 MB)  
+Stores template structures for appointment scheduling logic, such as available time slots, weekdays, and timing constraints.
+
+\item \textbf{User Likes} (\texttt{user\_likes.json}, 22 MB)  
+Represents user interactions with doctors, generated according to the geographic distribution of the doctors reviewed by each user.
+
+\end{itemize}
+
+Overall, this dataset offers a realistic simulation of user and doctor activity on a healthcare review platform, reflecting both volume and behavioral complexity.
