@@ -1,0 +1,35 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{multicol, graphicx, float, multirow}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{booktabs}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=cyan,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    citecolor=cyan
+}
+
+\hyphenation{analy-sis}
+
+\author{Paolo Palumbo, Francesco Panattoni, Nedal Hadam}
+\title{HealthHub: A Healthcare Data Management System}
+
+\begin{document}
+\maketitle
+
+\input{chapters/introduction}
+\input{chapters/data}
+\input{chapters/design}
+\input{chapters/implementation}
+\input{chapters/queries}
+
+
+\bibliographystyle{ieeetr}
+\bibliography{bibliography.bib}
+
+\end{document}
