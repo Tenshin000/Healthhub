@@ -280,3 +280,89 @@ We define two types of directed edges:
 
 These relations enable pattern discovery and inference. Spatial behavior is indirectly modeled through interaction patterns, which often reflect geographic closeness.
 
+\section{Distributed Database Design}
+
+\subsection{Replica Set Deployment}
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.2]{./resources/mongo_replica.png}
+    \caption{MongoDB Replica Set Structure}
+    \label{fig:mongo-replica}
+\end{figure}
+
+We were given access to a cluster composed of three nodes. On each node, we deployed a MongoDB instance as part of a replica set. Neo4j was deployed in standalone mode, as replication requires the Enterprise edition, which was not available.
+
+In the MongoDB replica set, only the \textbf{primary node} handles write operations. Each write is logged in the primary’s \emph{oplog} (operation log), which is then replicated to the \textbf{secondary nodes}. These secondaries apply the operations in the same order to maintain a consistent dataset. While all members of the replica set can serve read operations, by default, the application is configured to read from the primary node to preserve strong consistency.
+
+\paragraph{Consistency Level}
+
+Consistency across replicas is determined by the acknowledgment settings used during read and write operations. Our system adopts a hybrid consistency strategy:
+
+\begin{itemize}
+  \item The \texttt{write concern} is set to \texttt{w:1}, meaning that a write is acknowledged as soon as it has been applied by the primary node.
+  \item The \texttt{read concern} is generally set to \texttt{local} (\texttt{r:1}), allowing reads from the local state of a node, which may not reflect the latest writes.
+  \item However, for critical data such as a doctor's availability schedule, we explicitly enforce \texttt{readConcernLevel=majority} to ensure that only the most up-to-date and replicated information is retrieved.
+\end{itemize}
+
+This approach enables us to maintain \textbf{eventual consistency} where acceptable—improving performance and reducing latency—while enforcing \textbf{strong consistency} only in the specific cases that require it. It provides a good balance between responsiveness and data reliability, especially in a system that emphasizes availability and user experience.
+
+\paragraph{CAP Theorem Considerations}
+
+Our architecture emphasizes the \textbf{Availability (A)} and \textbf{Partition Tolerance (P)} aspects of the CAP theorem. The system is designed to:
+\begin{itemize}
+  \item Remain accessible and operational even during node failures or network partitions.
+  \item Avoid sacrificing user responsiveness, ensuring that essential features—like searching doctors or leaving endorsements—remain available under most failure scenarios.
+\end{itemize}
+
+\subsection{Sharding (Design Perspective)}
+
+Sharding has not been implemented in the current system but was considered as a viable strategy to scale the document database in case of high demand.
+
+\paragraph{Horizontal Partitioning Strategy}
+
+Sharding would be employed solely on the MongoDB side, as distributing a graph database like Neo4j across nodes introduces significant traversal overhead that defeats its performance benefits.
+
+We proposed the following sharding design:
+
+\begin{itemize}
+  \item \textbf{Doctors Collection}:
+    \begin{itemize}
+      \item \textbf{Shard Key}: \texttt{address.province}
+      \item \textbf{Sharding Mechanism}: hash-based
+    \end{itemize}
+    This approach would evenly distribute documents geographically, avoiding load concentration in specific provinces.
+
+  \item \textbf{Appointments Collection}:
+    \begin{itemize}
+      \item \textbf{Shard Key}: \texttt{appointmentDateTime}
+      \item \textbf{Sharding Mechanism}: range-based
+    \end{itemize}
+    Optimized for time-range queries, this configuration would support efficient access to recent or upcoming appointments.
+\end{itemize}
+
+These design options would ensure balanced workloads and scalable query processing if user and appointment volumes significantly increase in the future.
+
+\subsection{Handling Inter-database Consistency}
+
+Given that we use both a document-oriented database (MongoDB) and a graph database (Neo4j), some redundancy exists across the systems. Certain information—such as user endorsements—must be stored and updated in both databases.
+
+To ensure consistency, we follow a two-phase update pattern:
+\begin{itemize}
+  \item A write operation is first performed on MongoDB.
+  \item Only if the MongoDB operation is successful, the corresponding write on Neo4j is triggered.
+  \item If the Neo4j update fails, a rollback is initiated to restore the system to a consistent state.
+\end{itemize}
+
+This logic is managed using Spring’s \texttt{@Transactional} annotation, ensuring atomicity across operations. Additionally, asynchronous execution is enabled via \texttt{@Async}, allowing long-running updates to Neo4j to execute in separate threads, enhancing system availability.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.5]{./resources/rollback.png}
+    \caption{Handling consistency between MongoDB and Neo4j}
+    \label{fig:mongo-neo4j-sync}
+\end{figure}
+
+\paragraph{Eventual Consistency and Responsiveness}
+
+The system is designed to tolerate brief inconsistencies between MongoDB and Neo4j. This decision improves performance and responsiveness—key aspects for a user-focused social system. Consistency is restored asynchronously and transparently, without impacting the user experience.
