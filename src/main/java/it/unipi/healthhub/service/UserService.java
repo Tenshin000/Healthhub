@@ -1,13 +1,10 @@
 package it.unipi.healthhub.service;
 
-import it.unipi.healthhub.dto.AppointmentDTO;
 import it.unipi.healthhub.dto.DoctorDTO;
 import it.unipi.healthhub.dto.PatientContactsDTO;
 import it.unipi.healthhub.dto.UserDetailsDTO;
 import it.unipi.healthhub.exception.UserNotFoundException;
-import it.unipi.healthhub.model.mongo.Address;
 import it.unipi.healthhub.model.mongo.Appointment;
-import it.unipi.healthhub.model.mongo.Doctor;
 import it.unipi.healthhub.model.mongo.User;
 import it.unipi.healthhub.model.neo4j.DoctorDAO;
 import it.unipi.healthhub.model.neo4j.UserDAO;
@@ -16,7 +13,6 @@ import it.unipi.healthhub.repository.mongo.DoctorMongoRepository;
 import it.unipi.healthhub.repository.mongo.UserMongoRepository;
 import it.unipi.healthhub.repository.neo4j.UserNeo4jRepository;
 import it.unipi.healthhub.util.FakeMailSender;
-import org.neo4j.cypherdsl.core.Use;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;

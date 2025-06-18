@@ -1,10 +1,9 @@
 package it.unipi.healthhub;
 
-import it.unipi.healthhub.events.UserNameUpdateEvent;
+import it.unipi.healthhub.event.UserNameUpdateEvent;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 
 @SpringBootTest
