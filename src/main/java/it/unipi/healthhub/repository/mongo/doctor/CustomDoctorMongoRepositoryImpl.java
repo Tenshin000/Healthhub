@@ -1,11 +1,18 @@
 package it.unipi.healthhub.repository.mongo.doctor;
 
 import com.mongodb.DBObject;
+import com.mongodb.ReadConcern;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Projections;
 import com.mongodb.client.result.UpdateResult;
 import it.unipi.healthhub.model.mongo.Doctor;
 import it.unipi.healthhub.projection.DoctorMongoProjection;
 import it.unipi.healthhub.util.DateUtil;
 import org.bson.Document;
+import org.bson.conversions.Bson;
+import org.bson.types.ObjectId;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
@@ -37,6 +44,35 @@ public class CustomDoctorMongoRepositoryImpl implements CustomDoctorMongoReposit
      */
     @Override
     public boolean checkScheduleSlot(String doctorId, Integer year, Integer week, String keyDay, String slotStart) {
+        LocalDateTime startOfWeek = DateUtil.getFirstDayOfWeek(week, year).atStartOfDay();
+
+        MongoCollection<Document> collection = mongoTemplate
+                .getDb()
+                .getCollection("doctors")
+                .withReadConcern(ReadConcern.MAJORITY);
+
+        List<Bson> pipeline = Arrays.asList(
+                Aggregates.match(Filters.eq("_id", new ObjectId(doctorId))),
+                Aggregates.unwind("$schedules"),
+                Aggregates.match(Filters.eq("schedules.week", startOfWeek)),
+                Aggregates.project(Projections.fields(Projections.computed("slots", "$schedules.slots." + keyDay))),
+                Aggregates.unwind("$slots"),
+                Aggregates.match(Filters.eq("slots.start", slotStart)),
+                Aggregates.project(Projections.fields(Projections.include("slots.taken")))
+        );
+
+        Document result = collection.aggregate(pipeline).first();
+
+        if (result == null) {
+            System.out.println("Error: No slot found");
+            return false;
+        }
+
+        Document slot = (Document) result.get("slots");
+        return Boolean.TRUE.equals(slot.getBoolean("taken"));
+    }
+
+    /*public boolean checkScheduleSlot(String doctorId, Integer year, Integer week, String keyDay, String slotStart) {
         // Compute the LocalDateTime representing the first day of the given week/year
         LocalDateTime startOfWeek = DateUtil.getFirstDayOfWeek(week, year).atStartOfDay();
 
@@ -68,7 +104,7 @@ public class CustomDoctorMongoRepositoryImpl implements CustomDoctorMongoReposit
         }
         // Return whether the slot is taken
         return result.getMappedResults().get(0).get("taken").equals(true);
-    }
+    }*/
 
     /**
      * Mark a specific schedule slot as booked (taken = true).
