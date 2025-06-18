@@ -88,11 +88,24 @@ The following non-functional requirements address the quality attributes of the 
 	\item The application shall include comprehensive documentation and code comments to facilitate future enhancements and debugging.
 \end{itemize}
 
-\section{UML Class Diagrams}
+\section{Use Case Diagram}
+
+\begin{figure}[!h]
+    \centering
+	\includegraphics[scale=0.60]{./resources/healthhub_use_case.pdf}
+    \caption{Use Case Diagram for HealthHub}
+    \label{fig:use-case-diagram}
+\end{figure}
+
+The use case diagram illustrates the core functionalities of the \textit{HealthHub} application, categorized by the actors involved: \textit{Guest}, \textit{User (Patient)}, and \textit{Doctor}. The Guest actor can access basic features such as registration, login, and browsing doctors. The authenticated user (Patient) can view and edit their profile, search for doctors, view doctor reviews, book and cancel appointments, endorse or review doctors, and receive personalized recommendations. The Doctor actor has access to a personal dashboard from which they can manage their schedule, define and edit calendar templates, view appointments, delete reviews, and handle their availability. Use cases are modeled with \texttt{<<include>>} and \texttt{<<extend>>} relationships to reflect functional modularity and reuse of common interactions like viewing profiles or appointments.
+
+
+\section{UML Class Diagram}
+
 \begin{figure}[!h]
     \centering
 	\includegraphics[scale=0.69]{./resources/healthhub_UML.pdf}
-    \caption{GraphDB structure for HealthHub}
+    \caption{UML Class Diagram for HealthHub}
     \label{fig:uml-diagram}
 \end{figure}
 
