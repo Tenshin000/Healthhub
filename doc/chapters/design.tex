@@ -88,6 +88,144 @@ The following non-functional requirements address the quality attributes of the 
 	\item The application shall include comprehensive documentation and code comments to facilitate future enhancements and debugging.
 \end{itemize}
 
+\newpage
+
 \section{UML Class Diagram}
 \hspace*{-6cm}
 \includegraphics[scale=0.7, ]{./resources/healthhub_UML.pdf}
+
+\newpage
+
+\subsection{Relationships between classes}
+Here we briefly summarise the relation between each class.
+\begin{itemize}
+	\item \textbf{Doctor} is a specialization of \textbf{User};
+	\item A \textbf{Doctor} may offer zero or more \textbf{Service} instances and each \textbf{Service} is provided by exactly one \textbf{Doctor};
+	\item A \textbf{Doctor} may have zero or more \textbf{Review} entries and each \textbf{Review} refers to exactly one \textbf{Doctor}; 
+	\item A \textbf{Doctor} may define zero or more \textbf{CalendarTemplates} and each \textbf{CalendarTemplate} belongs to exactly one \textbf{Doctor};
+	\item A \textbf{Doctor} may publish zero or more \textbf{Schedules} and each \textbf{Schedule} is associated with exactly one \textbf{Doctor};
+	\item Each \textbf{Schedule} comprises zero or more \textbf{PrenotableSlots} and each \textbf{PrenotableSlot} is part of exactly one \textbf{Schedule};
+	\item Each \textbf{CalendarTemplate} comprises zero or more \textbf{Slots} and each \textbf{Slot} belongs to exactly one \textbf{CalendarTemplate}; 
+	\item A \textbf{Doctor} has exactly one \textbf{Address} and each \textbf{Address} is linked to exactly one \textbf{Doctor} (and similarly to \textbf{DoctorInfo}); 
+	\item An \textbf{Appointment} is associated with exactly one \textbf{DoctorInfo} and one \textbf{PatientInfo} and each \textbf{DoctorInfo} or \textbf{PatientInfo} may have zero or more \textbf{Appointments}. 
+\end{itemize}
+
+\subsection{Design of the classes}
+Here we briefly summarise the primary attributes of each entity.
+
+\begin{description}
+	\item[\textbf{User}] 
+	\hfill
+	\begin{itemize}
+		\item \texttt{id: String} – unique identifier  
+		\item \texttt{username: String}  
+		\item \texttt{name: String}  
+		\item \texttt{password: String} – stored as hash  
+		\item \texttt{fiscalCode: String}  
+		\item \texttt{gender: String}  
+		\item \texttt{personalNumber: String}  
+		\item \texttt{email: String}  
+		\item \texttt{dob: LocalDate}  
+	\end{itemize}
+
+\newpage
+
+	\item[\textbf{Doctor}] (specialization of \textbf{User}) 
+	\hfill
+	\begin{itemize}
+		\item \texttt{orderRegistrationNumber: String}  
+		\item \texttt{services: List<Service>}  
+		\item \texttt{endorsementCount: int}  
+		\item \texttt{reviewCount: int}  
+		\item \texttt{reviews: List<Review>}  
+		\item \texttt{calendarTemplates: List<CalendarTemplate>}  
+		\item \texttt{schedules: List<Schedule>}  
+		\item \texttt{specializations: List<String>}  
+		\item \texttt{phoneNumbers: List<String>}  
+		\item \texttt{address: Address}  
+	\end{itemize}
+	
+	\item[\textbf{Address}]
+	\hfill
+	\begin{itemize}
+		\item \texttt{street: String}  
+		\item \texttt{city: String}  
+		\item \texttt{province: String}  
+		\item \texttt{postalCode: String}  
+		\item \texttt{country: String}  
+	\end{itemize}
+	
+	\item[\textbf{Appointment}]
+	\hfill
+	\begin{itemize}
+		\item \texttt{id: String}  
+		\item \texttt{date: LocalDateTime}  
+		\item \texttt{visitType: String}  
+		\item \texttt{patientNotes: String}  
+		\item \texttt{price: double}  
+	\end{itemize}
+	
+	\item[\textbf{Schedule}]
+	\hfill
+	\begin{itemize}
+		\item \texttt{week: LocalDate}  
+		\item \texttt{slots: List<PrenotableSlot>}  
+	\end{itemize}
+
+	\item[\textbf{CalendarTemplate}]
+	\hfill
+	\begin{itemize}
+		\item \texttt{id: String}  
+		\item \texttt{name: String}  
+		\item \texttt{slots: List<Slot>}  
+		\item \texttt{isDefault: boolean}  
+	\end{itemize}
+	
+	\item[\textbf{Slot}]
+	\hfill
+	\begin{itemize}
+		\item \texttt{start: String}  
+		\item \texttt{end: String}  
+	\end{itemize}
+	
+	\item[\textbf{PrenotableSlot}] (subclass of \textbf{Slot})
+	\hfill
+	\begin{itemize}
+		\item \texttt{taken: boolean}  
+	\end{itemize}
+	
+	\item[\textbf{Review}]
+	\hfill
+	\begin{itemize}
+		\item \texttt{name: String}  
+		\item \texttt{patientId: String}  
+		\item \texttt{text: String}  
+		\item \texttt{date: LocalDate}  
+	\end{itemize}
+	
+	\item[\textbf{Service}]
+	\hfill
+	\begin{itemize}
+		\item \texttt{service: String}  
+		\item \texttt{price: double}  
+	\end{itemize}
+	
+	\item[\textbf{PatientInfo}] (belong to \textbf{Appointment})
+	\hfill
+	\begin{itemize}
+		\item \texttt{id: String}  
+		\item \texttt{name: String}  
+		\item \texttt{email: String}  
+		\item \texttt{gender: String}  
+	\end{itemize}
+	
+	\item[\textbf{DoctorInfo}] (belong to \textbf{Appointment})
+	\hfill
+	\begin{itemize}
+		\item \texttt{id: String}  
+		\item \texttt{name: String}  
+		\item \texttt{email: String}  
+		\item \texttt{address: Address}  
+	\end{itemize}
+\end{description}
+
