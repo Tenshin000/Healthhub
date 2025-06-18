@@ -113,7 +113,7 @@ The \texttt{PrivateDoctorAPI} class implements a secure REST interface for authe
 	\item \texttt{POST /api/doctor/phone} \\
 	adds a phone number.
 	\item \texttt{DELETE /api/doctor/phone/\{index\}} \\
-	removes a phone number by index.
+	removes a phone number by a doctor.
 	\item \texttt{POST /api/doctor/specialization} \\
 	adds a specialization.
 	\item \texttt{DELETE /api/doctor/specialization/\{index\}} \\
@@ -147,13 +147,13 @@ The \texttt{PrivateDoctorAPI} class implements a secure REST interface for authe
 	\item \texttt{GET /api/doctor/reviews} \\
 	retrieves all received reviews.
 	\item \texttt{DELETE /api/doctor/review/\{id\}} \\
-	 deletes a review.
+	deletes a review.
 	\item \texttt{PUT /api/doctor/password} \\
-	 changes the password.
+	changes the password.
 	\item \texttt{GET /api/doctor/stats/visits}\\
 	gets number of visits (optionally weekly).
 	\item \texttt{GET /api/doctor/stats/earnings}\\
-	 gets annual earnings.
+	gets annual earnings.
 	\item \texttt{GET /api/doctor/stats/patients} \\
 	gets number of new patients per month.
 \end{itemize}
@@ -236,7 +236,935 @@ Two private helper methods, \texttt{toDto} and \texttt{toTop10Dto}, support this
 \subsection{\texttt{package it.unipi.healthhub.dto}}
 The Data Transfer Objects (DTO) directory encapsulates a set of plain Java objects that serve as data carriers between different layers of the HealthHub application, primarily facilitating communication between the service and presentation tiers. These DTO classes are designed to aggregate and structure data relevant to specific business operations or user interactions, decoupling the internal domain model from external API contracts.
 
-\subsection{\texttt{package it.unipi.healthhub.dto}}
+\subsection{\texttt{package it.unipi.healthhub.exception}}
+The \texttt{it.unipi.healthhub.exception} package defines a set of custom unchecked exceptions, each extending \texttt{RuntimeException}, to represent specific error conditions encountered in the HealthHub application’s domain logic. By encapsulating distinct failure scenarios—such as missing resources or duplicate entries—these exceptions facilitate clear error propagation and centralized handling in higher layers (e.g., controllers or global exception handlers). Moreover, they improve code readability by replacing generic error signals with semantically meaningful types.
 
-...
+\begin{itemize}
+	\item \texttt{DoctorNotFoundException}:  
+	Thrown when an operation attempts to retrieve or manipulate a doctor entity that does not exist in the system. Constructors allow for default or custom error messages, and for nesting an underlying cause;
+	
+	\item \texttt{ScheduleAlreadyExistsException}:  
+	Raised to indicate an attempt to create a schedule for a doctor in a week for which a schedule is already defined. This prevents conflicting availability entries. As with other exceptions, it supports message customization and cause propagation;
+	
+	\item \texttt{UserAlreadyExistsException}:  
+	Used when a registration or user-creation process detects that a user with the same unique identifier (e.g., email or fiscal code) is already present in the database. This exception enforces uniqueness constraints at the application layer;
+	
+	\item \texttt{UserNotFoundException}:  
+	Thrown when a requested user resource cannot be found, for instance during authentication, profile retrieval, or update operations. Its constructors mirror those of the other exception types, enabling flexible error reporting.
+\end{itemize}
+
+\subsection{\texttt{package it.unipi.healthhub.filter}}
+The \texttt{it.unipi.healthhub.filter} package provides servlet filters that centralize authentication and authorization logic for both API and web endpoints. These filters intercept incoming HTTP requests, verify session validity and user roles, and either allow processing to continue, redirect to the login page, or return appropriate HTTP error codes upon access violations.
+
+\begin{itemize}
+	\item \textbf{DoctorApiFilter}:
+	Ensures that requests to \texttt{/api/doctor/*} originate from an authenticated doctor. If no session exists or the session attribute \texttt{role} is not \texttt{"doctor"}, the filter responds with HTTP 403 Forbidden;
+	
+	\item \textbf{DoctorDashboardAuthFilter}:
+	Protects doctor dashboard pages under \texttt{/doctor/dashboard/*}. It verifies the presence of a valid session with \texttt{role = "doctor"}. If validation fails, the user is redirected to the login page;
+	
+	\item \textbf{LoginFilter}: 
+	Prevents authenticated users from re‐accessing the login page. For existing sessions, GET requests to the login URL are redirected to \texttt{/index} (the home page), while POST attempts are rejected with HTTP 403 Forbidden;
+	
+	\item \textbf{PatientApiFilter}:
+	Applies to \texttt{/api/user/*}, allowing read‐only GET requests for all users but restricting state‐changing methods (POST, PUT, DELETE) exclusively to authenticated patients (session attribute \texttt{role = "patient"}). Unauthorized modification attempts yield HTTP 403 Forbidden;
+	
+	\item \textbf{PatientDashboardFilter}:
+	Secures patient dashboard views under \texttt{/user/*}. It checks for an active session with \texttt{role = "patient"} and redirects unauthenticated or improperly privileged users to the login page.
+\end{itemize}
+
+\subsection{\texttt{package it.unipi.healthhub.model}}
+The \textbf{Model} package defines the entity classes corresponding to the database schema.
+
+The \texttt{it.unipi.healthhub.model.mongo} package contains the core domain entities persisted in MongoDB. These classes represent the primary data models for the application and include:
+
+\begin{itemize}
+	\item \textbf{Address.java}: encapsulates patient or doctor address fields (street, city, province, postal code and country);
+	\item \textbf{Appointment.java}: models appointment records, linking patients and doctors with date, time and status.;
+	\item \textbf{CalendarTemplate.java}: defines named availability templates composed of slot collections;
+	\item \textbf{Doctor.java}: represents doctor profiles, including personal details, specializations and business rules;
+	\item \textbf{PrenotableSlot.java}: denotes individual time slots available for booking;
+	\item \textbf{Review.java}: captures patient‑submitted reviews;
+	\item \textbf{Schedule.java}: organizes weekly schedules as mappings from days to prenotable slots;
+	\item \textbf{Service.java}: specifies medical services offered by a doctor, including descriptions and pricing;
+	\item \textbf{Slot.java}: a simple time interval used within templates and schedules;
+	\item \textbf{User.java}: models patient accounts with personal information and secure credentials.
+\end{itemize}
+
+In addition, the \texttt{it.unipi.healthhub.model.neo4j} subpackage defines lightweight DAO classes (\textbf{DoctorDAO.java}, \textbf{UserDAO.java}) used exclusively for graph queries. Since all entity attributes required by the application are already captured in the MongoDB models and relationships are managed via Neo4j projections, the MongoDB classes serve as the definitive domain models.
+
+Their structural design has already been detailed in the Design chapter’s UML class diagram section.
+
+\subsection{\texttt{package it.unipi.healthhub.model.mongo}}
+\subsubsection{User}
+\begin{lstlisting}[language=java]
+@Document(collection = "users")
+public class User {
+	@Id
+	protected String id;
+	
+	protected String username;
+	
+	protected String name;
+	protected String password;
+	protected String fiscalCode;
+	protected LocalDate dob;
+	protected String gender;
+	private String personalNumber;
+	protected String email;
+	
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) { this.id = id; }
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	
+	public String getFiscalCode(){ return fiscalCode; }
+	public void setFiscalCode(String fiscalCode){ this.fiscalCode = fiscalCode; }
+	
+	public String getGender() {
+		return gender;
+	}
+	public void setGender(String gender) {
+		this.gender = gender;
+	}
+	
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
+	}
+	
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	
+	public void setDob(LocalDate dob) {
+		this.dob = dob;
+	}
+	public LocalDate getDob() {
+		return dob;
+	}
+	
+	public String getPersonalNumber() {
+		return personalNumber;
+	}
+	
+	public void setPersonalNumber(String personalNumber) {
+		this.personalNumber = personalNumber;
+	}
+	
+	public String toString() {
+		return "User{" +
+			", username='" + username + '\'' +
+			", password='" + password + '\'' +
+			", dob=" + dob + "}";
+	}
+}
+\end{lstlisting}
+
+\subsubsection{}
+\begin{lstlisting}[language=java]
+	@Document(collection = "doctors")
+	public class Doctor extends User {
+		protected String orderRegistrationNumber;
+		private List<Service> services;
+		private int endorsementCount;
+		private int reviewCount;
+		private List<Review> reviews;
+		private List<Schedule> schedules;
+		private List<String> calendarTemplates;
+		private List<String> specializations;
+		private List<String> phoneNumbers;
+		private Address address;
+		
+		public Doctor() {
+			super();
+			services = new ArrayList<>();
+			reviews = new ArrayList<>();
+			schedules = new ArrayList<>();
+			calendarTemplates = new ArrayList<>();
+			specializations = new ArrayList<>();
+			phoneNumbers = new ArrayList<>();
+		}
+		
+		public String getOrderRegistrationNumber() { return orderRegistrationNumber; }
+		public void setOrderRegistrationNumber(String orderRegistrationNumber) { this.orderRegistrationNumber = orderRegistrationNumber; }
+		
+		public List<Service> getServices() {
+			return services;
+		}
+		public void setServices(List<Service> services) {
+			this.services = services;
+		}
+		
+		public int getEndorsementCount() {
+			return endorsementCount;
+		}
+		public void setEndorsementCount(int endorsementCount) {
+			this.endorsementCount = endorsementCount;
+		}
+		
+		public int getReviewCount() {
+			return reviewCount;
+		}
+		public void setReviewCount(int reviewCount) { this.reviewCount = reviewCount; }
+		
+		public List<Review> getReviews() {
+			return reviews;
+		}
+		public void setReviews(List<Review> reviews) {
+			this.reviews = reviews;
+		}
+		
+		public List<Schedule> getSchedules() {
+			return schedules;
+		}
+		public void setSchedules(List<Schedule> schedules) {
+			this.schedules = schedules;
+		}
+		
+		public List<String> getCalendarTemplates() {
+			return calendarTemplates;
+		}
+		public void setCalendarTemplates(List<String> calendarTemplates) {
+			this.calendarTemplates = calendarTemplates;
+		}
+		
+		public List<String> getSpecializations() {
+			return specializations;
+		}
+		public void setSpecializations(List<String> specializations) {
+			this.specializations = specializations;
+		}
+		
+		public List<String> getPhoneNumbers() {
+			return phoneNumbers;
+		}
+		public void setPhoneNumbers(List<String> phoneNumbers) {
+			this.phoneNumbers = phoneNumbers;
+		}
+		
+		public Address getAddress() {
+			return address;
+		}
+		public void setAddress(Address address) {
+			this.address = address;
+		}
+		
+		public String getId(){
+			return super.getId();
+		}
+		
+		public String toString() {
+			return "User{" +
+				", username='" + getUsername() + '\'' +
+				", password='" + getPassword() + '\'' +
+				", dob=" + dob + "}";
+		}
+	}
+\end{lstlisting}
+
+\subsubsection{Appointment}
+\begin{lstlisting}[language=java]
+@Document(collection = "appointments")
+public class Appointment {
+	@Id
+	private String id;
+	private LocalDateTime date;
+	private DoctorInfo doctor;
+	private PatientInfo patient;
+	private String visitType;
+	private String patientNotes;
+	private double price;
+	
+	// Constructors
+	public Appointment() {}
+	
+	public Appointment(String id, LocalDateTime appointmentDateTime, DoctorInfo doctorInfo, PatientInfo patientInfo, String visitType, String patientNotes) {
+		this.id = id;
+		this.date = appointmentDateTime;
+		this.doctor = doctorInfo;
+		this.patient = patientInfo;
+		this.visitType = visitType;
+		this.patientNotes = patientNotes;
+	}
+	
+	// Getters and Setters
+	public String getId() {
+		return id;
+	}
+	
+	public void setId(String id) {
+		this.id = id;
+	}
+	
+	public LocalDateTime getDate() {
+		return date;
+	}
+	
+	public void setDate(LocalDateTime date) {
+		this.date = date;
+	}
+	
+	public DoctorInfo getDoctor() {
+		return doctor;
+	}
+	
+	public void setDoctor(DoctorInfo doctor) {
+		this.doctor = doctor;
+	}
+	
+	public PatientInfo getPatient() {
+		return patient;
+	}
+	
+	public void setPatient(PatientInfo patient) {
+		this.patient = patient;
+	}
+	
+	public String getVisitType() {
+		return visitType;
+	}
+	
+	public void setVisitType(String visitType) {
+		this.visitType = visitType;
+	}
+	
+	public String getPatientNotes() {
+		return patientNotes;
+	}
+	
+	public void setPatientNotes(String patientNotes) {
+		this.patientNotes = patientNotes;
+	}
+	
+	public void setPrice(Double price) {
+		this.price = price;
+	}
+	
+	public double getPrice() {
+		return price;
+	}
+	
+	// Inner class DoctorInfo
+	public static class DoctorInfo {
+		private String id;
+		private String name;
+		private Address address;
+		private String email;
+		
+		public DoctorInfo() {}
+		
+		public DoctorInfo(String doctorId, String doctorName, Address address, String email) {
+			this.id = doctorId;
+			this.name = doctorName;
+			this.address = address;
+			this.email = email;
+		}
+		
+		public String getId() {
+			return id;
+		}
+		
+		public void setId(String id) {
+			this.id = id;
+		}
+		
+		public String getName() {
+			return name;
+		}
+		
+		public void setName(String name) {
+			this.name = name;
+		}
+		
+		public Address getAddress() {
+			return address;
+		}
+		
+		public void setAddress(Address address) {
+			this.address = address;
+		}
+		
+		public String getEmail() {
+			return email;
+		}
+		
+		public void setEmail(String email) {
+			this.email = email;
+		}
+	}
+	
+	// Inner class PatientInfo
+	public static class PatientInfo {
+		private String id;
+		private String name;
+		private String email;
+		private String gender;
+		
+		public PatientInfo() {}
+		
+		public PatientInfo(String patientId, String patientName, String email, String gender) {
+			this.id = patientId;
+			this.name = patientName;
+			this.email = email;
+			this.gender = gender;
+		}
+		
+		public String getId() {
+			return id;
+		}
+		
+		public void setId(String id) {
+			this.id = id;
+		}
+		
+		public String getName() {
+			return name;
+		}
+		
+		public void setName(String name) {
+			this.name = name;
+		}
+		
+		public String getEmail() {
+			return email;
+		}
+		
+		public void setEmail(String email) {
+			this.email = email;
+		}
+		
+		public String getGender() {
+			return gender;
+		}
+		
+		public void setGender(String gender) {
+			this.gender = gender;
+		}
+	}
+}
+\end{lstlisting}
+
+\subsubsection{Address}
+\begin{lstlisting}[language=java]
+public class Address {
+	private String street;
+	private String city;
+	private String province;
+	private String postalCode;
+	private String country;
+	
+	// Constructor
+	public Address(String street, String city, String province, String postalCode, String country){
+		this.street = street;
+		this.city = city;
+		this.province = province;
+		this.postalCode = postalCode;
+		this.country = country;
+	}
+	
+	// Getters and Setters
+	public String getStreet() {
+		return street;
+	}
+	
+	public void setStreet(String street) {
+		this.street = street;
+	}
+	
+	public String getCity() {
+		return city;
+	}
+	
+	public void setCity(String city) {
+		this.city = city;
+	}
+	
+	public String getProvince() {
+		return province;
+	}
+	
+	public void setProvince(String province) {
+		this.province = province;
+	}
+	
+	public String getPostalCode() {
+		return postalCode;
+	}
+	
+	public void setPostalCode(String postalCode) {
+		this.postalCode = postalCode;
+	}
+	
+	public String getCountry() {
+		return country;
+	}
+	
+	public void setCountry(String country) {
+		this.country = country;
+	}
+	
+	public String toString() {
+		return street + ", " + city + ", " + province + ", " + postalCode + ", " + country;
+	}
+	
+	public String toShortString() {
+		return street + ", " + city;
+	}
+}
+\end{lstlisting}
+
+\subsubsection{Calendar Template}
+\begin{lstlisting}[language=java]
+	@Document(collection = "templates")
+	public class CalendarTemplate {
+		@Id
+		private String id;
+		private String name;
+		private Map<String, List<Slot>> slots;
+		private boolean isDefault;
+		
+		// Constructor
+		public CalendarTemplate() {}
+		
+		public CalendarTemplate(String id, String name, Map<String, List<Slot>> slots, boolean isDefault) {
+			this.id = id;
+			this.name = name;
+			this.slots = slots;
+			this.isDefault = isDefault;
+		}
+		
+		// Getters and Setters
+		public String getId() {
+			return id;
+		}
+		
+		public void setId(String id) {
+			this.id = id;
+		}
+		
+		public String getName() {
+			return name;
+		}
+		
+		public void setName(String name) {
+			this.name = name;
+		}
+		
+		public Map<String, List<Slot>> getSlots() {
+			return slots;
+		}
+		
+		public void setSlots(Map<String, List<Slot>> slots) {
+			this.slots = slots;
+		}
+		
+		public boolean isDefault(){
+			return isDefault;
+		}
+		
+		public void setDefault(boolean isDefault) {
+			this.isDefault = isDefault;
+		}
+		
+		public String toString() {
+			return "CalendarTemplate{" +
+				"id='" + id + '\'' +
+				", name='" + name + '\'' +
+				", slots=" + slots +
+				", default=" + isDefault +
+				'}';
+		}
+		
+	}
+\end{lstlisting}
+
+\subsubsection{Prenotable Slot}
+\begin{lstlisting}[language=java]
+	public class PrenotableSlot extends Slot{
+		private boolean taken;
+		
+		public PrenotableSlot() {
+			super();
+		}
+		
+		public PrenotableSlot(String start, String end, boolean taken) {
+			super(start, end);
+			this.taken = taken;
+		}
+		
+		public boolean isTaken() {
+			return taken;
+		}
+		
+		public void setTaken(boolean taken) {
+			this.taken = taken;
+		}
+	}
+\end{lstlisting}
+
+\subsubsection{Review}
+\begin{lstlisting}[language=java]
+	public class Review {
+		public String name;
+		public String text;
+		public LocalDate date;
+		public String patientId;
+		
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
+		
+		public String getText() {
+			return text;
+		}
+		public void setText(String text) {
+			this.text = text;
+		}
+		
+		public LocalDate getDate() {
+			return date;
+		}
+		public void setDate(LocalDate date) {
+			this.date = date;
+		}
+		
+		public String getPatientId() {
+			return patientId;
+		}
+		public void setPatientId(String patientId) {
+			this.patientId = patientId;
+		}
+	}
+\end{lstlisting}
+
+\subsubsection{Schedule}
+\begin{lstlisting}[language=java]
+	public class Schedule {
+		private LocalDate week;
+		private Map<String, List<PrenotableSlot>> slots;
+		
+		// Getters and Setters
+		public LocalDate getWeek() {
+			return week;
+		}
+		
+		public void setWeek(LocalDate week) {
+			this.week = week;
+		}
+		
+		public Map<String, List<PrenotableSlot>> getSlots() {
+			return slots;
+		}
+		
+		public void setSlots(Map<String, List<PrenotableSlot>> slots) {
+			this.slots = slots;
+		}
+	}
+\end{lstlisting}
+
+\subsubsection{Service}
+\begin{lstlisting}[language=java]
+	public class Service {
+		private String service;
+		private double price;
+		
+		// Constructors
+		public Service() {}
+		public Service(String service, double price) {
+			this.service = service;
+			this.price = price;
+		}
+		
+		// Getters and Setters
+		public String getService() {
+			return service;
+		}
+		public void setService(String service) {
+			this.service = service;
+		}
+		
+		public double getPrice() {
+			return price;
+		}
+		public void setPrice(double price) {
+			this.price = price;
+		}
+	}
+\end{lstlisting}
+
+\subsubsection{Slot}
+\begin{lstlisting}[language=java]
+	public class Slot {
+		protected String start;
+		protected String end;
+		
+		// Constructor
+		public Slot() {}
+		
+		public Slot(String start, String end) {
+			this.start = start;
+			this.end = end;
+		}
+		
+		// Getters and Setters
+		public String getStart() {
+			return start;
+		}
+		
+		public void setStart(String start) {
+			this.start = start;
+		}
+		
+		public String getEnd() {
+			return end;
+		}
+		
+		public void setEnd(String end) {
+			this.end = end;
+		}
+		
+		public String toString() {
+			return "Slot{" +
+				"start='" + start + '\'' +
+				", end='" + end + '\'' +
+				'}';
+		}
+	}
+\end{lstlisting}
+
+
+
+\subsection{\texttt{package it.unipi.healthhub.model.neo4j}}
+
+\subsubsection{User DAO}
+\begin{lstlisting}[language=java]
+	@Node("User")
+	public class UserDAO {
+		@Id
+		private String id;
+		private String name;
+		
+		@Relationship(type = "ENDORSED")
+		private Set<DoctorDAO> endorsedDoctors = new HashSet<>();
+		
+		@Relationship(type = "REVIEWED")
+		private Set<DoctorDAO> reviewedDoctors = new HashSet<>();
+		
+		public UserDAO() {
+		}
+		
+		public UserDAO(String id, String name) {
+			this.id = id;
+			this.name = name;
+		}
+		
+		public String getId() {
+			return id;
+		}
+		
+		public void setId(String id) {
+			this.id = id;
+		}
+		
+		public String getName() {
+			return name;
+		}
+		
+		public void setName(String name) {
+			this.name = name;
+		}
+		
+		public Set<DoctorDAO> getEndorsedDoctors() {
+			return endorsedDoctors;
+		}
+		
+		public Set<DoctorDAO> getReviewedDoctors() {
+			return reviewedDoctors;
+		}
+	}
+\end{lstlisting}
+
+\subsubsection{Doctor DAO}
+\begin{lstlisting}[language=java]
+	@Node("Doctor")
+	public class DoctorDAO {
+		@Id
+		private String id;
+		
+		private String name;
+		private List<String> specializations;
+		
+		public DoctorDAO() {
+			specializations = new ArrayList<>();
+		}
+		
+		public DoctorDAO(String id, String name, List<String> specializations) {
+			this.id = id;
+			this.name = name;
+			this.specializations = specializations;
+		}
+		
+		public String getId() {
+			return id;
+		}
+		
+		public void setId(String id) {
+			this.id = id;
+		}
+		
+		public String getName() {
+			return name;
+		}
+		
+		public void setName(String name) {
+			this.name = name;
+		}
+		
+		public List<String> getSpecializations() {
+			return specializations;
+		}
+		
+		public void setSpecializations(List<String> specializations) {
+			this.specializations = specializations;
+		}
+		
+		public String toString() {
+			return "DoctorDAO{" +
+				"id='" + id + '\'' +
+				", name='" + name + '\'' +
+				", specializations=" + specializations +
+				'}';
+		}
+	}
+\end{lstlisting}
+
+\subsection{\texttt{package it.unipi.healthhub.projection}}
+The \texttt{it.unipi.healthhub.projection} package contains projection classes used to encapsulate doctors and their relevance scores obtained from search queries. Specifically, \texttt{DoctorMongoProjection} wraps a MongoDB \texttt{Doctor} entity with a score, while \texttt{DoctorNeo4jProjection} wraps a Neo4j \texttt{DoctorDAO} with a similar score. These projections facilitate merging and ranking results from both databases during doctor search operations, as implemented in the \texttt{SearchAPI} controller.
+
+\subsection{\texttt{package it.unipi.healthhub.repository}}
+The \textbf{Repository} package is responsible for managing data access operations by leveraging Spring Data JPA interfaces. This package abstracts the underlying persistence mechanisms, allowing for convenient CRUD operations and custom query definitions on the domain entities. 
+
+Detailed examination and implementation of specific queries within these repositories will be thoroughly discussed in the dedicated chapter on \textit{Queries}. 
+
+\subsection{\texttt{package it.unipi.healthhub.service}}
+The \textbf{Service} layer encapsulates the core business logic. This package is composed by: \texttt{AppointmentService}, \texttt{DoctorService} and \texttt{UserService}. 
+
+
+\subsubsection{Appointment Service}
+The \texttt{AppointmentService} class provides a comprehensive set of business logic functionalities related to appointment management within the system. This service interacts directly with the \texttt{AppointmentMongoRepository} to perform CRUD operations on appointment entities stored in MongoDB.
+
+Key aspects of \texttt{AppointmentService} include:
+\begin{itemize}
+	\item \textbf{Data Sanitization:} To prevent operator injection vulnerabilities specific to MongoDB, the service sanitizes input strings by replacing prohibited characters (e.g., '\$') within appointment fields, including nested doctor and patient information such as names, emails, and addresses.
+	
+	\item \textbf{CRUD Operations:} The service exposes methods to retrieve all appointments, fetch an appointment by its identifier, create new appointments after sanitization, update existing ones, and delete appointments by ID.
+	
+	\item \textbf{Asynchronous Updates:} Leveraging Spring's \texttt{@Async} annotation, the service asynchronously updates related doctor and patient information within appointments, improving responsiveness and decoupling these potentially costly operations.
+	
+	\item \textbf{Domain-Specific Queries:} It supports domain-specific queries such as retrieving all appointments for a given doctor on a specified day, facilitating calendar and scheduling functionalities.
+\end{itemize}
+
+\subsubsection{Doctor Service}
+
+The \texttt{DoctorService} class manages business logic related to doctor profiles, endorsements, reviews, specializations, analytics, and schedule maintenance. It coordinates between MongoDB (via \texttt{doctorMongoRepository}) for persistent doctor data and Neo4j (via \texttt{doctorNeo4jRepository} and \texttt{userNeo4jRepository}) for relationship data.
+
+Key features of \texttt{DoctorService} include:
+\begin{itemize}
+	\item \textbf{Data Sanitization:} Prevents injection vulnerabilities by sanitizing input strings differently for MongoDB (e.g., replacing '\$') and Neo4j (e.g., replacing '\$' and '.'). Sanitization applies to doctor fields and nested user data.
+	
+	\item \textbf{Reviews Management:} Enables patients to add and remove reviews after verifying appointments, updating both doctor documents and Neo4j relationships.
+	
+	\item \textbf{Profile Updates:} Supports login authentication, updating doctor details such as address, personal info, and phone numbers, with data sanitization and synchronization between MongoDB and Neo4j.
+	
+	\item \textbf{Specializations Handling:} Allows adding and removing specializations stored in MongoDB and mirrored in Neo4j, returning indices for reference.
+	
+	\item \textbf{Endorsements:} Manages patient endorsements for doctors by updating counts in MongoDB and maintaining endorsement relationships in Neo4j.
+	
+	\item \textbf{Analytics:} Provides visit and earnings statistics aggregated by type, week, month, and year, leveraging the appointment repository.
+	
+	\item \textbf{Schedule Management:} Maintains up-to-date doctor schedules by removing outdated entries and creating new ones for missing weeks, based on default calendar templates. The process includes progress logging and exception handling for missing templates.
+	
+	\item \textbf{Transactional Consistency:} Critical updates are annotated with \texttt{@Transactional} to ensure atomic operations.
+\end{itemize}
+
+\subsubsection{User Service}
+The \texttt{UserService} class handles all user-related business logic, managing users stored in both MongoDB and Neo4j databases. It ensures data integrity and synchronization across these stores while supporting user authentication, profile management, and interactions with appointments and doctors.
+
+Key features of \texttt{UserService} include:
+\begin{itemize}
+	\item \textbf{Data Sanitization:} Prevents injection vulnerabilities by sanitizing input strings differently for MongoDB (e.g., replacing '\$') and Neo4j (e.g., replacing '\$' and '.'). Sanitization applies to user fields and nested doctor data.
+
+	\item \textbf{User CRUD and Authentication:} Provides creation, retrieval, update, and deletion of users with transactional integrity. Includes username/email uniqueness checks and password validation for login and password changes.  
+	
+	\item \textbf{Profile and Contact Management:} Updates and retrieves detailed user profile information and contact data, synchronizing name changes across appointments and Neo4j relationships.  
+	
+	\item \textbf{Appointment Integration:} Retrieves past and upcoming appointments for users, supports appointment cancellation with schedule slot management and notification via a fake mail sender.  
+	
+	\item \textbf{Neo4j Relations and Recommendations:} Manages endorsement and review relations between users and doctors in Neo4j, fetching lists of endorsed, reviewed, and recommended doctors. Recommendation logic combines personalized and popular doctors.  
+	
+	\item \textbf{Email Operations:} Sends password reset links using a mocked mail sender component.  
+\end{itemize}
+
+\subsection{\texttt{package it.unipi.healthhub.util}}
+This package contains several utility classes and interfaces used within the HealthHub application to support functionalities like session handling, date manipulation, email sending, password hashing, and conversion between DTOs and model objects.
+
+\begin{itemize}
+	\item \texttt{ControllerUtil.java}\\
+	Provides utility methods for controllers, especially for setting common attributes in the Spring \texttt{Model} based on the user session. For example, it adds attributes indicating whether a user is logged in and their role (patient or doctor).
+	
+	\item \texttt{DateUtil.java}\\
+	Contains static methods for date calculations and conversions. Key methods include:
+	\begin{itemize}
+		\item Getting the first day of a specific week in a year.
+		\item Checking if two dates belong to the same week.
+		\item Getting the next four Mondays after a given date.
+		\item Conversion between \texttt{java.util.Date} and \texttt{java.time.LocalDate}.
+	\end{itemize}
+	
+	\item \texttt{FakeMailSender.java}\\
+	A service implementation of the \texttt{MailSenderService} interface that simulates sending emails by printing email content to the console. It handles sending notification emails related to appointment deletions and password reset links, validating email addresses before "sending".
+	
+	\item \texttt{HashUtil.java}\\
+	Provides a method for hashing passwords using SHA-256. It converts the password string into its hashed hexadecimal representation, throwing a runtime exception if hashing fails.
+	
+	\item \texttt{MailSenderService.java}\\
+	An interface defining methods for sending various types of emails related to appointment cancellations and password resets. Implemented by classes such as \texttt{FakeMailSender}.
+	
+	\item \texttt{ScheduleConverter.java}\\
+	Contains static methods to convert schedule data between DTO representations and model objects. It supports transforming collections of slots and building a schedule for a given Monday date based on a calendar template.
+	
+	\item \texttt{TemplateConverter.java}\\
+	Provides static methods for converting template-related slot data between DTOs and model classes, including converting regular slots and "prenotable" (bookable) slots, supporting the workflow of schedule creation and manipulation.
+\end{itemize}
+
+
+\subsection{Scheduler Component}
+The \texttt{Scheduler} class is a Spring-managed component responsible for automating weekly maintenance tasks on doctor schedules. Its \texttt{scheduleTask()} method executes every Sunday at midnight, invoking two key \texttt{DoctorService} operations:
+\begin{itemize}
+	\item \textbf{cleanOldSchedules():} Removes all schedule entries up to the current date, delegating to the repository’s \texttt{cleanOldSchedules(Date)} method to purge obsolete calendar data.
+	\item \textbf{setupNewSchedules():} Identifies doctors lacking schedules in the next four weeks, and for each missing week constructs new \texttt{Schedule} objects based on their default \texttt{CalendarTemplate}. Progress is logged in intervals to monitor throughput.
+\end{itemize}
+
+By centralizing these operations in a scheduled job, the \texttt{Scheduler} ensures that doctor availabilities remain current without manual intervention, leveraging reusable service methods and Spring’s scheduling infrastructure to maintain data consistency and system reliability.
 
