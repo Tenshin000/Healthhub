@@ -20,21 +20,55 @@
 \contentsline {subsection}{\numberline {3.3.4}Usability}{13}{subsection.3.3.4}%
 \contentsline {subsection}{\numberline {3.3.5}Portability and Flexibility}{13}{subsection.3.3.5}%
 \contentsline {subsection}{\numberline {3.3.6}Maintainability}{13}{subsection.3.3.6}%
-\contentsline {section}{\numberline {3.4}UML Class Diagram}{14}{section.3.4}%
-\contentsline {subsection}{\numberline {3.4.1}Relationships between classes}{15}{subsection.3.4.1}%
-\contentsline {subsection}{\numberline {3.4.2}Design of the classes}{15}{subsection.3.4.2}%
-\contentsline {chapter}{\numberline {4}Implementation}{19}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Front-End}{19}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Back-End}{19}{section.4.2}%
-\contentsline {section}{\numberline {4.3}Spring Boot}{19}{section.4.3}%
-\contentsline {section}{\numberline {4.4}Back-End Structure}{20}{section.4.4}%
-\contentsline {subsection}{\numberline {4.4.1}\texttt {package it.unipi.healthhub.config}}{20}{subsection.4.4.1}%
-\contentsline {subsection}{\numberline {4.4.2}\texttt {package it.unipi.healthhub.controller}}{20}{subsection.4.4.2}%
-\contentsline {subsection}{\numberline {4.4.3}\texttt {package it.unipi.healthhub.controller.api}}{21}{subsection.4.4.3}%
-\contentsline {subsubsection}{DoctorAPI}{21}{section*.2}%
-\contentsline {subsubsection}{PrivateDoctorAPI}{22}{section*.3}%
-\contentsline {subsubsection}{UserAPI}{24}{section*.4}%
-\contentsline {subsubsection}{PrivateUserAPI}{25}{section*.5}%
-\contentsline {subsubsection}{SearchAPI}{26}{section*.6}%
-\contentsline {subsection}{\numberline {4.4.4}\texttt {package it.unipi.healthhub.dto}}{27}{subsection.4.4.4}%
-\contentsline {subsection}{\numberline {4.4.5}\texttt {package it.unipi.healthhub.dto}}{27}{subsection.4.4.5}%
+\contentsline {subsection}{\numberline {3.3.7}Relationships between classes}{14}{subsection.3.3.7}%
+\contentsline {subsection}{\numberline {3.3.8}Design of the classes}{15}{subsection.3.3.8}%
+\contentsline {chapter}{\numberline {4}Data Model}{19}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Document Database - MongoDB}{19}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Collections}{19}{subsection.4.1.1}%
+\contentsline {subsubsection}{Users}{19}{section*.2}%
+\contentsline {subsubsection}{Doctors}{20}{section*.3}%
+\contentsline {subsubsection}{Appointments}{21}{section*.4}%
+\contentsline {subsubsection}{CalendarTemplates}{21}{section*.5}%
+\contentsline {subsection}{\numberline {4.1.2}Document Structure}{22}{subsection.4.1.2}%
+\contentsline {section}{\numberline {4.2}Graph Database - Neo4j}{25}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Node Types}{26}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Relationships}{26}{subsection.4.2.2}%
+\contentsline {chapter}{\numberline {5}Implementation}{27}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Front-End}{27}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Back-End}{27}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Spring Boot}{27}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Back-End Structure}{28}{section.5.4}%
+\contentsline {subsection}{\numberline {5.4.1}\texttt {package it.unipi.healthhub.config}}{28}{subsection.5.4.1}%
+\contentsline {subsection}{\numberline {5.4.2}\texttt {package it.unipi.healthhub.controller}}{28}{subsection.5.4.2}%
+\contentsline {subsection}{\numberline {5.4.3}\texttt {package it.unipi.healthhub.controller.api}}{29}{subsection.5.4.3}%
+\contentsline {subsubsection}{DoctorAPI}{29}{section*.6}%
+\contentsline {subsubsection}{PrivateDoctorAPI}{30}{section*.7}%
+\contentsline {subsubsection}{UserAPI}{32}{section*.8}%
+\contentsline {subsubsection}{PrivateUserAPI}{33}{section*.9}%
+\contentsline {subsubsection}{SearchAPI}{34}{section*.10}%
+\contentsline {subsection}{\numberline {5.4.4}\texttt {package it.unipi.healthhub.dto}}{35}{subsection.5.4.4}%
+\contentsline {subsection}{\numberline {5.4.5}\texttt {package it.unipi.healthhub.exception}}{35}{subsection.5.4.5}%
+\contentsline {subsection}{\numberline {5.4.6}\texttt {package it.unipi.healthhub.filter}}{35}{subsection.5.4.6}%
+\contentsline {subsection}{\numberline {5.4.7}\texttt {package it.unipi.healthhub.model}}{36}{subsection.5.4.7}%
+\contentsline {subsection}{\numberline {5.4.8}\texttt {package it.unipi.healthhub.model.mongo}}{37}{subsection.5.4.8}%
+\contentsline {subsubsection}{User}{37}{section*.11}%
+\contentsline {subsubsection}{}{38}{section*.12}%
+\contentsline {subsubsection}{Appointment}{40}{section*.13}%
+\contentsline {subsubsection}{Address}{44}{section*.14}%
+\contentsline {subsubsection}{Calendar Template}{45}{section*.15}%
+\contentsline {subsubsection}{Prenotable Slot}{46}{section*.16}%
+\contentsline {subsubsection}{Review}{47}{section*.17}%
+\contentsline {subsubsection}{Schedule}{48}{section*.18}%
+\contentsline {subsubsection}{Service}{48}{section*.19}%
+\contentsline {subsubsection}{Slot}{49}{section*.20}%
+\contentsline {subsection}{\numberline {5.4.9}\texttt {package it.unipi.healthhub.model.neo4j}}{49}{subsection.5.4.9}%
+\contentsline {subsubsection}{User DAO}{49}{section*.21}%
+\contentsline {subsubsection}{Doctor DAO}{50}{section*.22}%
+\contentsline {subsection}{\numberline {5.4.10}\texttt {package it.unipi.healthhub.projection}}{51}{subsection.5.4.10}%
+\contentsline {subsection}{\numberline {5.4.11}\texttt {package it.unipi.healthhub.repository}}{52}{subsection.5.4.11}%
+\contentsline {subsection}{\numberline {5.4.12}\texttt {package it.unipi.healthhub.service}}{52}{subsection.5.4.12}%
+\contentsline {subsubsection}{Appointment Service}{52}{section*.23}%
+\contentsline {subsubsection}{Doctor Service}{52}{section*.24}%
+\contentsline {subsubsection}{User Service}{53}{section*.25}%
+\contentsline {subsection}{\numberline {5.4.13}\texttt {package it.unipi.healthhub.util}}{54}{subsection.5.4.13}%
+\contentsline {subsection}{\numberline {5.4.14}Scheduler Component}{55}{subsection.5.4.14}%
