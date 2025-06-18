@@ -52,4 +52,4 @@ src/main/java/it/unipi/healthhub/HealthhubApplication.java
 /doc/**/*.out
 /doc/**/*.toc
 /doc/**/*.synctex.gz
-/doc/**/*.pdf
+/doc/main.pdf
