@@ -1,0 +1,36 @@
+\usepackage{xcolor}
+\usepackage{listings}
+
+% Colori per MongoDB
+\definecolor{mongoBackground}{HTML}{F7F7F7}
+\definecolor{mongoKeyword}{RGB}{0,102,204}    % blu
+\definecolor{mongoFunction}{RGB}{153,0,153}   % viola
+\definecolor{mongoString}{RGB}{163,21,21}     % rosso scuro
+\definecolor{mongoComment}{RGB}{0,128,0}      % verde
+\definecolor{mongoNumber}{RGB}{100,0,100}     % viola scuro
+
+% Definizione linguaggio MongoDB (simile a JavaScript)
+\lstdefinelanguage{mongodb}{
+	morekeywords={db,find,insert,insertOne,insertMany,update,updateOne,updateMany,delete,deleteOne,deleteMany,aggregate,match,project,group,sort,limit,skip},
+	keywordstyle=\color{mongoKeyword}\bfseries,
+	morekeywords=[2]{ObjectId,ISODate,NumberInt,NumberLong},
+	keywordstyle=[2]\color{mongoFunction},
+	sensitive=true,
+	comment=[l]{//},
+	morecomment=[s]{/*}{*/},
+	commentstyle=\color{mongoComment}\itshape,
+	stringstyle=\color{mongoString},
+	morestring=[b]",
+	morestring=[b]',
+	numberstyle=\color{mongoNumber},
+	basicstyle=\footnotesize\ttfamily,
+	numbers=left,
+	numbersep=8pt,
+	stepnumber=1,
+	backgroundcolor=\color{mongoBackground},
+	showstringspaces=false,
+	breaklines=true,
+	frame=lines,
+	captionpos=b,
+	tabsize=2
+}

@@ -1,18 +1,40 @@
 \chapter{Implementation}
 \section{Front-End}
-The front-end of our application has been developed as a traditional web-based interface, utilizing a combination of \textbf{JavaScript}, \textbf{HTML} and \textbf{CSS}. This technology stack enables the creation of a responsive and interactive user interface that can be accessed from any modern web browser without the need for additional installations. The application communicates asynchronously with the back-end server through \textbf{AJAX} (Asynchronous JavaScript and XML) requests, allowing data to be fetched and updated dynamically without requiring full page reloads. This results in a smoother user experience and improved performance, particularly when handling operations such as appointment booking, profile management, and real-time data visualization. The separation of concerns between presentation and logic also enhances the maintainability and scalability of the application.
+The front-end of our application has been developed as a traditional web-based interface, utilizing a combination of \textbf{JavaScript}, \textbf{HTML} and \textbf{CSS}. This technology stack enables the creation of a responsive and interactive user interface that can be accessed from any modern web browser without the need for additional installations. The application communicates asynchronously with the back-end server through \textbf{AJAX} (Asynchronous JavaScript and XML) requests, allowing data to be fetched and updated dynamically without requiring full page reloads. This results in a smoother user experience and improved performance, particularly when handling operations such as appointment booking, profile managementand real-time data visualization. The separation of concerns between presentation and logic also enhances the maintainability and scalability of the application.
+
+\section{Front-End Structure}
+The \textbf{resources} directory encapsulates the front-end assets and configuration files essential to the operation and presentation of the web application. Its hierarchical organization reflects a separation of concerns, promoting maintainability and modular development.
+
+Static resources such as CSS and JavaScript files reside in the \textbf{static} folder, structured into subdirectories for stylesheets (\textbf{css/}), scripts (\textbf{js/}) and error pages (\texttt{error/}). These support the visual and interactive components of the application.
+
+Dynamic \textbf{HTML} views based on \textbf{Thymeleaf} are located in the \textbf{templates} folder, with dedicated files for both doctors and users. A \textbf{fragments} subfolder contains reusable layout components (e.g., headers, footers, sidebars) to ensure consistency and reusability. Application-level configuration is managed through \texttt{application.properties}.
+
+\subsection{Static}
+The \textbf{static} directory collects all static web assets that are delivered to the client without server-side processing. These assets are organized into three primary subfolders: \texttt{css/}, \texttt{js/}, and \texttt{error/}, each serving a distinct role in the client-side rendering process.
+
+The \textbf{css} folder contains a series of modular stylesheets dedicated to specific views or components. These include both general-purpose files (e.g. \texttt{base.css}, \texttt{main.css}, \texttt{form.css}) and context-specific styles (e.g. \texttt{doctor-dashboard.css}, \texttt{user-profile.css}), which define the visual identity and layout of user and doctor interfaces.
+
+The \textbf{js} folder hosts JavaScript files that manage client-side interactions and dynamic behavior. Each script is associated with a specific view or functionality—for instance, \texttt{login.js} handles authentication interactions, while \texttt{slot-calendar.js} governs dynamic calendar updates for appointment scheduling.
+
+The \textbf{error} folder includes static HTML pages for standard HTTP error responses (400, 404, 500), ensuring that users receive consistent and informative feedback in case of failure scenarios.
+
+This structure promotes modularity and clarity, allowing for straightforward maintenance and scalability of front-end assets.
+
+\subsection{Templates}
+The \texttt{templates} directory constitutes a fundamental component within the presentation layer of the web application, as it houses the markup resources responsible for rendering the user interface. This directory is hierarchically organized into subfolders, each reflecting a specific functional domain or interaction paradigm with which the user engages. The HTML documents contained therein are primarily structured using Thymeleaf, a server-side template engine designed for Java-based web environments.
+
+Thymeleaf facilitates the synthesis of dynamic HTML views on the server side, enabling the embedding of context-sensitive data—such as session attributes, query outputsand user-submitted form content—directly into the markup prior to delivery to the client. This server-side rendering paradigm promotes a high degree of interactivity and allows for the generation of customized and context-aware web pages, thereby improving the overall responsiveness and user-centricity of the application interface.
 
 \section{Back-End}
-The back-end is implemented using \textbf{Java} due to its robustness, platform independence, and strong ecosystem. Java offers a well-established set of libraries and frameworks that support rapid development of secure, scalable, and maintainable web applications. Its object-oriented nature encourages clean architecture and modular design, which are essential for complex systems like healthcare platforms. Additionally, Java's widespread use in enterprise environments ensures long-term support and community-driven innovation, making it a reliable choice for production-grade applications.
+The back-end is implemented using \textbf{Java} due to its robustness, platform independenceand strong ecosystem. Java offers a well-established set of libraries and frameworks that support rapid development of secure, scalableand maintainable web applications. Its object-oriented nature encourages clean architecture and modular design, which are essential for complex systems like healthcare platforms. Additionally, Java's widespread use in enterprise environments ensures long-term support and community-driven innovation, making it a reliable choice for production-grade applications.
 
-\section{Spring Boot}
+\subsection{Spring Boot}
 As the core of our application, we adopted the \textbf{Spring Boot} framework, which has significantly streamlined both the development and deployment processes. One of the primary advantages of Spring Boot lies in its built-in support for an embedded \textbf{Tomcat} server, allowing the creation of a fully functional web application without requiring external configuration. This design choice has enhanced our ability to construct responsive and maintainable RESTful APIs. 
 
 In addition, to support our data management needs, we integrated \textbf{Spring Data Neo4j} and \textbf{Spring Data MongoDB}. The former facilitates interaction with the \textbf{Neo4j graph database} through a consistent repository-based abstraction, ideal for managing highly interconnected medical data such as relationships between doctors and patients. The latter offers seamless integration with \textbf{MongoDB}, \textbf{a document-oriented NoSQL database}, while preserving the flexibility and idiomatic programming style of the broader Spring ecosystem. Collectively, these technologies have provided a robust, scalable and modular architecture well-suited to the requirements of our application. 
 
 \section{Back-End Structure}
 The application follows the layered architecture presented during lectures, organizing the codebase into clearly defined packages to promote modularity and separation of concerns. 
-
 
 \subsection{\texttt{package it.unipi.healthhub.config}}
 The \textbf{Config} package usually contains configuration classes. In our case, we have only one class. 
@@ -29,21 +51,21 @@ In detail:
 \end{itemize}
 
 \subsection{\texttt{package it.unipi.healthhub.controller}}
-The \texttt{Controller} package manages API endpoint mappings and web page controllers for the core sections of the application, including the homepage, login, registration, and doctor dashboard. All classes in this package follow the Spring MVC (Model-View-Controller) framework, ensuring a clean separation of concerns between business logic, HTTP request handling, and view rendering.
+The \texttt{Controller} package manages API endpoint mappings and web page controllers for the core sections of the application, including the homepage, login, registrationand doctor dashboard. All classes in this package follow the Spring MVC (Model-View-Controller) framework, ensuring a clean separation of concerns between business logic, HTTP request handlingand view rendering.
 
 More spefically:
 \begin{itemize}
-	\item The \texttt{AuthController} handles authentication and registration processes for both patients (users) and doctors. Its responsibilities include rendering login, registration, and password recovery views; managing user sessions; creating new user accounts; and processing password reset requests. Utility classes such as \texttt{ControllerUtil} and \texttt{HashUtil} are employed to promote modularity and code reuse.
+	\item The \texttt{AuthController} handles authentication and registration processes for both patients (users) and doctors. Its responsibilities include rendering login, registrationand password recovery views; managing user sessions; creating new user accounts; and processing password reset requests. Utility classes such as \texttt{ControllerUtil} and \texttt{HashUtil} are employed to promote modularity and code reuse.
 	\item The \texttt{DoctorController} manages requests related to viewing a doctor’s public profile. It retrieves the corresponding data via the \texttt{DoctorService} and injects it into the model for view rendering.
-	\item The \texttt{DoctorDashboardController} supports navigation within the doctor's dashboard by mapping each HTTP GET request to a specific section such as appointments, profile, reviews, templates, and weekly schedule. It retrieves the authenticated doctor's data from the session and delegates business logic to the \texttt{DoctorService}.
+	\item The \texttt{DoctorDashboardController} supports navigation within the doctor's dashboard by mapping each HTTP GET request to a specific section such as appointments, profile, reviews, templatesand weekly schedule. It retrieves the authenticated doctor's data from the session and delegates business logic to the \texttt{DoctorService}.
 	\item The \texttt{HomeController} handles requests to the root endpoints (\texttt{/}, \texttt{/index}) and to the \texttt{/search} page. Each method ensures that session-specific data is consistently added to the model using \texttt{ControllerUtil} before returning the appropriate view.
-	\item The \texttt{UserController} manages authenticated user interactions through endpoints under \texttt{/user}, including profile viewing, appointments, and favorite doctors. It uses \texttt{ControllerUtil} to populate the model with session-based data. The class adopts a session-aware MVC design aimed at personalized user interaction.
+	\item The \texttt{UserController} manages authenticated user interactions through endpoints under \texttt{/user}, including profile viewing, appointmentsand favorite doctors. It uses \texttt{ControllerUtil} to populate the model with session-based data. The class adopts a session-aware MVC design aimed at personalized user interaction.
 \end{itemize}
 
 \subsection{\texttt{package it.unipi.healthhub.controller.api}}
 The \texttt{it.unipi.healthhub.controller.api} package defines a set of RESTful controllers that expose the application's core services via HTTP endpoints. These controllers are designed to return data (typically in JSON format) allowing asynchronous communication with frontend components and third-party systems.
 
-Serving as the API layer of the system architecture, this package supports decoupled access to key resources such as users, doctors, appointments, and reviews. It complements the standard MVC controllers by enabling machine-oriented interactions, in alignment with modern web application practices.
+Serving as the API layer of the system architecture, this package supports decoupled access to key resources such as users, doctors, appointmentsand reviews. It complements the standard MVC controllers by enabling machine-oriented interactions, in alignment with modern web application practices.
 
 \subsubsection{DoctorAPI}
 The \texttt{DoctorAPI} class defines a RESTful web interface to manage and interact with doctor-related resources within the \textit{HealthHub} system. It is annotated with \texttt{@RestController} and is mapped to the base path \texttt{/api/doctors}. Below is a summary of the main endpoints:
@@ -99,7 +121,7 @@ The \texttt{DoctorAPI} class defines a RESTful web interface to manage and inter
 \end{itemize}
 
 \subsubsection{PrivateDoctorAPI}
-The \texttt{PrivateDoctorAPI} class implements a secure REST interface for authenticated doctors to manage their personal data, appointments, and analytic insights. Annotated with \texttt{@RestController} and mapped to \texttt{/api/doctor}, it delegates domain logic to \texttt{AppointmentService} and \texttt{DoctorService}, enforcing session‐based access control. Below is a summary of the main endpoints:
+The \texttt{PrivateDoctorAPI} class implements a secure REST interface for authenticated doctors to manage their personal data, appointmentsand analytic insights. Annotated with \texttt{@RestController} and mapped to \texttt{/api/doctor}, it delegates domain logic to \texttt{AppointmentService} and \texttt{DoctorService}, enforcing session‐based access control. Below is a summary of the main endpoints:
 
 \begin{itemize}
 	\item \texttt{GET /api/doctor/appointments} \\
@@ -179,7 +201,7 @@ The \texttt{UserAPI} controller is a RESTful web service component. It provides 
 \end{itemize}
 
 \subsubsection{PrivateUserAPI}
-The \texttt{PrivateUserAPI} controller is a RESTful web service implemented using the Spring framework in Java, designed to provide secured endpoints for user-specific operations within the HealthHub system. It leverages HTTP sessions to identify the authenticated user (typically a patient) and delegates business logic to the \texttt{UserService}. The controller exposes various endpoints to manage user details, contacts, appointments, doctor recommendations, and password changes, emphasizing privacy and personalization.
+The \texttt{PrivateUserAPI} controller is a RESTful web service implemented using the Spring framework in Java, designed to provide secured endpoints for user-specific operations within the HealthHub system. It leverages HTTP sessions to identify the authenticated user (typically a patient) and delegates business logic to the \texttt{UserService}. The controller exposes various endpoints to manage user details, contacts, appointments, doctor recommendationsand password changes, emphasizing privacy and personalization.
 
 \begin{itemize}
 	\item \texttt{GET /api/user/details} \\
@@ -229,7 +251,7 @@ Upon receiving a valid query, the controller queries the MongoDB database via \t
 
 For authenticated users, the controller enriches the search outcomes by querying the Neo4j graph database to retrieve personalized recommendations. These recommendations are returned as \texttt{DoctorNeo4jProjection} objects, each associated with a relevance score reflecting the strength of the doctor-patient relationship, such as prior interactions or endorsements. In the absence of Neo4j results, the system falls back to the top MongoDB results.
 
-The integration of results from both sources is achieved by mapping doctor identifiers to Neo4j scores, then augmenting each MongoDB doctor's score accordingly. Doctors without Neo4j matches receive a default negative score to denote lack of personalized relevance. The aggregated list is sorted in descending order by combined score, and the top ten entries are converted into \texttt{DoctorDTO} objects for API response consistency.
+The integration of results from both sources is achieved by mapping doctor identifiers to Neo4j scores, then augmenting each MongoDB doctor's score accordingly. Doctors without Neo4j matches receive a default negative score to denote lack of personalized relevance. The aggregated list is sorted in descending order by combined scoreand the top ten entries are converted into \texttt{DoctorDTO} objects for API response consistency.
 
 Two private helper methods, \texttt{toDto} and \texttt{toTop10Dto}, support this process by converting raw entities to DTOs and by sorting and limiting the result set. This design ensures that search responses maintain a uniform format, whether or not personalization is applied. Overall, the \texttt{SearchAPI} exemplifies a hybrid search strategy that effectively merges traditional document-based retrieval with graph-driven personalization, leveraging session data to optimize relevance and incorporating fallback mechanisms to ensure robust performance for both authenticated and anonymous users.
 
@@ -241,7 +263,7 @@ The \texttt{it.unipi.healthhub.exception} package defines a set of custom unchec
 
 \begin{itemize}
 	\item \texttt{DoctorNotFoundException}:  
-	Thrown when an operation attempts to retrieve or manipulate a doctor entity that does not exist in the system. Constructors allow for default or custom error messages, and for nesting an underlying cause;
+	Thrown when an operation attempts to retrieve or manipulate a doctor entity that does not exist in the system. Constructors allow for default or custom error messagesand for nesting an underlying cause;
 	
 	\item \texttt{ScheduleAlreadyExistsException}:  
 	Raised to indicate an attempt to create a schedule for a doctor in a week for which a schedule is already defined. This prevents conflicting availability entries. As with other exceptions, it supports message customization and cause propagation;
@@ -254,7 +276,7 @@ The \texttt{it.unipi.healthhub.exception} package defines a set of custom unchec
 \end{itemize}
 
 \subsection{\texttt{package it.unipi.healthhub.filter}}
-The \texttt{it.unipi.healthhub.filter} package provides servlet filters that centralize authentication and authorization logic for both API and web endpoints. These filters intercept incoming HTTP requests, verify session validity and user roles, and either allow processing to continue, redirect to the login page, or return appropriate HTTP error codes upon access violations.
+The \texttt{it.unipi.healthhub.filter} package provides servlet filters that centralize authentication and authorization logic for both API and web endpoints. These filters intercept incoming HTTP requests, verify session validity and user rolesand either allow processing to continue, redirect to the login page, or return appropriate HTTP error codes upon access violations.
 
 \begin{itemize}
 	\item \textbf{DoctorApiFilter}:
@@ -1076,9 +1098,9 @@ The \texttt{AppointmentService} class provides a comprehensive set of business l
 
 Key aspects of \texttt{AppointmentService} include:
 \begin{itemize}
-	\item \textbf{Data Sanitization:} To prevent operator injection vulnerabilities specific to MongoDB, the service sanitizes input strings by replacing prohibited characters (e.g., '\$') within appointment fields, including nested doctor and patient information such as names, emails, and addresses.
+	\item \textbf{Data Sanitization:} To prevent operator injection vulnerabilities specific to MongoDB, the service sanitizes input strings by replacing prohibited characters (e.g., '\$') within appointment fields, including nested doctor and patient information such as names, emailsand addresses.
 	
-	\item \textbf{CRUD Operations:} The service exposes methods to retrieve all appointments, fetch an appointment by its identifier, create new appointments after sanitization, update existing ones, and delete appointments by ID.
+	\item \textbf{CRUD Operations:} The service exposes methods to retrieve all appointments, fetch an appointment by its identifier, create new appointments after sanitization, update existing onesand delete appointments by ID.
 	
 	\item \textbf{Asynchronous Updates:} Leveraging Spring's \texttt{@Async} annotation, the service asynchronously updates related doctor and patient information within appointments, improving responsiveness and decoupling these potentially costly operations.
 	
@@ -1087,7 +1109,7 @@ Key aspects of \texttt{AppointmentService} include:
 
 \subsubsection{Doctor Service}
 
-The \texttt{DoctorService} class manages business logic related to doctor profiles, endorsements, reviews, specializations, analytics, and schedule maintenance. It coordinates between MongoDB (via \texttt{doctorMongoRepository}) for persistent doctor data and Neo4j (via \texttt{doctorNeo4jRepository} and \texttt{userNeo4jRepository}) for relationship data.
+The \texttt{DoctorService} class manages business logic related to doctor profiles, endorsements, reviews, specializations, analyticsand schedule maintenance. It coordinates between MongoDB (via \texttt{doctorMongoRepository}) for persistent doctor data and Neo4j (via \texttt{doctorNeo4jRepository} and \texttt{userNeo4jRepository}) for relationship data.
 
 Key features of \texttt{DoctorService} include:
 \begin{itemize}
@@ -1095,13 +1117,13 @@ Key features of \texttt{DoctorService} include:
 	
 	\item \textbf{Reviews Management:} Enables patients to add and remove reviews after verifying appointments, updating both doctor documents and Neo4j relationships.
 	
-	\item \textbf{Profile Updates:} Supports login authentication, updating doctor details such as address, personal info, and phone numbers, with data sanitization and synchronization between MongoDB and Neo4j.
+	\item \textbf{Profile Updates:} Supports login authentication, updating doctor details such as address, personal infoand phone numbers, with data sanitization and synchronization between MongoDB and Neo4j.
 	
 	\item \textbf{Specializations Handling:} Allows adding and removing specializations stored in MongoDB and mirrored in Neo4j, returning indices for reference.
 	
 	\item \textbf{Endorsements:} Manages patient endorsements for doctors by updating counts in MongoDB and maintaining endorsement relationships in Neo4j.
 	
-	\item \textbf{Analytics:} Provides visit and earnings statistics aggregated by type, week, month, and year, leveraging the appointment repository.
+	\item \textbf{Analytics:} Provides visit and earnings statistics aggregated by type, week, monthand year, leveraging the appointment repository.
 	
 	\item \textbf{Schedule Management:} Maintains up-to-date doctor schedules by removing outdated entries and creating new ones for missing weeks, based on default calendar templates. The process includes progress logging and exception handling for missing templates.
 	
@@ -1109,25 +1131,25 @@ Key features of \texttt{DoctorService} include:
 \end{itemize}
 
 \subsubsection{User Service}
-The \texttt{UserService} class handles all user-related business logic, managing users stored in both MongoDB and Neo4j databases. It ensures data integrity and synchronization across these stores while supporting user authentication, profile management, and interactions with appointments and doctors.
+The \texttt{UserService} class handles all user-related business logic, managing users stored in both MongoDB and Neo4j databases. It ensures data integrity and synchronization across these stores while supporting user authentication, profile managementand interactions with appointments and doctors.
 
 Key features of \texttt{UserService} include:
 \begin{itemize}
 	\item \textbf{Data Sanitization:} Prevents injection vulnerabilities by sanitizing input strings differently for MongoDB (e.g., replacing '\$') and Neo4j (e.g., replacing '\$' and '.'). Sanitization applies to user fields and nested doctor data.
 
-	\item \textbf{User CRUD and Authentication:} Provides creation, retrieval, update, and deletion of users with transactional integrity. Includes username/email uniqueness checks and password validation for login and password changes.  
+	\item \textbf{User CRUD and Authentication:} Provides creation, retrieval, updateand deletion of users with transactional integrity. Includes username/email uniqueness checks and password validation for login and password changes.  
 	
 	\item \textbf{Profile and Contact Management:} Updates and retrieves detailed user profile information and contact data, synchronizing name changes across appointments and Neo4j relationships.  
 	
 	\item \textbf{Appointment Integration:} Retrieves past and upcoming appointments for users, supports appointment cancellation with schedule slot management and notification via a fake mail sender.  
 	
-	\item \textbf{Neo4j Relations and Recommendations:} Manages endorsement and review relations between users and doctors in Neo4j, fetching lists of endorsed, reviewed, and recommended doctors. Recommendation logic combines personalized and popular doctors.  
+	\item \textbf{Neo4j Relations and Recommendations:} Manages endorsement and review relations between users and doctors in Neo4j, fetching lists of endorsed, reviewedand recommended doctors. Recommendation logic combines personalized and popular doctors.  
 	
 	\item \textbf{Email Operations:} Sends password reset links using a mocked mail sender component.  
 \end{itemize}
 
 \subsection{\texttt{package it.unipi.healthhub.util}}
-This package contains several utility classes and interfaces used within the HealthHub application to support functionalities like session handling, date manipulation, email sending, password hashing, and conversion between DTOs and model objects.
+This package contains several utility classes and interfaces used within the HealthHub application to support functionalities like session handling, date manipulation, email sending, password hashingand conversion between DTOs and model objects.
 
 \begin{itemize}
 	\item \texttt{ControllerUtil.java}\\
@@ -1163,7 +1185,7 @@ This package contains several utility classes and interfaces used within the Hea
 The \texttt{Scheduler} class is a Spring-managed component responsible for automating weekly maintenance tasks on doctor schedules. Its \texttt{scheduleTask()} method executes every Sunday at midnight, invoking two key \texttt{DoctorService} operations:
 \begin{itemize}
 	\item \textbf{cleanOldSchedules():} Removes all schedule entries up to the current date, delegating to the repository’s \texttt{cleanOldSchedules(Date)} method to purge obsolete calendar data.
-	\item \textbf{setupNewSchedules():} Identifies doctors lacking schedules in the next four weeks, and for each missing week constructs new \texttt{Schedule} objects based on their default \texttt{CalendarTemplate}. Progress is logged in intervals to monitor throughput.
+	\item \textbf{setupNewSchedules():} Identifies doctors lacking schedules in the next four weeksand for each missing week constructs new \texttt{Schedule} objects based on their default \texttt{CalendarTemplate}. Progress is logged in intervals to monitor throughput.
 \end{itemize}
 
 By centralizing these operations in a scheduled job, the \texttt{Scheduler} ensures that doctor availabilities remain current without manual intervention, leveraging reusable service methods and Spring’s scheduling infrastructure to maintain data consistency and system reliability.
