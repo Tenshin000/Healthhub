@@ -45,10 +45,11 @@ src/main/java/it/unipi/healthhub/HealthhubApplication.java
 **/.DS_Store
 
 # Latex build files
-doc/**/*.aux
-doc/**/*.bbl
-doc/**/*.blg
-doc/**/*.log
-doc/**/*.out
-doc/**/*.toc
-doc/**/*.synctex.gz
+/doc/**/*.aux
+/doc/**/*.bbl
+/doc/**/*.blg
+/doc/**/*.log
+/doc/**/*.out
+/doc/**/*.toc
+/doc/**/*.synctex.gz
+/doc/**/*.pdf
