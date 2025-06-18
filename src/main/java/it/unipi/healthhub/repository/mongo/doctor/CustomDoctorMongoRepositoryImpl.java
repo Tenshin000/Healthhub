@@ -148,7 +148,7 @@ public class CustomDoctorMongoRepositoryImpl implements CustomDoctorMongoReposit
     }
 
     /**
-     * Full‑text–style search across multiple fields, with a custom ranking score.
+     * Full‑text-style search across multiple fields, with a custom ranking score.
      */
     @Override
     public List<DoctorMongoProjection> searchDoctors(String text) {

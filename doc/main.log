@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.10.9)  18 JUN 2025 22:26
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.10.9)  19 JUN 2025 00:05
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -542,8 +542,8 @@ File: listings.cfg 2024/09/23 1.10c listings configuration
 ))
 Package: listings 2024/09/23 1.10c (Carsten Heinz)
 
-(./listings/json.tex) (./listings/java.tex)
-Package hyperref Info: Option `colorlinks' set `true' on input line 23.
+(./listings/mongodb.tex) (./listings/json.tex) (./listings/java.tex)
+Package hyperref Info: Option `colorlinks' set `true' on input line 24.
 
 (c:/texlive/2024/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2024-05-08 L3 backend support: PDF output (pdfTeX)
@@ -553,24 +553,24 @@ File: l3backend-pdftex.def 2024-05-08 L3 backend support: PDF output (pdfTeX)
 (./main.aux)
 \openout1 = `main.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 30.
-LaTeX Font Info:    ... okay on input line 30.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 30.
-LaTeX Font Info:    ... okay on input line 30.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 30.
-LaTeX Font Info:    ... okay on input line 30.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 30.
-LaTeX Font Info:    ... okay on input line 30.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 30.
-LaTeX Font Info:    ... okay on input line 30.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 30.
-LaTeX Font Info:    ... okay on input line 30.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 30.
-LaTeX Font Info:    ... okay on input line 30.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 30.
-LaTeX Font Info:    ... okay on input line 30.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 30.
-LaTeX Font Info:    ... okay on input line 30.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -628,7 +628,7 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-Package hyperref Info: Link coloring ON on input line 30.
+Package hyperref Info: Link coloring ON on input line 31.
 
 (./main.out) (./main.out)
 \@outlinefile=\write3
@@ -697,7 +697,7 @@ Chapter 3.
 
 pdfTeX warning: pdflatex.exe (file ./resources/healthhub_UML.pdf): PDF inclusio
 n: found PDF version <1.7>, but at most version <1.5> allowed
-<./resources/healthhub_UML.pdf, id=335, 677.65169pt x 605.3817pt>
+<./resources/healthhub_UML.pdf, id=355, 677.65169pt x 605.3817pt>
 File: ./resources/healthhub_UML.pdf Graphic file (type pdf)
 <use ./resources/healthhub_UML.pdf>
 Package pdftex.def Info: ./resources/healthhub_UML.pdf  used on input line 94.
@@ -746,7 +746,7 @@ LaTeX Font Warning: Font shape `OMS/cmtt/m/n' undefined
 
 pdfTeX warning: pdflatex.exe (file ./resources/neo4j.pdf): PDF inclusion: found
  PDF version <1.7>, but at most version <1.5> allowed
-<./resources/neo4j.pdf, id=515, 189.8292pt x 59.2614pt>
+<./resources/neo4j.pdf, id=535, 189.8292pt x 59.2614pt>
 File: ./resources/neo4j.pdf Graphic file (type pdf)
 <use ./resources/neo4j.pdf>
 Package pdftex.def Info: ./resources/neo4j.pdf  used on input line 234.
@@ -892,17 +892,53 @@ Overfull \hbox (12.16129pt too wide) in paragraph at lines 1173--1175
 lasses such as \OT1/cmtt/m/n/12 FakeMailSender\OT1/cmr/m/n/12 . 
  []
 
-) (./chapters/queries.tex) (./main.bbl
+) (./chapters/queries.tex
 
 [56]
+Chapter 6.
+LaTeX Font Info:    Trying to load font information for TS1+cmtt on input line 
+13.
+(c:/texlive/2024/texmf-dist/tex/latex/base/ts1cmtt.fd
+File: ts1cmtt.fd 2023/04/13 v2.5m Standard LaTeX font definitions
+)
+
+[57
+
+]
+LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <12> not available
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 69.
+
+
+LaTeX Font Warning: Font shape `TS1/cmtt/bx/n' undefined
+(Font)              using `TS1/cmtt/m/n' instead
+(Font)              for symbol `textdollar' on input line 69.
+
+
+
+[58]
+
+[59]
+Overfull \hbox (0.41757pt too wide) in paragraph at lines 154--155
+[]\TS1/cmtt/bx/n/12 $\OT1/cmtt/m/n/12 match\OT1/cmr/m/n/12 : This stage per-for
+ms a se-lec-tive fil-ter-ing of doc-u-ments within the \OT1/cmtt/m/n/12 appoint
+ments
+ []
+
+
+
+[60]) (./main.bbl
+
+[61]
+
+[62
+
+]
 
 LaTeX Warning: Empty `thebibliography' environment on input line 3.
 
 )
 
-[57
-
-] (./main.aux)
+[63] (./main.aux)
  ***********
 LaTeX2e <2024-06-01> patch level 2
 L3 programming layer <2024-09-10>
@@ -912,34 +948,36 @@ L3 programming layer <2024-09-10>
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: B8115C09FA9B39E5263F6309C8E6771D;8824.
+(rerunfilecheck)             Checksum: 2D1948A853DC2CEE64C7EAA3080A930A;9233.
  ) 
 Here is how much of TeX's memory you used:
- 16538 strings out of 473579
- 256741 string characters out of 5732263
- 960595 words of memory out of 5000000
- 38194 multiletter control sequences out of 15000+600000
- 567241 words of font info for 70 fonts, out of 8000000 for 9000
+ 16799 strings out of 473579
+ 260881 string characters out of 5732263
+ 961659 words of memory out of 5000000
+ 38319 multiletter control sequences out of 15000+600000
+ 567835 words of font info for 72 fonts, out of 8000000 for 9000
  1142 hyphenation exceptions out of 8191
  75i,11n,79p,966b,2208s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><c:/tex
 live/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmitt10.pfb><c:/texlive/202
 4/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb><c:/texlive/2024/texmf-d
-ist/fonts/type1/public/amsfonts/cm/cmr12.pfb><c:/texlive/2024/texmf-dist/fonts/
-type1/public/amsfonts/cm/cmr17.pfb><c:/texlive/2024/texmf-dist/fonts/type1/publ
-ic/amsfonts/cm/cmr6.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts
-/cm/cmr7.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pf
-b><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmsl12.pfb><c:/tex
-live/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb><c:/texlive/2024
-/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb><c:/texlive/2024/texmf-di
-st/fonts/type1/public/amsfonts/cm/cmtt10.pfb><c:/texlive/2024/texmf-dist/fonts/
-type1/public/amsfonts/cm/cmtt12.pfb><c:/texlive/2024/texmf-dist/fonts/type1/pub
-lic/amsfonts/cm/cmtt8.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/cm-sup
-er/sfrm1200.pfb>
-Output written on main.pdf (57 pages, 380172 bytes).
+ist/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/texlive/2024/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmr12.pfb><c:/texlive/2024/texmf-dist/fonts/type1/publ
+ic/amsfonts/cm/cmr17.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmr6.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.p
+fb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb><c:/texl
+ive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmsl12.pfb><c:/texlive/2024/
+texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb><c:/texlive/2024/texmf-dis
+t/fonts/type1/public/amsfonts/cm/cmti12.pfb><c:/texlive/2024/texmf-dist/fonts/t
+ype1/public/amsfonts/cm/cmtt10.pfb><c:/texlive/2024/texmf-dist/fonts/type1/publ
+ic/amsfonts/cm/cmtt12.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfon
+ts/cm/cmtt8.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sfrm120
+0.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sftt1000.pfb><c:/
+texlive/2024/texmf-dist/fonts/type1/public/cm-super/sftt1200.pfb>
+Output written on main.pdf (63 pages, 419110 bytes).
 PDF statistics:
- 1718 PDF objects out of 1728 (max. 8388607)
- 1604 compressed objects within 17 object streams
- 996 named destinations out of 1000 (max. 500000)
- 435 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1924 PDF objects out of 2073 (max. 8388607)
+ 1797 compressed objects within 18 object streams
+ 1124 named destinations out of 1200 (max. 500000)
+ 467 words of extra memory for PDF output out of 10000 (max. 10000000)
 

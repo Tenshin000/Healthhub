@@ -1,0 +1,175 @@
+\chapter{Queries}
+In this chapter, we present only the complex queries executed by our application, without dwelling on trivial queries. 
+
+\section{Mongo DB}
+\subsection{Search Query}
+This query is run every time a guest user, a patient or a doctor inserts a character in the search bar. t works in the same way for all three actors. Returns a list of doctors based on the entered string. The string can be a name, a specialization, a city, a province or a mix of these. 
+
+This is the Java code:
+\begin{lstlisting}[language=java]
+	@Override
+	public List<DoctorMongoProjection> searchDoctors(String text) {
+		// Match documents using full-text search
+		AggregationOperation match = match(Criteria.where("$text").is(new Document("$search", text)));
+		
+		// Add MongoDB's built-in text relevance score
+		AggregationOperation project = context -> new Document("$project",
+		new Document("doctor", "$$ROOT")
+		.append("score", new Document("$meta", "textScore"))
+		);
+		
+		// Sort by relevance score
+		AggregationOperation sort = context -> new Document("$sort",
+		new Document("score", new Document("$meta", "textScore"))
+		);
+		
+		// Limit to top 250 results
+		AggregationOperation limit = limit(250);
+		
+		// Build the aggregation pipeline
+		Aggregation agg = newAggregation(match, project, sort, limit);
+		
+		// Execute aggregation
+		AggregationResults<DoctorMongoProjection> results =
+		mongoTemplate.aggregate(agg, "doctors", DoctorMongoProjection.class);
+		
+		return results.getMappedResults();
+	}
+\end{lstlisting}
+
+This is its one-to-one translation into a MongoDB query. 
+\begin{lstlisting}[language=mongodb]
+	db.doctors.aggregate([
+		{
+			$match: {
+				$text: { $search: query }
+			}
+		},
+		{
+			$project: {
+				doctor: "$$ROOT",
+				score: { $meta: "textScore" }
+			}
+		},
+		{
+			$sort: {
+				score: { $meta: "textScore" }
+			}
+		},
+		{
+			$limit: 250
+		}
+	]);
+\end{lstlisting}
+
+The above aggregation pipeline enables a full-text search over the \texttt{doctors} collection, returning the most relevant documents according to a weighted scoring scheme. Although the underlying text index will be discussed in detail in the dedicated indexing section, it is important to mention that the fields \texttt{name}, \texttt{specializations}, \texttt{address.city}, and \texttt{address.province} are indexed with different weights, thereby influencing the ranking of the search results.
+
+The pipeline is composed of four main stages:
+\begin{itemize}
+	\item \textbf{\texttt{\$match}}: This stage filters documents that match the full-text search criteria specified by the user input. The search is performed across all indexed fields using MongoDB's \texttt{\$text} operator;
+	
+	\item \textbf{\texttt{\$project}}: At this stage, each document is projected into a new structure where the original document is nested under the \texttt{doctor} field. Additionally, a new field \texttt{score} is introduced, which represents the text relevance score computed by MongoDB using its internal ranking algorithm based on term frequency and field weights;
+	
+	\item \textbf{\texttt{\$sort}}: Documents are then ordered in descending order of their \texttt{score}, so that the most relevant matches (according to the text index configuration) are prioritized in the output;
+	
+	\item \textbf{\texttt{\$limit}}: Finally, the result set is truncated to a maximum of 250 documents, which serves both as a performance optimization and a practical upper bound for rendering results in the user interface.
+\end{itemize}
+
+\subsection{Analytics}
+\subsubsection{Earnings}
+This query is an analytic for the doctor's Dashboard and returns a map of monthly revenues for a given year.
+
+\begin{lstlisting}[language=java]
+	@Override
+	public Map<String, Double> getEarningsByYearForDoctor(String doctorId, Integer year) {
+		
+		MatchOperation matchOperation = Aggregation.match(Criteria.where("doctor.id").is(doctorId)
+		.and("date")
+		.gte(LocalDate.of(year, 1, 1).atStartOfDay())
+		.lt(LocalDate.of(year + 1, 1, 1).atStartOfDay())
+		);
+		ProjectionOperation projectMonth = Aggregation.project().andExpression("month(date)").as("month").and("price").as("price");
+		GroupOperation groupOperation = Aggregation.group("month").sum("price").as("total");
+		ProjectionOperation projectionOperation = Aggregation.project("total").and("month").previousOperation();
+		
+		Aggregation aggregation = Aggregation.newAggregation(
+		matchOperation,
+		projectMonth,
+		groupOperation,
+		projectionOperation
+		);
+		
+		AggregationResults<DBObject> results = mongoTemplate.aggregate(aggregation, Appointment.class, DBObject.class);
+		
+		Map<String, Double> earningsByYear = new HashMap<>();
+		for (DBObject doc : results.getMappedResults()) {
+			Integer month = (Integer) doc.get("month");
+			String monthString = new DateFormatSymbols(Locale.ENGLISH).getMonths()[month-1].toLowerCase();
+			Double total = (doc.get("total") instanceof Number) ? ((Number) doc.get("total")).doubleValue() : null;
+			earningsByYear.put(monthString, total);
+		}
+		
+		return earningsByYear;
+	}
+\end{lstlisting}
+
+\begin{lstlisting}[language=mongodb]
+	db.appointments.aggregate([
+	{
+		$match: {
+			"doctor._id": ObjectId(doctorId),
+			date: {
+				$gte: ISODate("${year}-01-01T00:00:00Z"),
+				$lt: ISODate("${year + 1}-01-01T00:00:00Z")
+			}
+		}
+	},
+	{
+		$project: {
+			month: { $month: "$date" },
+			price: 1
+		}
+	},
+	{
+		$group: {
+			_id: "$month",
+			total: { $sum: "$price" }
+		}
+	},
+	{
+		$project: {
+			month: "$_id",
+			total: 1,
+			_id: 0
+		}
+	}
+	]); 
+\end{lstlisting}
+
+The aggregation pipeline shown above is designed to compute the monthly revenue generated by a specific doctor over the course of a given calendar year. This query supports the analytical needs of the doctor's dashboard, enabling a temporal breakdown of financial performance.
+
+The pipeline consists of the following sequential stages:
+
+\begin{itemize}
+	\item \textbf{\texttt{\$match}}: This stage performs a selective filtering of documents within the \texttt{appointments} collection. It restricts the result set to only those documents where the embedded \texttt{doctor.\_id} field matches the provided identifier and the \texttt{date} field falls within the specified year. The temporal filtering is implemented using the \texttt{\$gte} and \texttt{\$lt} operators to define an inclusive-exclusive date range between the first day of January and the first day of the following year;
+	
+	\item \textbf{\texttt{\$project}}: Each document is then transformed to retain only two fields: the \texttt{price} of the appointment and a computed \texttt{month} field, which is extracted from the \texttt{date} using MongoDB’s \texttt{\$month} operator. This transformation facilitates the grouping operation in the subsequent stage;
+	
+	\item \textbf{\texttt{\$group}}: Documents are aggregated by the computed \texttt{month} value. For each month, the total revenue is computed by summing the values of the \texttt{price} field using the \texttt{\$sum} accumulator. The grouping key, \texttt{\_id}, is implicitly set to the month number (ranging from 1 to 12);
+	
+	\item \textbf{\texttt{\$project}}: In the final projection stage, the output is restructured to explicitly include the \texttt{month} and \texttt{total} fields, while omitting the default \texttt{\_id} field. This renders the result set suitable for direct transformation into a month-to-amount mapping.
+\end{itemize}
+
+The result of this pipeline is a flat collection of documents, each representing the total earnings for a specific month. In the application layer, this output is subsequently mapped into a \texttt{Map<String, Double>}, where each key corresponds to the English name of a month (e.g., \texttt{"january"}, \texttt{"february"}), and each value denotes the corresponding revenue in that month. This processed result can be directly visualized in the dashboard through line charts.
+
+\subsubsection{Visit Type Summary}
+...
+
+\begin{lstlisting}[language=java]
+	
+\end{lstlisting}
+
+\begin{lstlisting}[language=mongodb]
+	
+\end{lstlisting}
+
