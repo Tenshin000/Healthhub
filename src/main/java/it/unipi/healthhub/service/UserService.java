@@ -4,7 +4,6 @@ import it.unipi.healthhub.dto.AppointmentDTO;
 import it.unipi.healthhub.dto.DoctorDTO;
 import it.unipi.healthhub.dto.PatientContactsDTO;
 import it.unipi.healthhub.dto.UserDetailsDTO;
-import it.unipi.healthhub.events.UserNameUpdateEvent;
 import it.unipi.healthhub.exception.UserNotFoundException;
 import it.unipi.healthhub.model.mongo.Address;
 import it.unipi.healthhub.model.mongo.Appointment;
@@ -209,10 +208,6 @@ public class UserService {
             sanitizeUserMongo(user);
             
             updateUser(user.getId(), user);
-
-            applicationEventPublisher.publishEvent(
-                    new UserNameUpdateEvent(this, patientId, userDetails.getFullName())
-            );
 
             return userDetails;
         }

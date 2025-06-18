@@ -10,19 +10,233 @@ As the core of our application, we adopted the \textbf{Spring Boot} framework, w
 
 In addition, to support our data management needs, we integrated \textbf{Spring Data Neo4j} and \textbf{Spring Data MongoDB}. The former facilitates interaction with the \textbf{Neo4j graph database} through a consistent repository-based abstraction, ideal for managing highly interconnected medical data such as relationships between doctors and patients. The latter offers seamless integration with \textbf{MongoDB}, \textbf{a document-oriented NoSQL database}, while preserving the flexibility and idiomatic programming style of the broader Spring ecosystem. Collectively, these technologies have provided a robust, scalable and modular architecture well-suited to the requirements of our application. 
 
-\vspace{4mm}
+\section{Back-End Structure}
+The application follows the layered architecture presented during lectures, organizing the codebase into clearly defined packages to promote modularity and separation of concerns. 
 
-The application follows the layered architecture presented during lectures, organizing the codebase into clearly defined packages to promote modularity and separation of concerns. Specifically: 
+
+\subsection{\texttt{package it.unipi.healthhub.config}}
+The \textbf{Config} package usually contains configuration classes. In our case, we have only one class. 
+
+The \texttt{FilterConfig} class defines the registration of custom servlet filters used to manage access control within the application. Annotated with \texttt{@Configuration}, it registers filters via \texttt{FilterRegistrationBean}, associating each filter with specific URL patterns. 
+
+In detail:
 \begin{itemize}
-	\item The \textbf{Config} package contains configuration classes;
-	\item The \textbf{Controller} package handles API endpoint mappings, the \textbf{Model} package defines the entity classes corresponding to the database schema. The Controller also contains the \textbf{APIs} with which the front-end communicates;
-	\item The \textbf{Repository} package provides data access functionality through Spring Data JPA interfaces;
-	\item The \textbf{Resources} directory includes external configuration files such as \texttt{application.properties};
-	\item The \textbf{Service} layer encapsulates the core business logic;
+	\item \texttt{DoctorDashboardAuthFilter}: restricts access to \texttt{/doctor/dashboard/*};
+	\item \texttt{PatientDashboardFilter}: applied to \texttt{/user/*};
+	\item \texttt{PatientApiFilter}: secures \texttt{/api/user/*};
+	\item \texttt{DoctorApiFilter}: secures \texttt{/api/doctor/*};
+	\item \texttt{LoginFilter}: manages access to the login page at \texttt{/login}.
 \end{itemize}
 
+\subsection{\texttt{package it.unipi.healthhub.controller}}
+The \texttt{Controller} package manages API endpoint mappings and web page controllers for the core sections of the application, including the homepage, login, registration, and doctor dashboard. All classes in this package follow the Spring MVC (Model-View-Controller) framework, ensuring a clean separation of concerns between business logic, HTTP request handling, and view rendering.
 
+More spefically:
+\begin{itemize}
+	\item The \texttt{AuthController} handles authentication and registration processes for both patients (users) and doctors. Its responsibilities include rendering login, registration, and password recovery views; managing user sessions; creating new user accounts; and processing password reset requests. Utility classes such as \texttt{ControllerUtil} and \texttt{HashUtil} are employed to promote modularity and code reuse.
+	\item The \texttt{DoctorController} manages requests related to viewing a doctor’s public profile. It retrieves the corresponding data via the \texttt{DoctorService} and injects it into the model for view rendering.
+	\item The \texttt{DoctorDashboardController} supports navigation within the doctor's dashboard by mapping each HTTP GET request to a specific section such as appointments, profile, reviews, templates, and weekly schedule. It retrieves the authenticated doctor's data from the session and delegates business logic to the \texttt{DoctorService}.
+	\item The \texttt{HomeController} handles requests to the root endpoints (\texttt{/}, \texttt{/index}) and to the \texttt{/search} page. Each method ensures that session-specific data is consistently added to the model using \texttt{ControllerUtil} before returning the appropriate view.
+	\item The \texttt{UserController} manages authenticated user interactions through endpoints under \texttt{/user}, including profile viewing, appointments, and favorite doctors. It uses \texttt{ControllerUtil} to populate the model with session-based data. The class adopts a session-aware MVC design aimed at personalized user interaction.
+\end{itemize}
 
+\subsection{\texttt{package it.unipi.healthhub.controller.api}}
+The \texttt{it.unipi.healthhub.controller.api} package defines a set of RESTful controllers that expose the application's core services via HTTP endpoints. These controllers are designed to return data (typically in JSON format) allowing asynchronous communication with frontend components and third-party systems.
 
+Serving as the API layer of the system architecture, this package supports decoupled access to key resources such as users, doctors, appointments, and reviews. It complements the standard MVC controllers by enabling machine-oriented interactions, in alignment with modern web application practices.
 
+\subsubsection{DoctorAPI}
+The \texttt{DoctorAPI} class defines a RESTful web interface to manage and interact with doctor-related resources within the \textit{HealthHub} system. It is annotated with \texttt{@RestController} and is mapped to the base path \texttt{/api/doctors}. Below is a summary of the main endpoints:
+
+\begin{itemize}
+	\item \texttt{GET /api/doctors} \\
+	Returns a list of all registered doctors.
+	
+	\item \texttt{GET /api/doctors/\{id\}} \\
+	Retrieves a specific doctor by their unique identifier.
+	
+	\item \texttt{POST /api/doctors} \\
+	Creates a new doctor resource.
+	
+	\item \texttt{PUT /api/doctors/\{id\}} \\
+	Updates an existing doctor identified by \texttt{id}.
+	
+	\item \texttt{DELETE /api/doctors/\{id\}} \\
+	Deletes the doctor with the specified \texttt{id}.
+	
+	\item \texttt{GET /api/doctors/\{doctorId\}/services} \\
+	Retrieves the list of services offered by the specified doctor.
+	
+	\item \texttt{GET /api/doctors/\{doctorId\}/appointments} \\
+	Returns the list of appointments associated with a doctor.
+	
+	\item \texttt{POST /api/doctors/\{doctorId\}/appointments} \\
+	Books an appointment for the authenticated patient with the given doctor.
+	
+	\item \texttt{GET /api/doctors/\{doctorId\}/templates} \\
+	Retrieves scheduling templates used by the doctor.
+	
+	\item \texttt{GET /api/doctors/\{doctorId\}/schedules/week?year=\dots\&week=\dots} \\
+	Returns the weekly schedule (including prenotable slots) for a doctor, given the ISO week and year.
+	
+	\item \texttt{GET /api/doctors/\{doctorId\}/endorsements} \\
+	Retrieves the total number of endorsements for a doctor and whether the current user has endorsed them.
+	
+	\item \texttt{POST /api/doctors/\{doctorId\}/endorse} \\
+	Allows a logged-in patient to endorse a doctor.
+	
+	\item \texttt{POST /api/doctors/\{doctorId\}/unendorse} \\
+	Removes an existing endorsement made by the patient.
+	
+	\item \texttt{GET /api/doctors/\{doctorId\}/reviews} \\
+	Returns all patient reviews for the specified doctor.
+	
+	\item \texttt{POST /api/doctors/\{doctorId\}/reviews} \\
+	Submits a review for a doctor, provided the patient has had an appointment with them.
+	
+	\item \texttt{GET /api/doctors/\{doctorId\}/reviews/week/count} \\
+	Returns the number of reviews a doctor received during the current ISO week.
+\end{itemize}
+
+\subsubsection{PrivateDoctorAPI}
+The \texttt{PrivateDoctorAPI} class implements a secure REST interface for authenticated doctors to manage their personal data, appointments, and analytic insights. Annotated with \texttt{@RestController} and mapped to \texttt{/api/doctor}, it delegates domain logic to \texttt{AppointmentService} and \texttt{DoctorService}, enforcing session‐based access control. Below is a summary of the main endpoints:
+
+\begin{itemize}
+	\item \texttt{GET /api/doctor/appointments} \\
+	retrieves today's appointments (or for a given date).
+	\item \texttt{DELETE /api/doctor/appointments/\{id\}} \\
+	deletes an appointment.
+	\item \texttt{PUT /api/doctor/address} \\
+	updates the doctor's address.
+	\item \texttt{PUT /api/doctor/info} \\
+	updates the doctor's profile info.
+	\item \texttt{POST /api/doctor/phone} \\
+	adds a phone number.
+	\item \texttt{DELETE /api/doctor/phone/\{index\}} \\
+	removes a phone number by index.
+	\item \texttt{POST /api/doctor/specialization} \\
+	adds a specialization.
+	\item \texttt{DELETE /api/doctor/specialization/\{index\}} \\
+	removes a specialization.
+	\item \texttt{POST /api/doctor/service} \\
+	adds a medical service.
+	\item \texttt{GET /api/doctor/service} \\
+	retrieves all offered services.
+	\item \texttt{PUT /api/doctor/service} \\
+	updates a medical service.
+	\item \texttt{DELETE /api/doctor/service/\{id\}} \\
+	deletes a medical service.
+	\item \texttt{POST /api/doctor/template} \\
+	creates a new availability template.
+	\item \texttt{GET /api/doctor/template} \\
+	retrieves all availability templates.
+	\item \texttt{PUT /api/doctor/template} \\
+	updates a template. 
+	\item \texttt{DELETE /api/doctor/template/\{id\}} \\
+	deletes a template.
+	\item \texttt{PUT /api/doctor/template/default} \\
+	sets the default availability template.
+	\item \texttt{POST /api/doctor/schedule} \\
+	creates a weekly schedule.
+	\item \texttt{GET /api/doctor/schedule} \\
+	retrieves the weekly schedule.
+	\item \texttt{PUT /api/doctor/schedule} \\
+	updates the weekly schedule.
+	\item \texttt{DELETE /api/doctor/schedule} \\
+	deletes the weekly schedule.
+	\item \texttt{GET /api/doctor/reviews} \\
+	retrieves all received reviews.
+	\item \texttt{DELETE /api/doctor/review/\{id\}} \\
+	 deletes a review.
+	\item \texttt{PUT /api/doctor/password} \\
+	 changes the password.
+	\item \texttt{GET /api/doctor/stats/visits}\\
+	gets number of visits (optionally weekly).
+	\item \texttt{GET /api/doctor/stats/earnings}\\
+	 gets annual earnings.
+	\item \texttt{GET /api/doctor/stats/patients} \\
+	gets number of new patients per month.
+\end{itemize}
+
+\subsubsection{UserAPI}
+The \texttt{UserAPI} controller is a RESTful web service component. It provides endpoints for managing user entities within the HealthHub application, leveraging the \texttt{UserService} to perform CRUD (Create, Read, Update, Delete) operations on patients stored in a MongoDB database. The controller follows standard REST conventions, utilizing HTTP verbs to represent actions on resources. 
+
+\begin{itemize}
+	\item \texttt{GET /api/users} \\
+	Retrieves a list of all users registered in the system.
+	
+	\item \texttt{GET /api/users/\{id\}} \\
+	Fetches a specific user by their unique identifier. Returns HTTP 200 with the user data if found, otherwise HTTP 404.
+	
+	\item \texttt{POST /api/users} \\
+	Creates a new user entity based on the data provided in the request body. Returns the created user.
+	
+	\item \texttt{PUT /api/users/\{id\}} \\
+	Updates an existing user identified by the given ID with new data provided in the request body. Returns HTTP 200 with the updated user if the operation is successful; returns HTTP 404 if the user does not exist.
+	
+	\item \texttt{DELETE /api/users/\{id\}} \\
+	Deletes the user identified by the specified ID. Returns HTTP 204 No Content regardless of whether the user existed, indicating that the request has been processed.
+\end{itemize}
+
+\subsubsection{PrivateUserAPI}
+The \texttt{PrivateUserAPI} controller is a RESTful web service implemented using the Spring framework in Java, designed to provide secured endpoints for user-specific operations within the HealthHub system. It leverages HTTP sessions to identify the authenticated user (typically a patient) and delegates business logic to the \texttt{UserService}. The controller exposes various endpoints to manage user details, contacts, appointments, doctor recommendations, and password changes, emphasizing privacy and personalization.
+
+\begin{itemize}
+	\item \texttt{GET /api/user/details} \\
+	Retrieves detailed personal information of the currently authenticated user by extracting the patient ID from the HTTP session. Returns user details or an error message in case of failure.
+	
+	\item \texttt{PUT /api/user/details} \\
+	Updates the personal details of the authenticated user. The new data is supplied in the request body as a \texttt{UserDetailsDTO} object.
+	
+	\item \texttt{GET /api/user/details/view?id=\{id\}} \\
+	Retrieves contact information and demographic data for a user specified by the \texttt{id} query parameter. Additionally, if a doctor is logged in, it returns the number of visits that doctor has conducted with the user.
+	
+	\item \texttt{GET /api/user/contacts} \\
+	Fetches the contact information related to the authenticated user.
+	
+	\item \texttt{PUT /api/user/contacts} \\
+	Updates the contact information of the authenticated user using data provided in the request body as a \texttt{PatientContactsDTO}.
+	
+	\item \texttt{GET /api/user/appointments/upcoming} \\
+	Retrieves a list of upcoming appointments for the authenticated user.
+	
+	\item \texttt{GET /api/user/appointments/past} \\
+	Retrieves a list of past appointments for the authenticated user.
+	
+	\item \texttt{DELETE /api/user/appointments/\{appointmentId\}} \\
+	Cancels the appointment identified by \texttt{appointmentId}. Returns HTTP 200 on success or HTTP 400 if the appointment does not exist.
+	
+	\item \texttt{GET /api/user/recommendations?limit=\{limit\}} \\
+	Returns a list of recommended doctors for the authenticated user, with an optional parameter \texttt{limit} to specify the maximum number of results (default is 3).
+	
+	\item \texttt{GET /api/user/doctors/reviewed} \\
+	Returns a list of doctors that the authenticated user has reviewed.
+	
+	\item \texttt{GET /api/user/doctors/endorsed} \\
+	Returns a list of doctors endorsed by the authenticated user.
+	
+	\item \texttt{PUT /api/user/password} \\
+	Allows the authenticated user to change their password. The current and new passwords are supplied in the request body as a \texttt{PasswordChangeDTO} and are hashed before validation and update.
+\end{itemize}
+
+\subsubsection{SearchAPI}
+The \texttt{SearchAPI} controller is a RESTful component, responsible for executing search queries specifically targeted at medical doctors within the HealthHub system. This controller integrates data from two distinct data sources: a MongoDB database and a Neo4j graph database. The rationale behind this dual-source approach is to combine traditional document-oriented search results with personalized recommendations derived from graph-based relationships. 
+
+The primary endpoint exposed by this controller is: \texttt{GET /api/search/doctors}.  
+This endpoint accepts a mandatory \texttt{query} parameter, representing the search string to be matched against doctor records. Additionally, it accesses the HTTP session to retrieve the identifier of the currently authenticated patient (if available), enabling personalized search refinement. 
+
+Upon receiving a valid query, the controller queries the MongoDB database via \texttt{DoctorService}, returning results as \texttt{DoctorMongoProjection} objects that represent doctor records optimized for search display. If the user is unauthenticated or the patient identifier is absent, the controller returns the top ten doctors from the MongoDB results, sorted by relevance.
+
+For authenticated users, the controller enriches the search outcomes by querying the Neo4j graph database to retrieve personalized recommendations. These recommendations are returned as \texttt{DoctorNeo4jProjection} objects, each associated with a relevance score reflecting the strength of the doctor-patient relationship, such as prior interactions or endorsements. In the absence of Neo4j results, the system falls back to the top MongoDB results.
+
+The integration of results from both sources is achieved by mapping doctor identifiers to Neo4j scores, then augmenting each MongoDB doctor's score accordingly. Doctors without Neo4j matches receive a default negative score to denote lack of personalized relevance. The aggregated list is sorted in descending order by combined score, and the top ten entries are converted into \texttt{DoctorDTO} objects for API response consistency.
+
+Two private helper methods, \texttt{toDto} and \texttt{toTop10Dto}, support this process by converting raw entities to DTOs and by sorting and limiting the result set. This design ensures that search responses maintain a uniform format, whether or not personalization is applied. Overall, the \texttt{SearchAPI} exemplifies a hybrid search strategy that effectively merges traditional document-based retrieval with graph-driven personalization, leveraging session data to optimize relevance and incorporating fallback mechanisms to ensure robust performance for both authenticated and anonymous users.
+
+\subsection{\texttt{package it.unipi.healthhub.dto}}
+The Data Transfer Objects (DTO) directory encapsulates a set of plain Java objects that serve as data carriers between different layers of the HealthHub application, primarily facilitating communication between the service and presentation tiers. These DTO classes are designed to aggregate and structure data relevant to specific business operations or user interactions, decoupling the internal domain model from external API contracts.
+
+\subsection{\texttt{package it.unipi.healthhub.dto}}
+
+...
 

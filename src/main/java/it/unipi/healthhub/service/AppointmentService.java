@@ -9,6 +9,7 @@ import it.unipi.healthhub.repository.mongo.AppointmentMongoRepository;
 import it.unipi.healthhub.util.FakeMailSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -17,6 +18,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+@EnableAsync
 @Service
 public class AppointmentService {
     @Autowired
