@@ -241,7 +241,7 @@ public class DoctorService {
         it.unipi.healthhub.model.mongo.Service service = new it.unipi.healthhub.model.mongo.Service("Standard Visit", 0);
         newService(doctor, service);
         sanitizeDoctorMongo(doctor);
-        Doctor newDoc = updateDoctor(doctor.getId(), doctor);
+        Doctor newDoc = doctorMongoRepository.save(doctor);
         DoctorDAO doctorDAO = new DoctorDAO(newDoc.getId(), newDoc.getName(), newDoc.getSpecializations());
 
         sanitizeDoctorNeo4j(doctorDAO);
