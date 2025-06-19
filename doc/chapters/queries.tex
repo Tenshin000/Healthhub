@@ -3,9 +3,8 @@ In this chapter, we present only the complex queries executed by our application
 
 \section{Mongo DB}
 \subsection{Search Query}
-This query is run every time a guest user, a patient or a doctor inserts a character in the search bar. t works in the same way for all three actors. Returns a list of doctors based on the entered string. The string can be a name, a specialization, a city, a province or a mix of these. 
+This query is run every time a guest user, a patient or a doctor inserts a character in the search bar. It works in the same way for all three actors. Returns a list of doctors based on the entered string. The string can be a name, a specialization, a city, a province or a mix of these. 
 
-This is the Java code:
 \begin{lstlisting}[language=java]
 	@Override
 	public List<DoctorMongoProjection> searchDoctors(String text) {
@@ -37,7 +36,6 @@ This is the Java code:
 	}
 \end{lstlisting}
 
-This is its one-to-one translation into a MongoDB query. 
 \begin{lstlisting}[language=mongodb]
 	db.doctors.aggregate([
 		{
@@ -163,13 +161,512 @@ The pipeline consists of the following sequential stages:
 The result of this pipeline is a flat collection of documents, each representing the total earnings for a specific month. In the application layer, this output is subsequently mapped into a \texttt{Map<String, Double>}, where each key corresponds to the English name of a month (e.g., \texttt{"january"}, \texttt{"february"}), and each value denotes the corresponding revenue in that month. This processed result can be directly visualized in the dashboard through line charts.
 
 \subsubsection{Visit Type Summary}
-...
+This query is an analytic for the doctor's Dashboard and is designed to produce a statistical summary of the different types of visits conducted by a particular doctor, identified uniquely by their \texttt{doctorId}. It serves as a key analytic metric within the doctor's dashboard, providing insight into the distribution of appointment types.
 
 \begin{lstlisting}[language=java]
-	
+	@Override
+	public Map<String, Integer> getVisitsCountByTypeForDoctor(String doctorId){
+		MatchOperation matchOperation = Aggregation.match(Criteria.where("doctor.id").is(doctorId));
+		GroupOperation groupOperation = Aggregation.group("visitType").count().as("total");
+		ProjectionOperation projectionOperation = Aggregation.project("total").and("visitType").previousOperation();
+		
+		Aggregation aggregation = Aggregation.newAggregation(
+		matchOperation,
+		groupOperation,
+		projectionOperation
+		);
+		
+		AggregationResults<DBObject> results = mongoTemplate.aggregate(aggregation, Appointment.class, DBObject.class);
+		
+		Map<String, Integer> visitsCountByType = new HashMap<>();
+		for (DBObject doc : results.getMappedResults()) {
+			String visitType = (String) doc.get("visitType");
+			Integer total = (Integer) doc.get("total");
+			visitsCountByType.put(visitType, total);
+		}
+		
+		return visitsCountByType;
+	}
 \end{lstlisting}
 
 \begin{lstlisting}[language=mongodb]
-	
+	db.appointments.aggregate([
+	{ $match: { "doctor._id": ObjectId(doctorId)} },
+	{ $group: { _id: "$visitType", total: { $sum: 1 } } },
+	{ $project: { _id: 0, visitType: "$_id", total: 1 } }
+	])
 \end{lstlisting}
 
+
+The pipeline consists of three primary stages:
+\begin{itemize}
+	\item \textbf{\texttt{\$match}}: This initial stage filters the documents in the \texttt{appointments} collection to include only those records where the embedded field \texttt{doctor.\_id} matches the specified \texttt{doctorId}. This restriction ensures that subsequent aggregations consider exclusively the appointments associated with the target medical professional;
+	
+	\item \textbf{\texttt{\$group}}: After filtering, the documents are grouped according to their \texttt{visitType} attribute. The grouping key, represented by \texttt{\_id}, is assigned the value of the \texttt{visitType} field. For each distinct visit type, the pipeline computes the total count of corresponding appointments by incrementing a counter via the \texttt{\$sum} accumulator initialized to 1 for every document;
+	
+	\item \textbf{\texttt{\$project}}: In the final stage, the pipeline reformats the output documents to enhance readability and usability. It excludes the default \texttt{\_id} field and introduces two explicit fields: \texttt{visitType}, mapped from the grouping key \texttt{\_id}, and \texttt{total}, representing the count of appointments for that visit type.
+	
+\end{itemize}
+
+The resulting data structure is a set of key-value pairs, where each key corresponds to a visit type (e.g., consultation, follow-up, diagnostic) and each value denotes the frequency of that visit type performed by the doctor. This aggregation output is subsequently transformed within the application layer into a \texttt{Map<String, Integer>}, facilitating efficient access and visualization of the visit type distribution in the user interface, with a pie graph in our case.
+
+\subsubsection{New Patients of the Month}
+This query is aimed at identifying the number of new patients a specific doctor has seen for the first time within a given month and year. From a clinical and administrative perspective, this information is crucial for assessing patient acquisition trends, measuring outreach effectiveness, and planning capacity for onboarding procedures. The logic is implemented through a multi-stage MongoDB aggregation pipeline that systematically filters, groups, and analyzes the data within the \texttt{appointments} collection.
+
+\begin{lstlisting}[language=java]
+	@Override
+	public Integer findNewPatientsVisitedByDoctorInCurrentMonth(String doctorId, Integer year, Integer month){
+		LocalDateTime startOfMonth = LocalDate.of(year, month, 1).atStartOfDay();
+		LocalDateTime endOfMonth = startOfMonth.plusMonths(1);
+		
+		// 1. Filter all appointments for this doctor
+		MatchOperation matchDoctor = Aggregation.match(
+		Criteria.where("doctor.id").is(doctorId)
+		);
+		
+		// 2. Group by patient ID and compute the date of their first visit
+		GroupOperation groupByPatient = Aggregation.group("patient.id")
+		.min("date").as("firstVisitDate");
+		
+		// 3. Keep only those patients whose first visit falls in the current month
+		MatchOperation matchFirstVisitInMonth = Aggregation.match(
+		Criteria.where("firstVisitDate").gte(startOfMonth).lt(endOfMonth)
+		);
+		
+		// 4. Count how many unique new patients remain
+		CountOperation countNewPatients = Aggregation.count().as("newPatientsCount");
+		
+		Aggregation aggregation = Aggregation.newAggregation(
+		matchDoctor,
+		groupByPatient,
+		matchFirstVisitInMonth,
+		countNewPatients
+		);
+		
+		// 5. Execute the aggregation pipeline
+		AggregationResults<org.bson.Document> results =
+		mongoTemplate.aggregate(aggregation, Appointment.class, org.bson.Document.class);
+		
+		List<org.bson.Document> mappedResults = results.getMappedResults();
+		if(mappedResults.isEmpty()){
+			return 0;
+		}
+		else{
+			return mappedResults.get(0).getInteger("newPatientsCount", 0);
+		}
+	}
+\end{lstlisting}
+
+\begin{lstlisting}[language=mongodb]
+	db.appointments.aggregate([
+		{
+			$match: {
+				"doctor._id": doctorId
+			}
+		},
+		{
+			$group: {
+				_id: "$patient._id",
+				firstVisitDate: { $min: "$date" }
+			}
+		},
+		{
+			$match: {
+				firstVisitDate: {
+					$gte: startOfMonth,
+					$lt: endOfMonth
+				}
+			}
+		},
+		{
+			$count: "newPatientsCount"
+		}
+	]);
+\end{lstlisting}
+
+The pipeline performs the following operations:
+
+\begin{itemize}
+	\item \textbf{\$match}: This initial stage filters the documents to include only those appointments where the embedded field \texttt{doctor.\_id} matches the specified \texttt{doctorId}. This ensures the analysis is scoped exclusively to the appointments associated with the targeted physician;
+		
+	\item \textbf{\$group}: At this stage, documents are grouped by the unique identifier of each patient, i.e., \texttt{patient.\_id}. For each patient, the aggregation computes the earliest recorded visit date using the accumulator \texttt{\$min: "\$date"}. The resulting field, \texttt{firstVisitDate}, represents the patient's first interaction with the doctor in question;
+		
+	\item \textbf{\$match} (second occurrence): This filtering stage retains only those patient groups whose \texttt{firstVisitDate} falls within the specified month and year. This is achieved by comparing \texttt{firstVisitDate} to a temporal interval delimited by \texttt{startOfMonth} (inclusive) and \texttt{endOfMonth} (exclusive), both computed using Java's \texttt{LocalDateTime} API. Patients whose initial interaction with the doctor predates the selected month are excluded from further consideration;
+	
+	\item \textbf{\$count}: The final stage performs a scalar aggregation to compute the total number of new patients that passed all previous filters. The result is a single document containing the field \texttt{newPatientsCount}, which holds the computed cardinality.
+	
+\end{itemize}
+
+In the application layer, the result of the aggregation is retrieved using the Spring Data MongoDB \texttt{mongoTemplate.aggregate} method. If no patients match the criteria, the method safely returns zero; otherwise, it extracts the value associated with the \texttt{newPatientsCount} field.
+
+From a technical standpoint, this aggregation ensures uniqueness at the patient level and temporal precision by leveraging both document-level filtering and grouped date evaluation. It is efficient, interpretable, and aligned with the goal of producing actionable monthly cohort data for clinical decision-making.
+
+\subsubsection{Number of Visits for a week}
+This query returns a count of the number of visits for each day of the week (Sunday through Saturday) for a given doctor, in a specific week and year. It is designed to provide a temporal distribution of clinical activity for a specific doctor over the course of a given week, identified by a year and ISO week number. 
+
+\begin{lstlisting}[language=java]
+	@Override
+	public Map<String, Integer> getVisitsCountByDayForDoctorWeek(String doctorId, Integer week, Integer year) {
+		LocalDateTime startOfWeek = DateUtil.getFirstDayOfWeek(week, year).atStartOfDay();
+		LocalDateTime endOfWeek = startOfWeek.plusDays(7);
+		
+		MatchOperation matchOperation = Aggregation.match(Criteria.where("doctor.id").is(doctorId)
+		.and("date")
+		.gte(startOfWeek)
+		.lt(endOfWeek)
+		);
+		ProjectionOperation projectDay = Aggregation.project().andExpression("dayOfWeek(date)").as("day");
+		GroupOperation groupOperation = Aggregation.group("day").count().as("total");
+		
+		Aggregation aggregation = Aggregation.newAggregation(
+		matchOperation,
+		projectDay,
+		groupOperation
+		);
+		
+		AggregationResults<DBObject> results = mongoTemplate.aggregate(aggregation, Appointment.class, DBObject.class);
+		
+		Map<String, Integer> visitsCountByDay = new HashMap<>();
+		for (DBObject doc : results.getMappedResults()) {
+			Integer day = (Integer) doc.get("_id");
+			String dayString = new DateFormatSymbols(Locale.ENGLISH).getWeekdays()[day].toLowerCase();
+			Integer total = (Integer) doc.get("total");
+			visitsCountByDay.put(dayString, total);
+		}
+		
+		return visitsCountByDay;
+	}
+\end{lstlisting}
+
+\begin{lstlisting}[language=mongodb]
+	db.appointments.aggregate([
+	{
+		$match: {
+			"doctor._id": doctorId,
+			date: {
+				$gte: startOfWeek,
+				$lt: endOfWeek
+			}
+		}
+	},
+	{
+		$project: {
+			day: { $dayOfWeek: "$date" }
+		}
+	},
+	{
+		$group: {
+			_id: "$day",
+			total: { $sum: 1 }
+		}
+	},
+	{
+		$project: {
+			_id: 0,
+			day: "$_id",
+			total: 1
+		}
+	}
+	])
+\end{lstlisting}
+
+The query follows a multi-stage aggregation process applied to the \texttt{appointments} collection, and operates as follows:
+\begin{itemize}
+	\item \textbf{\$match}: In the first stage, the aggregation filters documents to include only those appointments that match two criteria: the embedded field \texttt{doctor.\_id} equals the specified \texttt{doctorId} AND the \texttt{date} field falls within the temporal window delimited by \texttt{startOfWeek} (inclusive) and \texttt{endOfWeek} (exclusive);
+	
+	\item \textbf{\$project}: The second stage projects a derived field named \texttt{day}, which is computed via the MongoDB expression \texttt{\$dayOfWeek}. This operator returns an integer in the range \([1,7]\), representing the day of the week (where 1 corresponds to Sunday and 7 to Saturday), extracted from the \texttt{date} field of each matching document;
+	
+	\item \textbf{\$group}: In this stage, the documents are grouped according to the previously computed \texttt{day} field. For each day of the week, the total number of appointments is calculated using the accumulator \texttt{\$sum: 1}, effectively counting the number of occurrences per day;
+	
+	\item \textbf{\$project}: The final stage restructures the output by renaming the grouping key \texttt{\_id} to the more semantically meaningful field \texttt{day}, while removing the default \texttt{\_id} field from the output. The resulting documents contain only two fields: \texttt{day} (an integer representing the weekday) and \texttt{total} (the count of appointments).
+\end{itemize}
+
+On the application side, the output of this aggregation is mapped into a \texttt{Map<String, Integer>}, where each key corresponds to the English name of the day of the week (converted to lowercase), and each value indicates the number of visits on that day. The mapping leverages the \texttt{DateFormatSymbols} utility class to convert day indices into human-readable weekday names, ensuring correct localization.
+
+\section{Neo4j}
+\subsection{Recommendation Queries}
+\subsubsection{First Query}
+This method recommends a list of doctors to a specific patient (userId) based on a collaborative filtering algorithm implemented in Neo4j via Cypher. The goal is to suggest doctors that “similar” users have liked, but that the target user has not yet rated or endorsed. 
+
+\begin{lstlisting}[language=java]
+	/**
+	* Recommends doctors to a specific user based on collaborative filtering:
+	* 1) Finds "similar" users who have at least 3 doctors in common via endorsement/review.
+	* 2) Gets their favorite doctors, excluding those already endorsed/reviewed by the target user.
+	* 3) Sorts the doctors by aggregated score and returns the top-N results.
+	*
+	* Complexity: O(E_shared + E_rec), where E_shared is the number of shared relationships
+	* and E_rec is the number of endorsement/review relationships of the similar users.
+	* The query is parameterized and uses indexes.
+	*
+	* @param limit Maximum number of doctors to recommend.
+	* @return List of recommended doctors with their details.
+	*/
+	@Override
+	public List<DoctorDAO> recommendDoctorsForUser(String userId, int limit){
+		try(Session session = driver.session()){
+			return session.readTransaction(tx -> {
+				String cypher =
+				"MATCH (me:User {id:$uid})-[:ENDORSED|REVIEWED]->(d:Doctor)<-[:ENDORSED|REVIEWED]-(other:User) " +
+				"WITH me, other, count(d) AS sharedCount " +
+				"WHERE sharedCount >= 3 AND me <> other " +
+				"LIMIT 250 " +
+				// Get other doctors from 'other' that 'me' has not yet endorsed/reviewed
+				"MATCH (other)-[r:ENDORSED|REVIEWED*1..3]->(rec:Doctor) " +
+				"WHERE NOT (me)-[:ENDORSED|REVIEWED]->(rec) " +
+				// Aggregate a score: more relationships and more similar users increase the score
+				"WITH rec, sum(sharedCount) AS score, count(r) AS endorsements " +
+				"ORDER BY score DESC, endorsements DESC " +
+				"RETURN rec.id   AS id, " +
+				"rec.name AS name, " +
+				"rec.specializations AS specializations " +
+				"LIMIT $limit";
+				
+				Result result = tx.run(cypher,
+				Values.parameters("uid", userId, "limit", limit));
+				List<DoctorDAO> out = new ArrayList<>(limit);
+				while (result.hasNext()) {
+					Record rec = result.next();
+					out.add(new DoctorDAO(
+					rec.get("id").asString(),
+					rec.get("name").asString(),
+					rec.get("specializations").asList(Value::asString)
+					));
+				}
+				return out;
+			});
+		}
+	}
+\end{lstlisting}
+
+\begin{lstlisting}[language=cypher]
+	MATCH (me:User {id: uid})-[:ENDORSED|REVIEWED]->(d:Doctor)<-[:ENDORSED|REVIEWED]-(other:User)
+	WHERE me <> other
+	WITH me, other, count(d) AS sharedCount
+	WHERE sharedCount >= 3
+	LIMIT 250
+	
+	MATCH (other)-[r:ENDORSED|REVIEWED*1..3]->(rec:Doctor)
+	WHERE NOT (me)-[:ENDORSED|REVIEWED]->(rec)
+	
+	WITH rec, sum(sharedCount) AS score, count(r) AS endorsements
+	ORDER BY score DESC, endorsements DESC
+	RETURN rec.id AS id, rec.name AS name, rec.specializations AS specializations
+	LIMIT limit
+\end{lstlisting}
+
+The procedure can be formally decomposed into the following stages:
+
+\begin{itemize}
+	\item \textbf{Step 1: Identification of Similar Users.} The query first retrieves all users who share at least three doctors in common with the target user via either \texttt{ENDORSED} or \texttt{REVIEWED} relationships. This is achieved by performing a bi-directional match of the form:
+	\begin{quote}
+		\texttt{(me:User)-[:ENDORSED|REVIEWED]->(d:Doctor)<-[:ENDORSED|REVIEWED]-(other:User)}
+	\end{quote}
+	followed by an aggregation using \texttt{count(d)} to compute the number of shared doctors. The threshold \texttt{sharedCount} $\geq 3$ ensures that only users with a significant overlap are considered similar. A cap of 250 similar users is imposed to ensure query tractability.
+	
+	\item \textbf{Step 2: Discovery of Candidate Doctors.} For each similar user, the query searches for additional doctors to whom they are connected through endorsement or review paths up to a length of 3 hops:
+	\begin{quote}
+		\texttt{(other)-[r:ENDORSED|REVIEWED*1..3]->(rec:Doctor)}
+	\end{quote}
+	The constraint \texttt{WHERE NOT (me)-[:ENDORSED|REVIEWED]->(rec)} filters out doctors already known (and evaluated) by the target user, ensuring novelty in the recommendations.
+	
+	\item \textbf{Step 3: Scoring and Ranking.} Each candidate doctor \texttt{rec} is scored based on two aggregated metrics:
+	\begin{enumerate}
+		\item \texttt{score = sum(sharedCount)}: Reflects the cumulative similarity strength from all similar users who have recommended this doctor.
+		\item \texttt{endorsements = count(r)}: Captures the total number of paths (endorsements/reviews) that link similar users to the candidate doctor, indicating popularity.
+	\end{enumerate}
+	The final list is sorted in descending order of \texttt{score}, and in case of tie, by \texttt{endorsements}. The top-$N$ doctors are then returned as personalized recommendations.
+	
+\end{itemize}
+
+From a computational perspective, the algorithm has a complexity of $\mathcal{O}(E_{\text{shared}} + E_{\text{rec}})$, where $E_{\text{shared}}$ denotes the number of shared relationships used to determine similarity, and $E_{\text{rec}}$ denotes the number of endorsement or review relationships used to evaluate and score recommendations.
+
+This approach effectively exploits Neo4j's native graph traversal capabilities, using path-based semantics to identify non-trivial, yet meaningful associations. It balances locality (similar users) and popularity (frequent endorsements), aligning well with established practices in collaborative filtering literature.
+
+\subsubsection{Second Query}
+If the previous query does not return an acceptable number of results, this query is used which simply returns the most popular doctors and adds them to the result.
+
+\begin{lstlisting}[language=java]
+	/**
+	* Recommends popular doctors based on overall endorsements or reviews.
+	* Retrieves doctors ordered by their popularity score, which reflects the total number
+	* of endorsements or reviews received from all users.
+	*
+	* @param limit Maximum number of popular doctors to recommend.
+	* @return List of popular doctors with their details.
+	*/
+	@Override
+	public List<DoctorDAO> recommendPopularDoctors(int limit){
+		try(Session session = driver.session()){
+			return session.readTransaction(tx -> {
+				Result result = tx.run(
+				// Match all doctors with non-null specializations
+				"MATCH (d:Doctor) WHERE d.specializations IS NOT NULL " +
+				// Optionally match endorsements or reviews to compute popularity
+				"OPTIONAL MATCH (u:User)-[r:ENDORSED|REVIEWED]->(d) " +
+				"WITH d, count(r) AS popularityScore " +
+				// Return popular doctors ordered by popularity
+				"RETURN d.id AS id, d.name AS name, d.specializations AS specializations " +
+				"ORDER BY popularityScore DESC " +
+				"LIMIT $limit",
+				Values.parameters("limit", limit)
+				);
+				List<DoctorDAO> doctors = new ArrayList<>();
+				while(result.hasNext()){
+					Record record = result.next();
+					Value specValue = record.get("specializations");
+					List<String> specializations = specValue.isNull()
+					? new ArrayList<>()
+					: specValue.asList(Value::asString);
+					doctors.add(new DoctorDAO(
+					record.get("id").asString(),
+					record.get("name").asString(),
+					specializations
+					));
+				}
+				return doctors;
+			});
+		}
+	}
+\end{lstlisting}
+
+\begin{lstlisting}[language=cypher]
+	MATCH (d:Doctor)
+	WHERE d.specializations IS NOT NULL
+	OPTIONAL MATCH (u:User)-[r:ENDORSED|REVIEWED]->(d)
+	WITH d, count(r) AS popularityScore
+	RETURN d.id AS id, d.name AS name, d.specializations AS specializations
+	ORDER BY popularityScore DESC
+	LIMIT limit
+\end{lstlisting}
+
+This secondary recommendation query acts as a fallback strategy, intended to ensure the system provides a meaningful output even when the primary collaborative filtering query yields an insufficient number of doctor recommendations.
+
+The query is structured as follows:
+\begin{itemize}
+	\item \textbf{Step 1: Doctor Selection.} It begins by selecting all nodes of label \texttt{Doctor} for which the \texttt{specializations} attribute is not null:
+	\begin{quote}
+		\texttt{MATCH (d:Doctor) WHERE d.specializations IS NOT NULL}
+	\end{quote}
+	This constraint ensures that only doctors with defined specialization information are considered, likely to increase the relevance and utility of the recommendation.
+	
+	\item \textbf{Step 2: Popularity Computation.} An optional match is then performed to collect all \texttt{ENDORSED} and \texttt{REVIEWED} relationships originating from any \texttt{User} and pointing to the selected doctors:
+	\begin{quote}
+		\texttt{OPTIONAL MATCH (u:User)-[r:ENDORSED|REVIEWED]->(d)}
+	\end{quote}
+	The keyword \texttt{OPTIONAL} is crucial here: it ensures that doctors with zero endorsements or reviews are still included in the result set, albeit with a popularity score of zero. The query then aggregates the total number of such relationships per doctor using:
+	\begin{quote}
+		\texttt{WITH d, count(r) AS popularityScore}
+	\end{quote}
+	The resulting \texttt{popularityScore} reflects the doctor's visibility or trustworthiness as perceived by the user community.
+	
+	\item \textbf{Step 3: Ranking and Limiting.} The doctors are subsequently ordered in descending order of their computed \texttt{popularityScore}, and the top-$N$ results (as specified by the input parameter \texttt{limit}) are returned:
+	\begin{quote}
+		\texttt{ORDER BY popularityScore DESC LIMIT limit}
+	\end{quote}
+	The query finally returns the doctor's unique identifier (\texttt{id}), name (\texttt{name}), and areas of expertise (\texttt{specializations}), which are then mapped into \texttt{DoctorDAO} objects by the application logic.
+\end{itemize}
+
+From a technical perspective, this query is highly efficient, operating in linear time relative to the number of \texttt{ENDORSED} and \texttt{REVIEWED} edges in the graph. It is well-suited for cold-start scenarios, such as when a new user lacks sufficient interaction history to enable collaborative filtering. While it lacks personalization, it serves as a robust fallback to preserve the responsiveness and coverage of the recommendation system.
+
+\subsubsection{Random Sampling}
+\begin{lstlisting}[language=java]
+	@Transactional
+	public List<DoctorDAO> getRecommendedDoctors(String userId, int limit) {
+		List<DoctorDAO> recommendedDoctors = userNeo4jRepository.recommendDoctorsForUser(userId, limit * 10);
+		
+		if (recommendedDoctors.size() < limit * 10) {
+			int remaining = limit - recommendedDoctors.size();
+			Set<String> alreadyAddedIds = recommendedDoctors.stream()
+			.map(DoctorDAO::getId)
+			.collect(Collectors.toSet());
+			
+			List<DoctorDAO> popularDoctors = userNeo4jRepository.recommendPopularDoctors(remaining * 2);
+			if (!popularDoctors.isEmpty()) {
+				for (DoctorDAO doctor : popularDoctors) {
+					if (!alreadyAddedIds.contains(doctor.getId())) {
+						recommendedDoctors.add(doctor);
+						alreadyAddedIds.add(doctor.getId());
+					}
+				}
+			}
+		}
+		
+		// Random sampling
+		Collections.shuffle(recommendedDoctors);
+		return recommendedDoctors.stream()
+		.limit(limit)
+		.collect(Collectors.toList());
+	}
+\end{lstlisting}
+
+In pratice:
+\begin{itemize}
+	\item Requires up to limit * 10 personalized recommendations based on similar users (collaborative filtering), to have enough choices before filtering and shuffling;
+	\item If there are few personalized recommendations, it retrieves the most popular doctors and gradually adds them;
+	\item Randomly shuffles (\textbf{Random Sampling}) the combined list and returns only the top limits.
+\end{itemize}
+
+\section{Search Query Support}
+The \texttt{SearchAPI} class implements a RESTful endpoint for doctor search, combining document-based retrieval from MongoDB with graph-based personalization from Neo4j. This hybrid approach enables the system to deliver both relevant and personalized results while maintaining scalability and robustness. This feature is used only if the patient is logged. 
+
+This dual-database strategy leverages the strengths of both MongoDB and Neo4j: MongoDB provides efficient document retrieval based on textual relevance, while Neo4j introduces personalized ranking grounded in social and behavioral context. The use of Neo4j complements MongoDB by enabling context-aware recommendations, thus enhancing the overall search experience, especially for returning or registered users. 
+
+Neo4j performs a text search of doctors within the patient's social graph (User) based on the connection via \textit{REVIEWED} or \textit{ENDORSED} relations, and returns doctors closest to the user based on the minimum number of "steps" in the graph.
+
+\begin{lstlisting}[language=java]
+	@Query("MATCH path = (u:User {id:$uid})-[:REVIEWED|ENDORSED*1..3]-(d:Doctor) " +
+	"WHERE toLower(d.name) CONTAINS toLower($search) " +
+	" OR any(spec IN d.specializations WHERE toLower(spec) CONTAINS toLower($search)) " +
+	"WITH d, min(length(path)) AS steps " +
+	"RETURN d as doctor, (5-steps) as score " +
+	"ORDER BY steps " +
+	"LIMIT 250")
+	List<DoctorNeo4jProjection> findConnectedDoctorsBySteps(@Param("uid") String patientId, @Param("search") String search);
+\end{lstlisting}
+
+\begin{lstlisting}[language=cypher]
+	MATCH path = (u:User {id: uid})-[:REVIEWED|ENDORSED*1..3]-(d:Doctor)
+	WHERE toLower(d.name) CONTAINS toLower(search)
+	OR any(spec IN d.specializations WHERE toLower(spec) CONTAINS toLower(search))
+	WITH d, min(length(path)) AS steps
+	RETURN d AS doctor, (5 - steps) AS score
+	ORDER BY steps
+	LIMIT 250
+\end{lstlisting}
+
+The query is structured as follows:
+\begin{enumerate}
+	\item \textbf{Pattern Matching:} 
+	The query initiates a graph traversal by matching paths (\texttt{path}) between a given user node (\texttt{u:User})—identified via the parameter \texttt{\$uid}—and doctor nodes (\texttt{d:Doctor}). The traversal is constrained to edges labeled \texttt{REVIEWED} or \texttt{ENDORSED}, with a maximum traversal depth of 3 hops:
+	\begin{quote}
+		\texttt{MATCH path = (u:User \{id: \$uid\})-[:REVIEWED|ENDORSED*1..3]-(d:Doctor)}
+	\end{quote}
+	This clause effectively constructs the patient's \textit{social neighborhood} within the healthcare interaction network.
+	
+	\item \textbf{Textual Filtering:}
+	The query applies a text-based filter to select only those doctor nodes whose names or specializations partially match the input search string (\texttt{\$search}). Case-insensitive matching is achieved via the \texttt{toLower} function:
+	\begin{quote}
+		\texttt{WHERE toLower(d.name) CONTAINS toLower(\$search)}\\
+		\texttt{OR any(spec IN d.specializations WHERE toLower(spec) CONTAINS toLower(\$search))}
+	\end{quote}
+	This ensures that only semantically relevant doctors are considered, even within the personalized neighborhood.
+	
+	\item \textbf{Proximity-Based Scoring:}
+	For each doctor node, the query computes the shortest path length (in terms of hops) from the patient:
+	\begin{quote}
+		\texttt{WITH d, min(length(path)) AS steps}
+	\end{quote}
+	A score is then assigned to each doctor by subtracting the number of steps from a constant (5), producing higher scores for doctors that are more closely connected to the user:
+	\begin{quote}
+		\texttt{RETURN d AS doctor, (5 - steps) AS score}
+	\end{quote}
+	
+	\item \textbf{Ranking and Limiting Results:}
+	The resulting doctor nodes are sorted by ascending path length (\texttt{ORDER BY steps}), prioritizing closer relationships. The result set is capped at 250 entries to prevent computational overload and ensure responsiveness:
+	\begin{quote}
+		\texttt{LIMIT 250}
+	\end{quote}
+\end{enumerate}
+
+From a system architecture perspective, this approach allows the recommendation engine to exploit Neo4j's strengths in relationship traversal and path evaluation, complementing MongoDB's capabilities in scalable document storage and retrieval. The fusion of these two models supports a robust, intelligent and user-aware search experience.
