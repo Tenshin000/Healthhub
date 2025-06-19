@@ -1,0 +1,129 @@
+\chapter{Original Regex-Based Query}
+\label{ch:original-regex-query}
+This implementation defines a custom scoring logic using \texttt{\$regex} and \texttt{\$cond} operators to prioritize documents based on the match location. Although flexible, it does not leverage indexes and leads to full collection scans, making it inefficient for large datasets. 
+
+\begin{lstlisting}[language=java, caption={Java code for searching doctors with regex}]
+public List<DoctorMongoProjection> searchDoctors(String text) {
+        AggregationOperation match = match(new Criteria().orOperator(
+                Criteria.where("name").regex(text, "i"),
+                Criteria.where("specializations").regex(text, "i"),
+                Criteria.where("address.city").regex(text, "i"),
+                Criteria.where("address.province").regex(text, "i")
+        ));
+
+        Document nameCond = new Document("$cond", Arrays.asList(
+                new Document("$regexMatch", new Document("input", "$name").append("regex", text).append("options", "i")),
+                0,
+                5
+        ));
+        Document specFilter = new Document("$filter", new Document("input", "$specializations")
+                .append("as", "s")
+                .append("cond", new Document("$regexMatch",
+                        new Document("input", "$$s").append("regex", text).append("options", "i")))
+        );
+        Document specCond = new Document("$cond", Arrays.asList(
+                new Document("$gt", Arrays.asList(new Document("$size", specFilter), 0)),
+                1,
+                5
+        ));
+        Document cityCond = new Document("$cond", Arrays.asList(
+                new Document("$regexMatch", new Document("input", "$address.city").append("regex", text).append("options", "i")),
+                2,
+                5
+        ));
+        Document provCond = new Document("$cond", Arrays.asList(
+                new Document("$regexMatch", new Document("input", "$address.province").append("regex", text).append("options", "i")),
+                3,
+                5
+        ));
+        Document scoreExpr = new Document("$min", Arrays.asList(nameCond, specCond, cityCond, provCond));
+
+        AggregationOperation project = ctx -> new Document("$project",
+                new Document("doctor", "$$ROOT")
+                        .append("score", scoreExpr)
+        );
+
+        AggregationOperation sort = sort(Sort.Direction.ASC, "score");
+
+        AggregationOperation limit = limit(250);
+
+        Aggregation agg = newAggregation(match, project, sort, limit);
+
+        AggregationResults<DoctorMongoProjection> results =
+                mongoTemplate.aggregate(agg, "doctors", DoctorMongoProjection.class);
+
+        return results.getMappedResults();
+    }
+\end{lstlisting}
+
+\begin{lstlisting}[language=mongodb, caption={MongoDB aggregation pipeline for searching doctors with regex}]
+db.doctors.aggregate([
+        {
+            "$match": {
+                "$or": [
+                    {"name": {"$regex": term, "$options": "i"}},
+                    {"specializations": {"$regex": term, "$options": "i"}},
+                    {"address.city": {"$regex": term, "$options": "i"}},
+                    {"address.province": {"$regex": term, "$options": "i"}},
+                ]
+            }
+        },
+        {
+            "$addFields": {
+                "score": {
+                    "$min": [
+                        {
+                            "$cond": [
+                                {"$regexMatch": {"input": "$name", "regex": term, "options": "i"}},
+                                0,
+                                5
+                            ]
+                        },
+                        {
+                            "$cond": [
+                                {
+                                    "$gt": [
+                                        {
+                                            "$size": {
+                                                "$filter": {
+                                                    "input": "$specializations",
+                                                    "as": "s",
+                                                    "cond": {
+                                                        "$regexMatch": {
+                                                            "input": "$$s",
+                                                            "regex": term,
+                                                            "options": "i"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        0
+                                    ]
+                                },
+                                1,
+                                5
+                            ]
+                        },
+                        {
+                            "$cond": [
+                                {"$regexMatch": {"input": "$address.city", "regex": term, "options": "i"}},
+                                2,
+                                5
+                            ]
+                        },
+                        {
+                            "$cond": [
+                                {"$regexMatch": {"input": "$address.province", "regex": term, "options": "i"}},
+                                3,
+                                5
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {"$sort": {"score": 1}},
+        {"$limit": 250}
+    ])
+\end{lstlisting}
