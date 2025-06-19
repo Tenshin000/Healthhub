@@ -229,7 +229,7 @@ The \texttt{CalendarTemplates} collection stores predefined weekly availability 
 
 \section{Graph Database - Neo4j}
 
-\begin{figure}[!h]
+\begin{figure}[!ht]
     \centering
     \includegraphics[scale=1.7]{./resources/neo4j.pdf}
     \caption{GraphDB structure for HealthHub}
@@ -284,7 +284,7 @@ These relations enable pattern discovery and inference. Spatial behavior is indi
 
 \subsection{Replica Set Deployment}
 
-\begin{figure}[!h]
+\begin{figure}[t]
     \centering
     \includegraphics[scale=0.2]{./resources/mongo_replica.png}
     \caption{MongoDB Replica Set Structure}
@@ -305,7 +305,7 @@ Consistency across replicas is determined by the acknowledgment settings used du
   \item However, for critical data such as a doctor's availability schedule, we explicitly enforce \texttt{readConcernLevel=majority} to ensure that only the most up-to-date and replicated information is retrieved.
 \end{itemize}
 
-This approach enables us to maintain \textbf{eventual consistency} where acceptable—improving performance and reducing latency—while enforcing \textbf{strong consistency} only in the specific cases that require it. It provides a good balance between responsiveness and data reliability, especially in a system that emphasizes availability and user experience.
+This approach enables us to maintain \textbf{eventual consistency} where acceptable — improving performance and reducing latency — while enforcing \textbf{strong consistency} only in the specific cases that require it. It provides a good balance between responsiveness and data reliability, especially in a system that emphasizes availability and user experience.
 
 \paragraph{CAP Theorem Considerations}
 
@@ -356,7 +356,7 @@ To ensure consistency, we follow a two-phase update pattern:
 
 This logic is managed using Spring’s \texttt{@Transactional} annotation, ensuring atomicity across operations. Additionally, asynchronous execution is enabled via \texttt{@Async}, allowing long-running updates to Neo4j to execute in separate threads, enhancing system availability.
 
-\begin{figure}[!h]
+\begin{figure}[!ht]
     \centering
     \includegraphics[scale=0.5]{./resources/rollback.png}
     \caption{Handling consistency between MongoDB and Neo4j}

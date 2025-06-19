@@ -625,6 +625,7 @@ Neo4j performs a text search of doctors within the patient's social graph (User)
 	List<DoctorNeo4jProjection> findConnectedDoctorsBySteps(@Param("uid") String patientId, @Param("search") String search);
 \end{lstlisting}
 
+
 \begin{lstlisting}[language=cypher]
 	MATCH path = (u:User {id: uid})-[:REVIEWED|ENDORSED*1..3]-(d:Doctor)
 	WHERE toLower(d.name) CONTAINS toLower(search)
@@ -670,3 +671,75 @@ The query is structured as follows:
 \end{enumerate}
 
 From a system architecture perspective, this approach allows the recommendation engine to exploit Neo4j's strengths in relationship traversal and path evaluation, complementing MongoDB's capabilities in scalable document storage and retrieval. The fusion of these two models supports a robust, intelligent and user-aware search experience.
+
+\section{Indexes}
+
+\subsection{MongoDB}
+MongoDB supports a variety of index types, each designed to optimize query performance for specific use cases. The following sections detail the indexes implemented in our MongoDB collections, which are crucial for enhancing the efficiency of our application's data retrieval operations.
+
+\subsubsection{Appointments Collection - idx\_patient\_id}
+
+\begin{table}[H]
+\centering
+\caption{Performance comparison with and without the \texttt{idx\_patient\_id} index}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Metric} & \textbf{With index} & \textbf{Without index} & \textbf{\% Change} \\
+\midrule
+Execution time (ms)         & 333.20     & 892.80     & \textbf{-62.68\%} \\
+Documents examined (avg)         & 4,634.60   & 699,989.00 & \textbf{-99.34\%} \\
+Index keys examined (avg)        & 4,634.60   & 0.00       & N/A \\
+Documents returned (avg)         & 4,634.60   & 4,634.60   & +0.00\% \\
+\bottomrule
+\end{tabular}
+\label{tab:patient_idx_performance_corrected}
+\end{table}
+
+The \texttt{idx\_patient\_id} index significantly improves query performance when retrieving appointments for patients with a high number of visits. The average execution time decreased by more than 60\%, and the number of documents examined dropped by over 99\%. This demonstrates the importance of indexing frequently queried fields.
+
+\subsubsection{Appointments Collection - idx\_doctor\_id}
+
+
+\begin{table}[H]
+\centering
+\caption{Performance comparison with and without the \texttt{idx\_doctor\_id} index}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Metric} & \textbf{With index} & \textbf{Without index} & \textbf{\% Change} \\
+\midrule
+Execution time (ms)         & 13.70      & 566.80     & \textbf{-97.58\%} \\
+Documents examined (avg)         & 1,076.00   & 699,989.00 & \textbf{-99.85\%} \\
+Index keys examined (avg)       & 1,076.00   & 0.00       & N/A \\
+Documents returned (avg)         & 5.90       & 5.90       & +0.00\% \\
+\bottomrule
+\end{tabular}
+\label{tab:doctor_idx_performance}
+\end{table}
+
+Similarly, the \texttt{idx\_doctor\_id} index is essential for queries involving doctor-related appointment data, such as revenue analytics. The index reduced execution time by nearly 98\% and minimized the documents examined from nearly 700,000 to just over 1,000, highlighting a dramatic gain in efficiency.
+
+\subsubsection{Doctors Collection - DoctorsTextIndex}
+
+
+\begin{table}[H]
+\centering
+\caption{Performance comparison between regex-based and text index-based search}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Metric} & \textbf{Text Search} & \textbf{Regex Search} & \textbf{\% Change} \\
+\midrule
+Execution time (ms)         & 108.29     & 274.14     & \textbf{-60.50\%} \\
+Documents examined (avg)         & 14,081.00  & 87,632.00  & \textbf{-83.93\%} \\
+Index keys examined (avg)        & 31,073.71  & 0.00       & N/A \\
+Documents returned (avg)         & 14,081.00  & 9,587.71   & \textbf{+46.87\%} \\
+\bottomrule
+\end{tabular}
+\label{tab:text_vs_regex}
+\end{table}
+
+We compared regex-based search with full-text indexed search using \texttt{DoctorsTextIndex}. The indexed search not only executed over 60\% faster but also returned 47\% more documents on average, with significantly fewer documents examined. This underlines the advantage of using text indexes for flexible and performant search capabilities (see Appendix~\ref{ch:original-regex-query} for the original regex-based query).
+
+\subsection{Neo4j}
+
+
+During the initial setup of the Neo4j database, the insertion of relationships between \texttt{User} (patients) and \texttt{Doctor} nodes was significantly hindered by the lack of indexing. The script responsible for importing the data failed to complete within a reasonable time. By introducing indexes on the \texttt{id} field of both node types—which duplicates the original MongoDB \_id—relationship creation was drastically accelerated. After indexing, the setup process, which previously stalled indefinitely, was completed in just a few seconds. This confirms the critical role of indexes even in graph databases when handling large-scale relationship insertions.
