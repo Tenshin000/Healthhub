@@ -50,8 +50,7 @@ public class CustomAppointmentMongoRepositoryImpl implements CustomAppointmentMo
         Query query = new Query(Criteria.where("doctor.id").is(updatedDoctor.getId()));
         Update update = new Update()
                 .set("doctor.name", updatedDoctorInfo.getName())
-                .set("doctor.email", updatedDoctorInfo.getEmail())
-                .set("doctor.address", updatedDoctorInfo.getAddress());
+                .set("doctor.email", updatedDoctorInfo.getEmail());
 
         mongoTemplate.updateMulti(query, update, Appointment.class);
     }
@@ -100,7 +99,6 @@ public class CustomAppointmentMongoRepositoryImpl implements CustomAppointmentMo
 
     @Override
     public Map<String, Double> getEarningsByYearForDoctor(String doctorId, Integer year) {
-
         MatchOperation matchOperation = Aggregation.match(Criteria.where("doctor.id").is(doctorId)
                 .and("date")
                 .gte(LocalDate.of(year, 1, 1).atStartOfDay())

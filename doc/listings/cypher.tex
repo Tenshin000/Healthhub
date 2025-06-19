@@ -1,0 +1,39 @@
+\usepackage{xcolor}
+\usepackage{listings}
+
+% Colori per Cypher
+\definecolor{cypherBackground}{HTML}{F7F7F7}
+\definecolor{cypherKeyword}{RGB}{0,102,204}   % blu
+\definecolor{cypherFunction}{RGB}{153,0,153}  % viola
+\definecolor{cypherString}{RGB}{163,21,21}    % rosso scuro
+\definecolor{cypherComment}{RGB}{0,128,0}     % verde
+\definecolor{cypherNumber}{RGB}{100,0,100}    % viola scuro
+
+% Definizione linguaggio Cypher per Neo4j
+\lstdefinelanguage{cypher}{
+	morekeywords={
+		MATCH,RETURN,WHERE,CREATE,DELETE,DETACH,REMOVE,SET,WITH,ORDER,BY,ASC,DESC,
+		LIMIT,SKIP,UNWIND,MERGE,ON,OPTIONAL,USING,INDEX,CONSTRAINT,TRUE,FALSE,NULL,AS,AND,OR,NOT,IN,EXISTS,DISTINCT
+	},
+	keywordstyle=\color{cypherKeyword}\bfseries,
+	morekeywords=[2]{count,avg,sum,min,max,collect,length,type,id,labels,properties,startNode,endNode},
+	keywordstyle=[2]\color{cypherFunction},
+	sensitive=true,
+	comment=[l]{//},
+	morecomment=[s]{/*}{*/},
+	commentstyle=\color{cypherComment}\itshape,
+	stringstyle=\color{cypherString},
+	morestring=[b]",
+	morestring=[b]',
+	numberstyle=\color{cypherNumber},
+	basicstyle=\footnotesize\ttfamily,
+	numbers=left,
+	numbersep=8pt,
+	stepnumber=1,
+	backgroundcolor=\color{cypherBackground},
+	showstringspaces=false,
+	breaklines=true,
+	frame=lines,
+	captionpos=b,
+	tabsize=2
+}
