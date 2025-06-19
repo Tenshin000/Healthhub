@@ -26,4 +26,15 @@ public class DoctorMongoRepositoryTest {
         List<Date> foundSchedules = doctorRepository.findSchedulesWithinNext4Weeks(doctorId);
         System.out.println("Found schedules in next 4 weeks for doctor " + doctorId + ": " + foundSchedules.size());
     }
+
+    @Test
+    void testCheckScheduleSlot() {
+        String doctorId = "684adad437804916ca65ef04";
+        Integer year = 2025;
+        Integer week = 27;
+        String keyDay = "monday";
+        String slotStart = "08:00";
+        boolean isSlotTaken = doctorRepository.checkScheduleSlot(doctorId, year, week, keyDay, slotStart);
+        System.out.println("Is schedule slot taken for doctor " + doctorId + ": " + isSlotTaken);
+    }
 }

@@ -23,6 +23,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,6 +46,7 @@ public class CustomDoctorMongoRepositoryImpl implements CustomDoctorMongoReposit
     @Override
     public boolean checkScheduleSlot(String doctorId, Integer year, Integer week, String keyDay, String slotStart) {
         LocalDateTime startOfWeek = DateUtil.getFirstDayOfWeek(week, year).atStartOfDay();
+        Date startOfWeekDate = Date.from(startOfWeek.atZone(ZoneId.systemDefault()).toInstant());
 
         MongoCollection<Document> collection = mongoTemplate
                 .getDb()
@@ -54,7 +56,7 @@ public class CustomDoctorMongoRepositoryImpl implements CustomDoctorMongoReposit
         List<Bson> pipeline = Arrays.asList(
                 Aggregates.match(Filters.eq("_id", new ObjectId(doctorId))),
                 Aggregates.unwind("$schedules"),
-                Aggregates.match(Filters.eq("schedules.week", startOfWeek)),
+                Aggregates.match(Filters.eq("schedules.week", startOfWeekDate)),
                 Aggregates.project(Projections.fields(Projections.computed("slots", "$schedules.slots." + keyDay))),
                 Aggregates.unwind("$slots"),
                 Aggregates.match(Filters.eq("slots.start", slotStart)),
