@@ -11,21 +11,20 @@ collection = db["appointments"]
 year = 2025
 
 #doctor_id = ObjectId("684adad437804916ca65ef04")  # Sostituisci con un vero ObjectId
-# Estrae 10 dottori distinti casuali dalla collezione
-pipeline = [
-    { "$match": { "doctor._id": { "$exists": True } } },
-    { "$group": { "_id": "$doctor._id" } },
-    { "$sample": { "size": 10 } }
+# 10 doctor_id da analizzare, sono i primi 10 dottori con più visite totali
+doctor_ids = [
+  ObjectId('684adad437804916ca668f27'),
+  ObjectId('684adad437804916ca65f694'),
+  ObjectId('684adad437804916ca65ce02'),
+  ObjectId('684adad437804916ca65e751'),
+  ObjectId('684adad437804916ca65c08e'),
+  ObjectId('684adad437804916ca66281f'),
+  ObjectId('684adad437804916ca6603cc'),
+  ObjectId('684adad437804916ca660d75'),
+  ObjectId('684adad437804916ca66245d'),
+  ObjectId('684adad437804916ca65b393')
 ]
 
-doctor_ids = [doc["_id"] for doc in collection.aggregate(pipeline)]
-
-print("\n==============================")
-print("Selezionati 10 dottori a caso:")
-print("==============================")
-for did in doctor_ids:
-    print(f"- {did}")
-print()
 
 # Costruzione pipeline di aggregazione per un dato doctor_id
 def build_pipeline(doctor_id):

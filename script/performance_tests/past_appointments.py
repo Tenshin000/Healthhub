@@ -10,14 +10,19 @@ patients = db["users"]
 # Data limite per le visite da cercare
 date = datetime(2025, 6, 16)
 
-# Seleziona 10 pazienti a caso
-pipeline = [
-    { "$sample": { "size": 10 } },
-    { "$project": { "_id": 1 } }
+# Seleziona 10 pazienti con più visite totali 
+patient_ids = [
+    ObjectId("684ada4637804916ca65019d"),
+    ObjectId("684ada4537804916ca63b9d8"),
+    ObjectId("684ada4637804916ca656e11"),
+    ObjectId("684ada4637804916ca64f5d8"),
+    ObjectId("684ada4537804916ca64c07b"),
+    ObjectId("684ada4537804916ca64b480"),
+    ObjectId("684ada4537804916ca63fe36"),
+    ObjectId("684ada4437804916ca635f72"),
+    ObjectId("684ada4537804916ca647dd7"),
+    ObjectId("684ada4537804916ca63ab2c")
 ]
-
-results = list(patients.aggregate(pipeline))
-patient_ids = [doc["_id"] for doc in results]
 
 
 # Funzione per eseguire la query e ottenere il piano di esecuzione

@@ -1,35 +1,20 @@
 
 ==============================
-Selezionati 10 dottori a caso:
-==============================
-- 684adad337804916ca657ed6
-- 684adad437804916ca6696ec
-- 684adad337804916ca657825
-- 684adad437804916ca65c0b3
-- 684adad437804916ca65d91c
-- 684adad437804916ca65e314
-- 684adad437804916ca65fba4
-- 684adad437804916ca661122
-- 684adad337804916ca658ba6
-- 684adad437804916ca65fde6
-
-
-==============================
-Analisi per il dottore #1: 684adad337804916ca657ed6
+Analisi per il dottore #1: 684adad437804916ca668f27
 ==============================
 
 --- Con indice (idx_doctor_id attivo) ---
-Execution time       : 9 ms
-Documents examined   : 43
-Index keys examined  : 43
+Execution time       : 12 ms
+Documents examined   : 1671
+Index keys examined  : 1671
 Documents returned   : 6
 Execution stage      : project
 
 → Rimuovo indice su 'doctor._id'...
 
 --- Senza indice (idx_doctor_id rimosso) ---
-Execution time       : 835 ms
-Documents examined   : 699987
+Execution time       : 1067 ms
+Documents examined   : 699989
 Index keys examined  : 0
 Documents returned   : 6
 Execution stage      : project
@@ -38,207 +23,207 @@ Execution stage      : project
 
 
 ==============================
-Analisi per il dottore #2: 684adad437804916ca6696ec
+Analisi per il dottore #2: 684adad437804916ca65f694
 ==============================
 
 --- Con indice (idx_doctor_id attivo) ---
-Execution time       : 10 ms
-Documents examined   : 1
-Index keys examined  : 1
-Documents returned   : 0
+Execution time       : 18 ms
+Documents examined   : 1534
+Index keys examined  : 1534
+Documents returned   : 6
+Execution stage      : project
+
+→ Rimuovo indice su 'doctor._id'...
+
+--- Senza indice (idx_doctor_id rimosso) ---
+Execution time       : 521 ms
+Documents examined   : 699989
+Index keys examined  : 0
+Documents returned   : 6
+Execution stage      : project
+
+→ Ripristino indice su 'doctor._id'...
+
+
+==============================
+Analisi per il dottore #3: 684adad437804916ca65ce02
+==============================
+
+--- Con indice (idx_doctor_id attivo) ---
+Execution time       : 13 ms
+Documents examined   : 1210
+Index keys examined  : 1210
+Documents returned   : 6
+Execution stage      : project
+
+→ Rimuovo indice su 'doctor._id'...
+
+--- Senza indice (idx_doctor_id rimosso) ---
+Execution time       : 474 ms
+Documents examined   : 699989
+Index keys examined  : 0
+Documents returned   : 6
+Execution stage      : project
+
+→ Ripristino indice su 'doctor._id'...
+
+
+==============================
+Analisi per il dottore #4: 684adad437804916ca65e751
+==============================
+
+--- Con indice (idx_doctor_id attivo) ---
+Execution time       : 14 ms
+Documents examined   : 938
+Index keys examined  : 938
+Documents returned   : 5
+Execution stage      : project
+
+→ Rimuovo indice su 'doctor._id'...
+
+--- Senza indice (idx_doctor_id rimosso) ---
+Execution time       : 603 ms
+Documents examined   : 699989
+Index keys examined  : 0
+Documents returned   : 5
+Execution stage      : project
+
+→ Ripristino indice su 'doctor._id'...
+
+
+==============================
+Analisi per il dottore #5: 684adad437804916ca65c08e
+==============================
+
+--- Con indice (idx_doctor_id attivo) ---
+Execution time       : 13 ms
+Documents examined   : 934
+Index keys examined  : 934
+Documents returned   : 6
+Execution stage      : project
+
+→ Rimuovo indice su 'doctor._id'...
+
+--- Senza indice (idx_doctor_id rimosso) ---
+Execution time       : 442 ms
+Documents examined   : 699989
+Index keys examined  : 0
+Documents returned   : 6
+Execution stage      : project
+
+→ Ripristino indice su 'doctor._id'...
+
+
+==============================
+Analisi per il dottore #6: 684adad437804916ca66281f
+==============================
+
+--- Con indice (idx_doctor_id attivo) ---
+Execution time       : 9 ms
+Documents examined   : 911
+Index keys examined  : 911
+Documents returned   : 6
 Execution stage      : project
 
 → Rimuovo indice su 'doctor._id'...
 
 --- Senza indice (idx_doctor_id rimosso) ---
 Execution time       : 555 ms
-Documents examined   : 699987
+Documents examined   : 699989
 Index keys examined  : 0
-Documents returned   : 0
+Documents returned   : 6
 Execution stage      : project
 
 → Ripristino indice su 'doctor._id'...
 
 
 ==============================
-Analisi per il dottore #3: 684adad337804916ca657825
+Analisi per il dottore #7: 684adad437804916ca6603cc
 ==============================
 
 --- Con indice (idx_doctor_id attivo) ---
-Execution time       : 9 ms
-Documents examined   : 1
-Index keys examined  : 1
-Documents returned   : 0
+Execution time       : 14 ms
+Documents examined   : 905
+Index keys examined  : 905
+Documents returned   : 6
 Execution stage      : project
 
 → Rimuovo indice su 'doctor._id'...
 
 --- Senza indice (idx_doctor_id rimosso) ---
-Execution time       : 834 ms
-Documents examined   : 699987
+Execution time       : 467 ms
+Documents examined   : 699989
 Index keys examined  : 0
-Documents returned   : 0
+Documents returned   : 6
 Execution stage      : project
 
 → Ripristino indice su 'doctor._id'...
 
 
 ==============================
-Analisi per il dottore #4: 684adad437804916ca65c0b3
+Analisi per il dottore #8: 684adad437804916ca660d75
 ==============================
 
 --- Con indice (idx_doctor_id attivo) ---
-Execution time       : 10 ms
-Documents examined   : 25
-Index keys examined  : 25
-Documents returned   : 0
+Execution time       : 17 ms
+Documents examined   : 887
+Index keys examined  : 887
+Documents returned   : 6
 Execution stage      : project
 
 → Rimuovo indice su 'doctor._id'...
 
 --- Senza indice (idx_doctor_id rimosso) ---
-Execution time       : 538 ms
-Documents examined   : 699987
+Execution time       : 449 ms
+Documents examined   : 699989
 Index keys examined  : 0
-Documents returned   : 0
+Documents returned   : 6
 Execution stage      : project
 
 → Ripristino indice su 'doctor._id'...
 
 
 ==============================
-Analisi per il dottore #5: 684adad437804916ca65d91c
+Analisi per il dottore #9: 684adad437804916ca66245d
 ==============================
 
 --- Con indice (idx_doctor_id attivo) ---
-Execution time       : 10 ms
-Documents examined   : 13
-Index keys examined  : 13
-Documents returned   : 4
-Execution stage      : project
-
-→ Rimuovo indice su 'doctor._id'...
-
---- Senza indice (idx_doctor_id rimosso) ---
-Execution time       : 541 ms
-Documents examined   : 699987
-Index keys examined  : 0
-Documents returned   : 4
-Execution stage      : project
-
-→ Ripristino indice su 'doctor._id'...
-
-
-==============================
-Analisi per il dottore #6: 684adad437804916ca65e314
-==============================
-
---- Con indice (idx_doctor_id attivo) ---
-Execution time       : 16 ms
-Documents examined   : 5
-Index keys examined  : 5
-Documents returned   : 0
-Execution stage      : project
-
-→ Rimuovo indice su 'doctor._id'...
-
---- Senza indice (idx_doctor_id rimosso) ---
-Execution time       : 632 ms
-Documents examined   : 699987
-Index keys examined  : 0
-Documents returned   : 0
-Execution stage      : project
-
-→ Ripristino indice su 'doctor._id'...
-
-
-==============================
-Analisi per il dottore #7: 684adad437804916ca65fba4
-==============================
-
---- Con indice (idx_doctor_id attivo) ---
-Execution time       : 11 ms
-Documents examined   : 2
-Index keys examined  : 2
-Documents returned   : 0
-Execution stage      : project
-
-→ Rimuovo indice su 'doctor._id'...
-
---- Senza indice (idx_doctor_id rimosso) ---
-Execution time       : 670 ms
-Documents examined   : 699987
-Index keys examined  : 0
-Documents returned   : 0
-Execution stage      : project
-
-→ Ripristino indice su 'doctor._id'...
-
-
-==============================
-Analisi per il dottore #8: 684adad437804916ca661122
-==============================
-
---- Con indice (idx_doctor_id attivo) ---
-Execution time       : 9 ms
-Documents examined   : 8
-Index keys examined  : 8
-Documents returned   : 0
+Execution time       : 15 ms
+Documents examined   : 885
+Index keys examined  : 885
+Documents returned   : 6
 Execution stage      : project
 
 → Rimuovo indice su 'doctor._id'...
 
 --- Senza indice (idx_doctor_id rimosso) ---
 Execution time       : 477 ms
-Documents examined   : 699987
+Documents examined   : 699989
 Index keys examined  : 0
-Documents returned   : 0
+Documents returned   : 6
 Execution stage      : project
 
 → Ripristino indice su 'doctor._id'...
 
 
 ==============================
-Analisi per il dottore #9: 684adad337804916ca658ba6
+Analisi per il dottore #10: 684adad437804916ca65b393
 ==============================
 
 --- Con indice (idx_doctor_id attivo) ---
-Execution time       : 13 ms
-Documents examined   : 211
-Index keys examined  : 211
-Documents returned   : 0
+Execution time       : 12 ms
+Documents examined   : 885
+Index keys examined  : 885
+Documents returned   : 6
 Execution stage      : project
 
 → Rimuovo indice su 'doctor._id'...
 
 --- Senza indice (idx_doctor_id rimosso) ---
-Execution time       : 490 ms
-Documents examined   : 699987
+Execution time       : 613 ms
+Documents examined   : 699989
 Index keys examined  : 0
-Documents returned   : 0
-Execution stage      : project
-
-→ Ripristino indice su 'doctor._id'...
-
-
-==============================
-Analisi per il dottore #10: 684adad437804916ca65fde6
-==============================
-
---- Con indice (idx_doctor_id attivo) ---
-Execution time       : 14 ms
-Documents examined   : 4
-Index keys examined  : 4
-Documents returned   : 0
-Execution stage      : project
-
-→ Rimuovo indice su 'doctor._id'...
-
---- Senza indice (idx_doctor_id rimosso) ---
-Execution time       : 495 ms
-Documents examined   : 699987
-Index keys examined  : 0
-Documents returned   : 0
+Documents returned   : 6
 Execution stage      : project
 
 → Ripristino indice su 'doctor._id'...
