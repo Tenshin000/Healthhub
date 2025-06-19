@@ -99,10 +99,8 @@ public class AuthController {
             if (controlUser == null)
                 throw new UserAlreadyExistsException();
 
-            System.out.println("We");
             return "redirect:/login";
         } catch (UserAlreadyExistsException e) {
-            System.out.println("GG");
             // If registration fails, return an error message to the view
             model.addAttribute("logged", false);
             model.addAttribute("errorMessage", "Registration failed: " + e.getMessage());
