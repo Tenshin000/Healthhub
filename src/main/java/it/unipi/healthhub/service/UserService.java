@@ -124,7 +124,7 @@ public class UserService {
             return null;
         }
 
-        User savedUser = updateUser(user.getId(), user);
+        User savedUser = userMongoRepository.save(user);
         UserDAO userDAO = new UserDAO(savedUser.getId(), savedUser.getName());
         sanitizeUserNeo4j(userDAO);
         userNeo4jRepository.save(userDAO);
