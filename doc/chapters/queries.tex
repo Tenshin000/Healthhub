@@ -5,7 +5,7 @@ In this chapter, we present only the complex queries executed by our application
 \subsection{Search Query}
 This query is run every time a guest user, a patient or a doctor inserts a character in the search bar. It works in the same way for all three actors. Returns a list of doctors based on the entered string. The string can be a name, a specialization, a city, a province or a mix of these. 
 
-\begin{lstlisting}[language=java]
+\begin{lstlisting}[language=java, caption={Java code for the MongoDB Search Query}]
 	@Override
 	public List<DoctorMongoProjection> searchDoctors(String text) {
 		// Match documents using full-text search
@@ -36,7 +36,7 @@ This query is run every time a guest user, a patient or a doctor inserts a chara
 	}
 \end{lstlisting}
 
-\begin{lstlisting}[language=mongodb]
+\begin{lstlisting}[language=mongodb, caption={Equivalent MongoDB Aggregation Pipeline for the Search Query}]
 	db.doctors.aggregate([
 		{
 			$match: {
@@ -77,7 +77,7 @@ The pipeline is composed of four main stages:
 \subsubsection{Earnings}
 This query is an analytic for the doctor's Dashboard and returns a map of monthly revenues for a given year.
 
-\begin{lstlisting}[language=java]
+\begin{lstlisting}[language=java, caption={Java code for the Earning analytic}]
 	@Override
 	public Map<String, Double> getEarningsByYearForDoctor(String doctorId, Integer year) {
 		
@@ -111,7 +111,7 @@ This query is an analytic for the doctor's Dashboard and returns a map of monthl
 	}
 \end{lstlisting}
 
-\begin{lstlisting}[language=mongodb]
+\begin{lstlisting}[language=mongodb, caption={Equivalent MongoDB Aggregation Pipeline for the Earning analytic}]
 	db.appointments.aggregate([
 	{
 		$match: {
@@ -163,7 +163,8 @@ The result of this pipeline is a flat collection of documents, each representing
 \subsubsection{Visit Type Summary}
 This query is an analytic for the doctor's Dashboard and is designed to produce a statistical summary of the different types of visits conducted by a particular doctor, identified uniquely by their \texttt{doctorId}. It serves as a key analytic metric within the doctor's dashboard, providing insight into the distribution of appointment types.
 
-\begin{lstlisting}[language=java]
+\begin{lstlisting}[language=java, caption={Java code for the Visit Type Summary analytic}
+	]
 	@Override
 	public Map<String, Integer> getVisitsCountByTypeForDoctor(String doctorId){
 		MatchOperation matchOperation = Aggregation.match(Criteria.where("doctor.id").is(doctorId));
@@ -189,11 +190,11 @@ This query is an analytic for the doctor's Dashboard and is designed to produce 
 	}
 \end{lstlisting}
 
-\begin{lstlisting}[language=mongodb]
+\begin{lstlisting}[language=mongodb, caption={Equivalent MongoDB Aggregation Pipeline for the Visit Type Summary analytic}]
 	db.appointments.aggregate([
-	{ $match: { "doctor._id": ObjectId(doctorId)} },
-	{ $group: { _id: "$visitType", total: { $sum: 1 } } },
-	{ $project: { _id: 0, visitType: "$_id", total: 1 } }
+		{ $match: { "doctor._id": ObjectId(doctorId)} },
+		{ $group: { _id: "$visitType", total: { $sum: 1 } } },
+		{ $project: { _id: 0, visitType: "$_id", total: 1 } }
 	])
 \end{lstlisting}
 
@@ -213,7 +214,7 @@ The resulting data structure is a set of key-value pairs, where each key corresp
 \subsubsection{New Patients of the Month}
 This query is aimed at identifying the number of new patients a specific doctor has seen for the first time within a given month and year. From a clinical and administrative perspective, this information is crucial for assessing patient acquisition trends, measuring outreach effectiveness, and planning capacity for onboarding procedures. The logic is implemented through a multi-stage MongoDB aggregation pipeline that systematically filters, groups, and analyzes the data within the \texttt{appointments} collection.
 
-\begin{lstlisting}[language=java]
+\begin{lstlisting}[language=java, caption={Java code for the New Patients of the Month analytic}]
 	@Override
 	public Integer findNewPatientsVisitedByDoctorInCurrentMonth(String doctorId, Integer year, Integer month){
 		LocalDateTime startOfMonth = LocalDate.of(year, month, 1).atStartOfDay();
@@ -257,7 +258,7 @@ This query is aimed at identifying the number of new patients a specific doctor 
 	}
 \end{lstlisting}
 
-\begin{lstlisting}[language=mongodb]
+\begin{lstlisting}[language=mongodb, caption={Equivalent MongoDB Aggregation Pipeline for the New Patients of the Month analytic}]
 	db.appointments.aggregate([
 		{
 			$match: {
@@ -301,10 +302,10 @@ In the application layer, the result of the aggregation is retrieved using the S
 
 From a technical standpoint, this aggregation ensures uniqueness at the patient level and temporal precision by leveraging both document-level filtering and grouped date evaluation. It is efficient, interpretable, and aligned with the goal of producing actionable monthly cohort data for clinical decision-making.
 
-\subsubsection{Number of Visits for a week}
+\subsubsection{Number of Visits for a Week}
 This query returns a count of the number of visits for each day of the week (Sunday through Saturday) for a given doctor, in a specific week and year. It is designed to provide a temporal distribution of clinical activity for a specific doctor over the course of a given week, identified by a year and ISO week number. 
 
-\begin{lstlisting}[language=java]
+\begin{lstlisting}[language=java, caption={Java code for the Number of Visits in a Week analytic}]
 	@Override
 	public Map<String, Integer> getVisitsCountByDayForDoctorWeek(String doctorId, Integer week, Integer year) {
 		LocalDateTime startOfWeek = DateUtil.getFirstDayOfWeek(week, year).atStartOfDay();
@@ -338,7 +339,7 @@ This query returns a count of the number of visits for each day of the week (Sun
 	}
 \end{lstlisting}
 
-\begin{lstlisting}[language=mongodb]
+\begin{lstlisting}[language=mongodb, caption={Equivalent MongoDB Aggregation Pipeline for the Number of Visits in a Week analytic}]
 	db.appointments.aggregate([
 	{
 		$match: {
@@ -385,10 +386,11 @@ On the application side, the output of this aggregation is mapped into a \texttt
 
 \section{Neo4j}
 \subsection{Recommendation Queries}
-\subsubsection{First Query}
+\subsubsection{First Query (Collaborative Filtering)}
 This method recommends a list of doctors to a specific patient (userId) based on a collaborative filtering algorithm implemented in Neo4j via Cypher. The goal is to suggest doctors that “similar” users have liked, but that the target user has not yet rated or endorsed. 
 
-\begin{lstlisting}[language=java]
+\begin{lstlisting}[language=java, caption={Java code for the Recommendations with Collaborative Filtering}
+	]
 	/**
 	* Recommends doctors to a specific user based on collaborative filtering:
 	* 1) Finds "similar" users who have at least 3 doctors in common via endorsement/review.
@@ -439,7 +441,7 @@ This method recommends a list of doctors to a specific patient (userId) based on
 	}
 \end{lstlisting}
 
-\begin{lstlisting}[language=cypher]
+\begin{lstlisting}[language=cypher, caption={Equivalent Cypher query for Recommendations with Collaborative Filtering}]
 	MATCH (me:User {id: uid})-[:ENDORSED|REVIEWED]->(d:Doctor)<-[:ENDORSED|REVIEWED]-(other:User)
 	WHERE me <> other
 	WITH me, other, count(d) AS sharedCount
@@ -483,10 +485,10 @@ From a computational perspective, the algorithm has a complexity of $\mathcal{O}
 
 This approach effectively exploits Neo4j's native graph traversal capabilities, using path-based semantics to identify non-trivial, yet meaningful associations. It balances locality (similar users) and popularity (frequent endorsements), aligning well with established practices in collaborative filtering literature.
 
-\subsubsection{Second Query}
+\subsubsection{Second Query (Most Popular)}
 If the previous query does not return an acceptable number of results, this query is used which simply returns the most popular doctors and adds them to the result.
 
-\begin{lstlisting}[language=java]
+\begin{lstlisting}[language=java, caption={Java code for the Recommendations with the most popular doctors}]
 	/**
 	* Recommends popular doctors based on overall endorsements or reviews.
 	* Retrieves doctors ordered by their popularity score, which reflects the total number
@@ -530,7 +532,7 @@ If the previous query does not return an acceptable number of results, this quer
 	}
 \end{lstlisting}
 
-\begin{lstlisting}[language=cypher]
+\begin{lstlisting}[language=cypher, caption={Equivalent Cypher query for Recommendations with the most popular doctors}]
 	MATCH (d:Doctor)
 	WHERE d.specializations IS NOT NULL
 	OPTIONAL MATCH (u:User)-[r:ENDORSED|REVIEWED]->(d)
@@ -570,7 +572,8 @@ The query is structured as follows:
 From a technical perspective, this query is highly efficient, operating in linear time relative to the number of \texttt{ENDORSED} and \texttt{REVIEWED} edges in the graph. It is well-suited for cold-start scenarios, such as when a new user lacks sufficient interaction history to enable collaborative filtering. While it lacks personalization, it serves as a robust fallback to preserve the responsiveness and coverage of the recommendation system.
 
 \subsubsection{Random Sampling}
-\begin{lstlisting}[language=java]
+\begin{lstlisting}[language=java, caption={Java code for the Recommendations}
+	]
 	@Transactional
 	public List<DoctorDAO> getRecommendedDoctors(String userId, int limit) {
 		List<DoctorDAO> recommendedDoctors = userNeo4jRepository.recommendDoctorsForUser(userId, limit * 10);
@@ -614,7 +617,8 @@ This dual-database strategy leverages the strengths of both MongoDB and Neo4j: M
 
 Neo4j performs a text search of doctors within the patient's social graph (User) based on the connection via \textit{REVIEWED} or \textit{ENDORSED} relations, and returns doctors closest to the user based on the minimum number of "steps" in the graph.
 
-\begin{lstlisting}[language=java]
+\begin{lstlisting}[language=java, caption={Java code for the Neo4j Search Query}
+	]
 	@Query("MATCH path = (u:User {id:$uid})-[:REVIEWED|ENDORSED*1..3]-(d:Doctor) " +
 	"WHERE toLower(d.name) CONTAINS toLower($search) " +
 	" OR any(spec IN d.specializations WHERE toLower(spec) CONTAINS toLower($search)) " +
@@ -626,7 +630,7 @@ Neo4j performs a text search of doctors within the patient's social graph (User)
 \end{lstlisting}
 
 
-\begin{lstlisting}[language=cypher]
+\begin{lstlisting}[language=cypher, caption={Equivalent Cypher query for Neo4j Search Query}]
 	MATCH path = (u:User {id: uid})-[:REVIEWED|ENDORSED*1..3]-(d:Doctor)
 	WHERE toLower(d.name) CONTAINS toLower(search)
 	OR any(spec IN d.specializations WHERE toLower(spec) CONTAINS toLower(search))
@@ -740,6 +744,4 @@ Documents returned (avg)         & 14,081.00  & 9,587.71   & \textbf{+46.87\%} \
 We compared regex-based search with full-text indexed search using \texttt{DoctorsTextIndex}. The indexed search not only executed over 60\% faster but also returned 47\% more documents on average, with significantly fewer documents examined. This underlines the advantage of using text indexes for flexible and performant search capabilities (see Appendix~\ref{ch:original-regex-query} for the original regex-based query).
 
 \subsection{Neo4j}
-
-
 During the initial setup of the Neo4j database, the insertion of relationships between \texttt{User} (patients) and \texttt{Doctor} nodes was significantly hindered by the lack of indexing. The script responsible for importing the data failed to complete within a reasonable time. By introducing indexes on the \texttt{id} field of both node types—which duplicates the original MongoDB \_id—relationship creation was drastically accelerated. After indexing, the setup process, which previously stalled indefinitely, was completed in just a few seconds. This confirms the critical role of indexes even in graph databases when handling large-scale relationship insertions.
