@@ -260,12 +260,11 @@ public class DoctorService {
 
             boolean nameChanged = !oldDoctor.getName().equals(updatedDoctor.getName());
             boolean emailChanged = !oldDoctor.getEmail().equals(updatedDoctor.getEmail());
-            boolean addressChanged = !Objects.equals(oldDoctor.getAddress(), updatedDoctor.getAddress());
             boolean specializationsChanged =
                     !new HashSet<>(Optional.ofNullable(oldDoctor.getSpecializations()).orElse(List.of()))
                             .equals(new HashSet<>(Optional.ofNullable(updatedDoctor.getSpecializations()).orElse(List.of())));
 
-            if(nameChanged || emailChanged || addressChanged)
+            if(nameChanged || emailChanged)
                 appointmentService.updateDoctorInfo(updatedDoctor);
 
             if(nameChanged || specializationsChanged){

@@ -322,9 +322,9 @@ public class UserService {
 
     @Transactional
     public List<DoctorDAO> getRecommendedDoctors(String userId, int limit) {
-        List<DoctorDAO> recommendedDoctors = userNeo4jRepository.recommendDoctorsForUser(userId, limit);
+        List<DoctorDAO> recommendedDoctors = userNeo4jRepository.recommendDoctorsForUser(userId, limit * 10);
 
-        if (recommendedDoctors.size() < limit) {
+        if (recommendedDoctors.size() < limit * 10) {
             int remaining = limit - recommendedDoctors.size();
             Set<String> alreadyAddedIds = recommendedDoctors.stream()
                     .map(DoctorDAO::getId)
@@ -335,14 +335,17 @@ public class UserService {
                 for (DoctorDAO doctor : popularDoctors) {
                     if (!alreadyAddedIds.contains(doctor.getId())) {
                         recommendedDoctors.add(doctor);
-                        if (recommendedDoctors.size() == limit)
-                            break;
+                        alreadyAddedIds.add(doctor.getId());
                     }
                 }
             }
         }
 
-        return recommendedDoctors;
+        // Random sampling
+        Collections.shuffle(recommendedDoctors);
+        return recommendedDoctors.stream()
+                .limit(limit)
+                .collect(Collectors.toList());
     }
 
     // --- Mail Operations ---
