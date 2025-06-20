@@ -88,6 +88,52 @@ Furthermore, users have the option to endorse the doctor or leave a review. Howe
 	\label{fig:review-doctor}
 \end{figure}
 
+\subsection{Appointments}
+The \textit{Appointments} section can be accessed via the right-hand sidebar. Within this interface, the user's scheduled appointments are displayed and automatically sorted in chronological order, from the nearest to the most distant date. 
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{resources/screenshots/patient_ui/patient-appointment.png}
+	\caption{Appointment Overview Interface}
+	\label{fig:patient-appointment}
+\end{figure}
+
+Appointments are dynamically updated based on the current date and time. Once an appointment's scheduled time has passed, it is automatically transitioned from the \textit{Upcoming Appointments} section to the \textit{Past Appointments} section, which is sorted in reverse chronological order.
+
+Only the \textit{Upcoming Appointments} can be deleted. 
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{resources/screenshots/patient_ui/patient-old-appointment.png}
+	\caption{Appointment moved from Upcoming Appointments to Past Appointments}
+	\label{fig:patient-old-appointment}
+\end{figure}
+
+\subsection{Recommendation System}
+The \textit{Favorites} section is accessible via the right-hand sidebar. This interface displays the list of doctors that the patient has either endorsed or reviewed.
+
+In addition, a list of recommended doctors is presented at the top of the page. These recommendations are generated dynamically through a Neo4j-based graph query, as previously described in the Neo4j section of the \textit{Queries} chapter.
+
+By clicking on the name of any doctor listed, the user can directly navigate to the corresponding public profile page.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{resources/screenshots/patient_ui/favorites.png}
+	\caption{Favorites and Recommendations Interface}
+	\label{fig:favorites}
+\end{figure}
+
+\subsection{Profile}
+The user can also access and manage their personal profile through the dedicated \textit{Profile} section. This area allows for the visualization and editing of personal information and contact details.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{resources/screenshots/patient_ui/patient-profile.png}
+	\caption{Patient Profile Management Interface}
+	\label{fig:patient-profile}
+\end{figure}
+
+
 \section{Doctor}
 
 Doctors have access to a dedicated interface that allows them to manage their appointments, review patient feedback, and edit their personal and professional information. They can also monitor key analytics related to their activity and configure their weekly availability through calendar templates.
@@ -107,6 +153,7 @@ Doctors have access to a dedicated interface that allows them to manage their ap
 	\caption{Pie chart showing the distribution of services provided by the doctor.}
 	\label{fig:services_piechart}
 \end{figure}
+
 
 The dashboard provides doctors with an overview of their current performance. It includes:
 \begin{itemize}
