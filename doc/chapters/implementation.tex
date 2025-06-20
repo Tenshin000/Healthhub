@@ -1115,6 +1115,8 @@ Key features of \texttt{DoctorService} include:
 \begin{itemize}
 	\item \textbf{Data Sanitization:} Prevents injection vulnerabilities by sanitizing input strings differently for MongoDB (e.g., replacing '\$') and Neo4j (e.g., replacing '\$' and '.'). Sanitization applies to doctor fields and nested user data.
 	
+	\item \textbf{Doctor CRUD and Authentication:} Provides creation, retrieval, update and deletion of doctors with transactional integrity. Includes username/email uniqueness checks and password validation for login and password changes.  
+	
 	\item \textbf{Reviews Management:} Enables patients to add and remove reviews after verifying appointments, updating both doctor documents and Neo4j relationships.
 	
 	\item \textbf{Profile Updates:} Supports login authentication, updating doctor details such as address, personal infoand phone numbers, with data sanitization and synchronization between MongoDB and Neo4j.
@@ -1137,7 +1139,7 @@ Key features of \texttt{UserService} include:
 \begin{itemize}
 	\item \textbf{Data Sanitization:} Prevents injection vulnerabilities by sanitizing input strings differently for MongoDB (e.g., replacing '\$') and Neo4j (e.g., replacing '\$' and '.'). Sanitization applies to user fields and nested doctor data.
 
-	\item \textbf{User CRUD and Authentication:} Provides creation, retrieval, updateand deletion of users with transactional integrity. Includes username/email uniqueness checks and password validation for login and password changes.  
+	\item \textbf{User CRUD and Authentication:} Provides creation, retrieval, update and deletion of users with transactional integrity. Includes username/email uniqueness checks and password validation for login and password changes.  
 	
 	\item \textbf{Profile and Contact Management:} Updates and retrieves detailed user profile information and contact data, synchronizing name changes across appointments and Neo4j relationships.  
 	
@@ -1182,10 +1184,10 @@ This package contains several utility classes and interfaces used within the Hea
 
 
 \subsection{Scheduler Component}
-The \texttt{Scheduler} class is a Spring-managed component responsible for automating weekly maintenance tasks on doctor schedules. Its \texttt{scheduleTask()} method executes every Sunday at midnight, invoking two key \texttt{DoctorService} operations:
+The \texttt{Scheduler} class is a Spring-managed component responsible for automating weekly maintenance tasks on doctor schedules. Its \texttt{scheduleTask()} method executes every Sunday at midnight — a time slot deliberately chosen due to the low system load — invoking two key \texttt{DoctorService} operations:
 \begin{itemize}
 	\item \textbf{cleanOldSchedules():} Removes all schedule entries up to the current date, delegating to the repository’s \texttt{cleanOldSchedules(Date)} method to purge obsolete calendar data.
-	\item \textbf{setupNewSchedules():} Identifies doctors lacking schedules in the next four weeksand for each missing week constructs new \texttt{Schedule} objects based on their default \texttt{CalendarTemplate}. Progress is logged in intervals to monitor throughput.
+	\item \textbf{setupNewSchedules():} Identifies doctors lacking schedules in the next four weeksand for each missing week constructs new \texttt{Schedule} objects based on their default \texttt{CalendarTemplate}.
 \end{itemize}
 
 By centralizing these operations in a scheduled job, the \texttt{Scheduler} ensures that doctor availabilities remain current without manual intervention, leveraging reusable service methods and Spring’s scheduling infrastructure to maintain data consistency and system reliability.
