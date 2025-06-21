@@ -123,7 +123,7 @@ def drop_neo4j(config):
             CALL {{
               WITH *
               MATCH (n)
-              WITH n LIMIT 30000
+              WITH n LIMIT 3000
               DETACH DELETE n
             }}
             """)
