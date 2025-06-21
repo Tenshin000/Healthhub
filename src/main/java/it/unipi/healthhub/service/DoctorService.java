@@ -524,16 +524,24 @@ public class DoctorService {
     public CalendarTemplate addTemplate(String doctorId, CalendarTemplate template) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
-            sanitizeTemplate(template);
-            CalendarTemplate newTemplate = templateRepository.save(template); // Save template
             Doctor doctor = doctorOpt.get();
 
             if (doctor.getCalendarTemplates() == null) {
                 doctor.setCalendarTemplates(new ArrayList<>());
             }
+            List<String> templateIds = doctor.getCalendarTemplates();
+
+            // Prevent duplicate names among this doctor's templates
+            if (templateRepository.existsByNameIgnoreCaseAndIdIn(template.getName(), templateIds)) {
+                return null;
+            }
+
+            sanitizeTemplate(template);
+            CalendarTemplate newTemplate = templateRepository.save(template);
 
             doctor.getCalendarTemplates().add(newTemplate.getId());
-            updateDoctor(doctor.getId(), doctor); // Save updated doctor with the new appointment
+            updateDoctor(doctor.getId(), doctor);
+
             return newTemplate;
         }
         return null;
@@ -543,15 +551,20 @@ public class DoctorService {
     public CalendarTemplate updateTemplate(String doctorId, CalendarTemplate updatedTemplate) {
         Optional<Doctor> doctorOpt = doctorMongoRepository.findById(doctorId);
         if (doctorOpt.isPresent()) {
-            Optional<CalendarTemplate> existingTemplateOpt = templateRepository.findById(updatedTemplate.getId());
-            if (existingTemplateOpt.isPresent()) {
-                sanitizeTemplate(updatedTemplate);
-                CalendarTemplate existingTemplate = existingTemplateOpt.get();
-                existingTemplate.setName(updatedTemplate.getName());
-                existingTemplate.setSlots(updatedTemplate.getSlots());
-                existingTemplate.setDefault(updatedTemplate.isDefault());
+            Doctor doctor = doctorOpt.get();
+            List<String> templateIds = doctor.getCalendarTemplates() != null
+                    ? doctor.getCalendarTemplates()
+                    : Collections.emptyList();
 
-                return templateRepository.save(existingTemplate);
+            Optional<CalendarTemplate> existingOpt = templateRepository.findById(updatedTemplate.getId());
+            if (existingOpt.isPresent()) {
+                CalendarTemplate existing = existingOpt.get();
+                sanitizeTemplate(updatedTemplate);
+                existing.setName(updatedTemplate.getName());
+                existing.setSlots(updatedTemplate.getSlots());
+                existing.setDefault(updatedTemplate.isDefault());
+
+                return templateRepository.save(existing);
             }
         }
         return null;

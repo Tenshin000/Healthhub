@@ -330,7 +330,7 @@ public class UserService {
                     .map(DoctorDAO::getId)
                     .collect(Collectors.toSet());
 
-            List<DoctorDAO> popularDoctors = userNeo4jRepository.recommendPopularDoctors(remaining * 2);
+            List<DoctorDAO> popularDoctors = userNeo4jRepository.recommendPopularDoctors(userId, remaining * 2);
             if (!popularDoctors.isEmpty()) {
                 for (DoctorDAO doctor : popularDoctors) {
                     if (!alreadyAddedIds.contains(doctor.getId())) {

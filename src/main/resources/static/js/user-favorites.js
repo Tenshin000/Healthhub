@@ -69,7 +69,7 @@ function renderDoctorsList(ulId, endorsedDoctors) {
 
         const p = document.createElement('p');
         const hasSpecializations = Array.isArray(doctor.specializations) && doctor.specializations.length > 0;
-        p.textContent = hasSpecializations ? doctor.specializations[0] : 'No specializations';
+        p.textContent = hasSpecializations && doctor.specializations.length ? doctor.specializations.join(', ') : 'No specializations';
 
         div.appendChild(h3);
         div.appendChild(p);

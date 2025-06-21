@@ -329,7 +329,7 @@ We proposed the following sharding design:
   \item \textbf{Doctors Collection}:
     \begin{itemize}
       \item \textbf{Shard Key}: \texttt{address.province}
-      \item \textbf{Sharding Mechanism}: hash-based
+      \item \textbf{Sharding Mechanism}: list-based
     \end{itemize}
     This approach would evenly distribute documents geographically, avoiding load concentration in specific provinces.
 
