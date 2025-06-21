@@ -9,5 +9,5 @@ import java.util.List;
  */
 public interface CustomUserNeo4jRepository{
     List<DoctorDAO> recommendDoctorsForUser(String userId, int limit);
-    List<DoctorDAO> recommendPopularDoctors(int limit);
+    List<DoctorDAO> recommendPopularDoctors(String userId, int limit);
 }

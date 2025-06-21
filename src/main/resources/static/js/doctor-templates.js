@@ -83,7 +83,7 @@ function saveTemplate() {
         .then(savedTemplate => {
             console.log('Template saved successfully:', savedTemplate);
 
-            // Seconda richiesta GET per ottenere i template aggiornati
+            // Second GET request to get the updated templates
             fetchUpdatedTemplates();
         })
         .catch(error => {
@@ -198,6 +198,7 @@ function newTemplate() {
             fetchUpdatedTemplates();
         })
         .catch(error => {
+            alert("Template creation failed. You have used the same name of another template?");
             console.error('Error saving template:', error);
         });
 }

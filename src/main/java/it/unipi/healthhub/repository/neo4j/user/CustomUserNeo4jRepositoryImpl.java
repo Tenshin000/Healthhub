@@ -71,30 +71,31 @@ public class CustomUserNeo4jRepositoryImpl implements CustomUserNeo4jRepository 
 
     /**
      * Recommends popular doctors based on overall endorsements or reviews.
-     * Retrieves doctors ordered by their popularity score, which reflects the total number
-     * of endorsements or reviews received from all users.
+     * Excludes doctors already endorsed or reviewed by the given user.
      *
+     * @param userId ID of the user to exclude their reviewed/endorsed doctors.
      * @param limit Maximum number of popular doctors to recommend.
      * @return List of popular doctors with their details.
      */
     @Override
-    public List<DoctorDAO> recommendPopularDoctors(int limit){
-        try(Session session = driver.session()){
+    public List<DoctorDAO> recommendPopularDoctors(String userId, int limit) {
+        try (Session session = driver.session()) {
             return session.readTransaction(tx -> {
                 Result result = tx.run(
-                        // Match all doctors with non-null specializations
                         "MATCH (d:Doctor) WHERE d.specializations IS NOT NULL " +
-                                // Optionally match endorsements or reviews to compute popularity
-                                "OPTIONAL MATCH (u:User)-[r:ENDORSED|REVIEWED]->(d) " +
+                                "AND NOT EXISTS { " +
+                                "  MATCH (u:User {id: $userId})-[r:ENDORSED|REVIEWED]->(d) " +
+                                "} " +
+                                "OPTIONAL MATCH (otherUser:User)-[r:ENDORSED|REVIEWED]->(d) " +
                                 "WITH d, count(r) AS popularityScore " +
-                                // Return popular doctors ordered by popularity
                                 "RETURN d.id AS id, d.name AS name, d.specializations AS specializations " +
                                 "ORDER BY popularityScore DESC " +
                                 "LIMIT $limit",
-                        Values.parameters("limit", limit)
+                        Values.parameters("userId", userId, "limit", limit)
                 );
+
                 List<DoctorDAO> doctors = new ArrayList<>();
-                while(result.hasNext()){
+                while (result.hasNext()) {
                     Record record = result.next();
                     Value specValue = record.get("specializations");
                     List<String> specializations = specValue.isNull()

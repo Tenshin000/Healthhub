@@ -491,30 +491,31 @@ If the previous query does not return an acceptable number of results, this quer
 \begin{lstlisting}[language=java, caption={Java code for the Recommendations with the most popular doctors}]
 	/**
 	* Recommends popular doctors based on overall endorsements or reviews.
-	* Retrieves doctors ordered by their popularity score, which reflects the total number
-	* of endorsements or reviews received from all users.
+	* Excludes doctors already endorsed or reviewed by the given user.
 	*
+	* @param userId ID of the user to exclude their reviewed/endorsed doctors.
 	* @param limit Maximum number of popular doctors to recommend.
 	* @return List of popular doctors with their details.
 	*/
 	@Override
-	public List<DoctorDAO> recommendPopularDoctors(int limit){
-		try(Session session = driver.session()){
+	public List<DoctorDAO> recommendPopularDoctors(String userId, int limit) {
+		try (Session session = driver.session()) {
 			return session.readTransaction(tx -> {
 				Result result = tx.run(
-				// Match all doctors with non-null specializations
 				"MATCH (d:Doctor) WHERE d.specializations IS NOT NULL " +
-				// Optionally match endorsements or reviews to compute popularity
-				"OPTIONAL MATCH (u:User)-[r:ENDORSED|REVIEWED]->(d) " +
+				"AND NOT EXISTS { " +
+					"  MATCH (u:User {id: $userId})-[r:ENDORSED|REVIEWED]->(d) " +
+					"} " +
+				"OPTIONAL MATCH (otherUser:User)-[r:ENDORSED|REVIEWED]->(d) " +
 				"WITH d, count(r) AS popularityScore " +
-				// Return popular doctors ordered by popularity
 				"RETURN d.id AS id, d.name AS name, d.specializations AS specializations " +
 				"ORDER BY popularityScore DESC " +
 				"LIMIT $limit",
-				Values.parameters("limit", limit)
+				Values.parameters("userId", userId, "limit", limit)
 				);
+				
 				List<DoctorDAO> doctors = new ArrayList<>();
-				while(result.hasNext()){
+				while (result.hasNext()) {
 					Record record = result.next();
 					Value specValue = record.get("specializations");
 					List<String> specializations = specValue.isNull()
@@ -535,7 +536,10 @@ If the previous query does not return an acceptable number of results, this quer
 \begin{lstlisting}[language=cypher, caption={Equivalent Cypher query for Recommendations with the most popular doctors}]
 	MATCH (d:Doctor)
 	WHERE d.specializations IS NOT NULL
-	OPTIONAL MATCH (u:User)-[r:ENDORSED|REVIEWED]->(d)
+	AND NOT EXISTS {
+		MATCH (:User {id: uid})-[r:ENDORSED|REVIEWED]->(d)
+	}
+	OPTIONAL MATCH (:User)-[r:ENDORSED|REVIEWED]->(d)
 	WITH d, count(r) AS popularityScore
 	RETURN d.id AS id, d.name AS name, d.specializations AS specializations
 	ORDER BY popularityScore DESC
@@ -552,9 +556,15 @@ The query is structured as follows:
 	\end{quote}
 	This constraint ensures that only doctors with defined specialization information are considered, likely to increase the relevance and utility of the recommendation.
 	
-	\item \textbf{Step 2: Popularity Computation.} An optional match is then performed to collect all \texttt{ENDORSED} and \texttt{REVIEWED} relationships originating from any \texttt{User} and pointing to the selected doctors:
+	\item \textbf{Step 2: Exclusion of Previously Interacted Doctors.} The query then filters out doctors who have already been \texttt{REVIEWED} or \texttt{ENDORSED} by the target user:
 	\begin{quote}
-		\texttt{OPTIONAL MATCH (u:User)-[r:ENDORSED|REVIEWED]->(d)}
+		\texttt{AND NOT EXISTS \{ MATCH (:User \{id: \$uid\})-[:ENDORSED|REVIEWED]->(d) \}}
+	\end{quote}
+	This exclusion prevents redundant recommendations by avoiding doctors the user has already interacted with, improving the novelty of the output.
+	
+	\item \textbf{Step 3: Popularity Computation.} An optional match is then performed to collect all \texttt{ENDORSED} and \texttt{REVIEWED} relationships originating from any \texttt{User} and pointing to the selected doctors:
+	\begin{quote}
+		\texttt{OPTIONAL MATCH (:User)-[r:ENDORSED|REVIEWED]->(d)}
 	\end{quote}
 	The keyword \texttt{OPTIONAL} is crucial here: it ensures that doctors with zero endorsements or reviews are still included in the result set, albeit with a popularity score of zero. The query then aggregates the total number of such relationships per doctor using:
 	\begin{quote}
@@ -562,7 +572,7 @@ The query is structured as follows:
 	\end{quote}
 	The resulting \texttt{popularityScore} reflects the doctor's visibility or trustworthiness as perceived by the user community.
 	
-	\item \textbf{Step 3: Ranking and Limiting.} The doctors are subsequently ordered in descending order of their computed \texttt{popularityScore}, and the top-$N$ results (as specified by the input parameter \texttt{limit}) are returned:
+	\item \textbf{Step 4: Ranking and Limiting.} The doctors are subsequently ordered in descending order of their computed \texttt{popularityScore}, and the top-$N$ results (as specified by the input parameter \texttt{limit}) are returned:
 	\begin{quote}
 		\texttt{ORDER BY popularityScore DESC LIMIT limit}
 	\end{quote}
@@ -610,7 +620,7 @@ In pratice:
 	\item Randomly shuffles (\textbf{Random Sampling}) the combined list and returns only the top limits.
 \end{itemize}
 
-\section{Search Query Support}
+\subsection{Search Query Support}
 The \texttt{SearchAPI} class implements a RESTful endpoint for doctor search, combining document-based retrieval from MongoDB with graph-based personalization from Neo4j. This hybrid approach enables the system to deliver both relevant and personalized results while maintaining scalability and robustness. This feature is used only if the patient is logged. 
 
 This dual-database strategy leverages the strengths of both MongoDB and Neo4j: MongoDB provides efficient document retrieval based on textual relevance, while Neo4j introduces personalized ranking grounded in social and behavioral context. The use of Neo4j complements MongoDB by enabling context-aware recommendations, thus enhancing the overall search experience, especially for returning or registered users. 
@@ -744,4 +754,4 @@ Documents returned (avg)         & 14,081.00  & 9,587.71   & \textbf{+46.87\%} \
 We compared regex-based search with full-text indexed search using \texttt{DoctorsTextIndex}. The indexed search not only executed over 60\% faster but also returned 47\% more documents on average, with significantly fewer documents examined. This underlines the advantage of using text indexes for flexible and performant search capabilities (see Appendix~\ref{ch:original-regex-query} for the original regex-based query).
 
 \subsection{Neo4j}
-During the initial setup of the Neo4j database, the insertion of relationships between \texttt{User} (patients) and \texttt{Doctor} nodes was significantly hindered by the lack of indexing. The script responsible for importing the data failed to complete within a reasonable time. By introducing indexes on the \texttt{id} field of both node types—which duplicates the original MongoDB \_id—relationship creation was drastically accelerated. After indexing, the setup process, which previously stalled indefinitely, was completed in just a few seconds. This confirms the critical role of indexes even in graph databases when handling large-scale relationship insertions.
+During the initial setup of the Neo4j database, the insertion of relationships between \texttt{User} (patients) and \texttt{Doctor} nodes was significantly hindered by the lack of indexing. The script responsible for importing the data failed to complete within a reasonable time. By introducing indexes on the \texttt{id} field of both node types—which duplicates the original MongoDB \_id—relationship creation was drastically accelerated. After indexing, the setup process, which previously stalled indefinitely, was completed in just a few minutes. This confirms the critical role of indexes even in graph databases when handling large-scale relationship insertions.
