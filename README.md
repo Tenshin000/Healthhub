@@ -12,9 +12,9 @@ HealthHub is a university project developed for the LSMD (Large Scale and Multi-
 
 ## Features
 
-- **User Profile Management**: Users can update their personal information and manage their profiles.
-- **Appointments**: Patients can view, schedule, and manage their appointments with doctors.
-- **Favorites**: Patients can interact with their favorite doctors, including endorsements and reviews.
+- **User Profile Management**: Users can update their personal information and manage their profiles;
+- **Appointments**: Patients can view, schedule, and manage their appointments with doctors;
+- **Favorites**: Patients can interact with their favorite doctors, including endorsements and reviews;
 - **Analytics**: Doctors can access analytics on visits, earnings, and patient interactions.
 
 ---
