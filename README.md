@@ -1,6 +1,15 @@
 # HealthHub
 HealthHub is a university project developed for the LSMD (Large Scale and Multi-structured Databases) course. The application is designed to manage healthcare-related data, providing features for doctors and patients, such as profile management, appointment scheduling, and interaction with favorite doctors. The project leverages a multi-database architecture, combining MongoDB and Neo4j to handle structured and semi-structured data efficiently.
 
+\[This is a copy of the original project that is in: "https://github.com/paolpal/healthhub/tree/master". This project had a final score of 26. 
+
+There are three errors, not in the execution of the code (the application works normally), but in the design of the application.
+1. In Appointment there is a preview in the patient where we forgot to put the telephone number and therefore every time we go and retrieve it from the Patient;
+2. We didn't include a paging mechanism (to be honest, it's because we didn't think it would be considered). However, we didn't set a maximum size for reviews. The pin button wasn't defined and could have been defined to limit the number of reviews so that it would automatically delete older ones, but not pinned ones.
+3. The queries for Neo4j's recommendation system would have benefited from redundancies that we instead put into Mongo DB without ever really using them.
+
+However, the result is still satisfactory and these errors can be easily corrected.\]
+
 ## Features
 
 - **User Profile Management**: Users can update their personal information and manage their profiles.
