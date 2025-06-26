@@ -97,9 +97,6 @@ document.addEventListener('DOMContentLoaded', function(){
         // Remove existing reviews (if any)
         reviewsSection.innerHTML = '';
 
-        // Sort reviews by date descending
-        reviews.sort((a, b) => new Date(b.date) - new Date(a.date));
-
         // Iterate over the sorted reviews and create the review cards
         reviews.forEach((review, index) => {
             const reviewCard = createReviewCard(review, index);
