@@ -1,5 +1,5 @@
 # HealthHub
-HealthHub is a university project developed for the LSMD (Large Scale and Multi-structured Databases) course. The application is designed to manage healthcare-related data, providing features for doctors and patients, such as profile management, appointment scheduling, and interaction with favorite doctors. The project leverages a multi-database architecture, combining MongoDB and Neo4j to handle structured and semi-structured data efficiently.
+HealthHub is a university project developed for the LSMD (Large Scale and Multi-structured Databases) course. The application is designed to manage healthcare-related data, providing features for doctors and patients, such as profile management, appointment scheduling, and interaction with favorite doctors. The project leverages a multi-database architecture, combining MongoDB and Neo4j to handle structured and semi-structured data efficiently. For more information you can read the documentation (*HealthHubDocumentation.pdf*). 
 
 \[*This is a copy of the original project that is in: "https://github.com/paolpal/healthhub/tree/master". This project had a final score of 26.*
 
