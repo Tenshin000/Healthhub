@@ -19,6 +19,16 @@ HealthHub is a university project developed for the LSMD (Large Scale and Multi-
 
 ---
 
+## Equipment
+The tests were conducted on three identical virtual machines (10.1.1.55, 10.1.1.56, 10.1.1.57) provided by the University of Pisa, each configured with the following hardware and software specifications:
+
+- **CPU**: 2 virtual CPUs (vCPUs), mapped to Intel(R) Xeon(R) Silver 4208 CPU @2.10GHz, provided via KVM virtualization
+- **RAM**: 6.8 GB of system memory
+- **Disk**: 40 GB of allocated virtual storage (ext4 filesystem)
+- **Operating System**: Ubuntu 22.04.1 LTS (Jammy Jellyfish), 64-bit
+
+---
+
 ## Development Environment
 
 This project is intended to be used within **IntelliJ IDEA**.
